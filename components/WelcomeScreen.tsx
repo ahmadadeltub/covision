@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Language } from '../types';
 import { translations } from '../translations';
@@ -18,20 +17,20 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                await fetch('https://api.counterapi.dev/v1/covision_41ab1_final_v1/visitors/up');
+                await fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/visitors/up');
                 
                 const [visRes, testsRes, repRes] = await Promise.all([
-                    fetch('https://api.counterapi.dev/v1/covision_41ab1_final_v1/visitors'),
-                    fetch('https://api.counterapi.dev/v1/covision_41ab1_final_v1/tests_completed'),
-                    fetch('https://api.counterapi.dev/v1/covision_41ab1_final_v1/reports_sent')
+                    fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/visitors'),
+                    fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/tests_completed'),
+                    fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/reports_sent')
                 ]);
                 const vis = visRes.ok ? await visRes.json() : { count: 0 };
                 const tests = testsRes.ok ? await testsRes.json() : { count: 0 };
                 const rep = repRes.ok ? await repRes.json() : { count: 0 };
                 setStats({ 
-                    visitors: 101 + (vis.count || 0), 
-                    tests: 305 + (tests.count || 0), 
-                    reports: 223 + (rep.count || 0) 
+                    visitors: 102 + Math.max(0, (vis.count || 0) - 134), 
+                    tests: 305 + Math.max(0, (tests.count || 0) - 305), 
+                    reports: 223 + Math.max(0, (rep.count || 0) - 223) 
                 });
             } catch (err) {
                 console.error('Failed to fetch stats', err);
@@ -150,7 +149,7 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                 position: 'relative', zIndex: 10,
                 width: '100%', maxWidth: 760,
                 height: '100%',
-                padding: '2vh 20px',
+                padding: '2vh 20px 100px 20px', // Extra padding at bottom to avoid overlapping floating AI Guide
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -210,7 +209,7 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                         {lang === 'ar' ? 'نظام ذكاء اصطناعي متقدم' : 'Advanced AI-Powered System'}
                     </div>
                     <h1 style={{
-                        fontSize: 'clamp(24px, 4.5vw, 52px)',
+                        fontSize: 'clamp(20px, 6vw, 48px)',
                         fontWeight: 900,
                         background: 'linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 50%, #818cf8 100%)',
                         WebkitBackgroundClip: 'text',
@@ -218,7 +217,8 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                         lineHeight: 1.15,
                         marginBottom: 'clamp(4px, 0.6vh, 10px)',
                         letterSpacing: '-0.02em',
-                        whiteSpace: 'nowrap',
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-word',
                     }}>
                         {t.welcome_title}
                     </h1>
@@ -401,7 +401,7 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
             </div>
 
             <div className="absolute bottom-4 right-6 text-[10px] md:text-xs text-slate-600 font-bold tracking-widest uppercase z-10 hidden md:block">
-                CoVision OS v1.2.1 • Mobile Live
+                CoVision OS v1.2.2 • Mobile Live
             </div>
 
             <style>{`
