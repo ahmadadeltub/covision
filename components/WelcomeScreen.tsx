@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Language } from '../types';
 import { translations } from '../translations';
+import { requestForToken } from '../firebase';
 
 interface Props {
     lang: Language;
@@ -311,7 +312,12 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
 
                 {/* CTA Button — big & cinematic */}
                 <button
-                    onClick={onStart}
+                    onClick={async () => {
+                        try {
+                            await requestForToken();
+                        } catch(e) { console.error(e); }
+                        onStart();
+                    }}
                     style={{
                         width: '100%',
                         flexShrink: 0,

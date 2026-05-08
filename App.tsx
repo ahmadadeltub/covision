@@ -24,6 +24,7 @@ import MedicalReport from './components/MedicalReport';
 import ScreenCalibrationWizard from './components/ScreenCalibrationWizard';
 import GlobalAIBot from './components/GlobalAIBot';
 import { useGlobalBot } from './hooks/useGlobalBot';
+import { onMessageListener } from './firebase';
 
 /**
  * Main Application — Full Flow
@@ -111,6 +112,19 @@ const App: React.FC = () => {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  // ─── FCM Foreground Notification Listener ───
+  useEffect(() => {
+    onMessageListener()
+      .then((payload: any) => {
+        console.log("Foreground push notification received:", payload);
+        if (payload?.notification) {
+          // Minimalist alert for foreground messages
+          alert(`🔔 ${payload.notification.title}\n\n${payload.notification.body}`);
+        }
+      })
+      .catch((err) => console.log('FCM listen error: ', err));
+  }, []);
 
   // ─── Direction & Deep Linking ───
   useEffect(() => {
