@@ -522,7 +522,7 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
 
           {/* Camera Feed — compact, reduced width */}
           <div className="relative min-h-0 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden bg-black border-2 shadow-[0_0_40px_rgba(0,200,255,0.1)] order-1 md:order-2 mx-auto"
-            style={{ borderColor: getDistanceColor() + '40', maxHeight: 'clamp(180px, 32vh, 320px)', width: 'clamp(160px, 40vw, 360px)' }}
+            style={{ borderColor: getDistanceColor() + '40', maxHeight: 'clamp(360px, 64vh, 640px)', width: 'clamp(320px, 80vw, 720px)' }}
           >
             <video
               ref={videoRef}
