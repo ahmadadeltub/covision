@@ -18,17 +18,21 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                await fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/visitors/up');
+                await fetch('https://api.counterapi.dev/v1/covision_41ab1_final_v1/visitors/up');
                 
                 const [visRes, testsRes, repRes] = await Promise.all([
-                    fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/visitors'),
-                    fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/tests_completed'),
-                    fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/reports_sent')
+                    fetch('https://api.counterapi.dev/v1/covision_41ab1_final_v1/visitors'),
+                    fetch('https://api.counterapi.dev/v1/covision_41ab1_final_v1/tests_completed'),
+                    fetch('https://api.counterapi.dev/v1/covision_41ab1_final_v1/reports_sent')
                 ]);
                 const vis = visRes.ok ? await visRes.json() : { count: 0 };
                 const tests = testsRes.ok ? await testsRes.json() : { count: 0 };
                 const rep = repRes.ok ? await repRes.json() : { count: 0 };
-                setStats({ visitors: vis.count || 0, tests: tests.count || 0, reports: rep.count || 0 });
+                setStats({ 
+                    visitors: 101 + (vis.count || 0), 
+                    tests: 305 + (tests.count || 0), 
+                    reports: 223 + (rep.count || 0) 
+                });
             } catch (err) {
                 console.error('Failed to fetch stats', err);
             }
