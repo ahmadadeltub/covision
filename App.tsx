@@ -108,9 +108,17 @@ const App: React.FC = () => {
     toleranceM: tolerM,
   });
 
-  // ─── Theme ───
+  // ─── Theme & Mobile Detection ───
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+    
+    const checkMobile = () => {
+      const isMob = window.innerWidth <= 768;
+      document.body.classList.toggle('is-mobile', isMob);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, [theme]);
 
   // ─── FCM Foreground Notification Listener ───

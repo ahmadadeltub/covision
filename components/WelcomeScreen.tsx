@@ -17,23 +17,32 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                await fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/visitors/up');
+                // Persistent visitor tracking for local user
+                const hasVisited = localStorage.getItem('cv_v');
+                if (!hasVisited) {
+                    await fetch('https://api.counterapi.dev/v1/covision_final_v2/visitors/up');
+                    localStorage.setItem('cv_v', '1');
+                }
                 
                 const [visRes, testsRes, repRes] = await Promise.all([
-                    fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/visitors'),
-                    fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/tests_completed'),
-                    fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/reports_sent')
+                    fetch('https://api.counterapi.dev/v1/covision_final_v2/visitors'),
+                    fetch('https://api.counterapi.dev/v1/covision_final_v2/tests_completed'),
+                    fetch('https://api.counterapi.dev/v1/covision_final_v2/reports_sent')
                 ]);
                 const vis = visRes.ok ? await visRes.json() : { count: 0 };
                 const tests = testsRes.ok ? await testsRes.json() : { count: 0 };
                 const rep = repRes.ok ? await repRes.json() : { count: 0 };
+                
+                // Absolute base values requested by user + real counter
                 setStats({ 
-                    visitors: 102 + Math.max(0, (vis.count || 0) - 134), 
-                    tests: 305 + Math.max(0, (tests.count || 0) - 305), 
-                    reports: 223 + Math.max(0, (rep.count || 0) - 223) 
+                    visitors: 102 + (vis.count || 0), 
+                    tests: 305 + (tests.count || 0), 
+                    reports: 223 + (rep.count || 0) 
                 });
             } catch (err) {
                 console.error('Failed to fetch stats', err);
+                // Fallback to base values if API fails
+                setStats({ visitors: 102, tests: 305, reports: 223 });
             }
         };
         fetchStats();
@@ -401,7 +410,7 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
             </div>
 
             <div className="absolute bottom-4 right-6 text-[10px] md:text-xs text-slate-600 font-bold tracking-widest uppercase z-10 hidden md:block">
-                CoVision OS v1.2.2 • Mobile Live
+                CoVision OS v1.3.0 • Final Optimized Update
             </div>
 
             <style>{`
