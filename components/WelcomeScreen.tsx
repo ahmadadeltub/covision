@@ -17,12 +17,8 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                // Persistent visitor tracking for local user
-                const hasVisited = localStorage.getItem('cv_v');
-                if (!hasVisited) {
-                    await fetch('https://api.counterapi.dev/v1/covision_final_v2/visitors/up');
-                    localStorage.setItem('cv_v', '1');
-                }
+                // Increment visitor count on every refresh as requested
+                await fetch('https://api.counterapi.dev/v1/covision_final_v2/visitors/up');
                 
                 const [visRes, testsRes, repRes] = await Promise.all([
                     fetch('https://api.counterapi.dev/v1/covision_final_v2/visitors'),
