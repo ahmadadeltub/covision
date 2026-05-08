@@ -348,33 +348,23 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                     <span style={{ position: 'relative', zIndex: 1 }}>🚀 {t.begin_screening}</span>
                 </button>
 
-                {/* Live Stats — pill design */}
+                {/* Live Stats — single visitor counter */}
                 <div style={{
-                    display: 'flex', gap: 0, width: '100%',
+                    width: '100%',
                     background: 'var(--bg-card)',
                     border: '1px solid var(--border-color)',
                     borderRadius: 14,
                     overflow: 'hidden',
                     flexShrink: 0,
+                    padding: 'clamp(10px, 1.5vh, 14px) 12px',
+                    textAlign: 'center',
                 }}>
-                    {[
-                        { label: 'Total Visitors', value: stats.visitors.toLocaleString(), color: 'var(--accent)', icon: '👥' },
-                        { label: 'Tests Completed', value: stats.tests.toLocaleString(), color: 'var(--success)', icon: '✅' },
-                    ].map((s, i) => (
-                        <div key={i} style={{
-                            flex: 1,
-                            padding: 'clamp(10px, 1.5vh, 14px) 12px',
-                            textAlign: 'center',
-                            borderRight: i === 0 ? '1px solid var(--border-color)' : 'none',
-                        }}>
-                            <div style={{ fontSize: 'clamp(9px, 1.1vh, 11px)', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.1em', marginBottom: 4 }}>
-                                {s.icon} {s.label}
-                            </div>
-                            <div style={{ fontSize: 'clamp(18px, 2.8vh, 26px)', color: s.color, fontWeight: 900, fontFamily: 'Outfit, Inter, sans-serif' }}>
-                                {stats.visitors === 0 ? '—' : s.value}
-                            </div>
-                        </div>
-                    ))}
+                    <div style={{ fontSize: 'clamp(9px, 1.1vh, 11px)', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.1em', marginBottom: 4 }}>
+                        👥 Total Visitors
+                    </div>
+                    <div style={{ fontSize: 'clamp(18px, 2.8vh, 26px)', color: 'var(--accent)', fontWeight: 900, fontFamily: 'Outfit, Inter, sans-serif' }}>
+                        {stats.visitors === 0 ? '—' : stats.visitors.toLocaleString()}
+                    </div>
                 </div>
 
                 {/* Credits */}
