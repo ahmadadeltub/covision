@@ -353,6 +353,7 @@ const MedicalReport: React.FC<Props> = ({ lang, patient, acuity, colorVision, te
                         title: `CoVision Report – ${reportId}`,
                         text: message,
                     });
+                    fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/reports_sent/up').catch(e => console.error(e));
                     setWhatsappSending(false);
                     return;
                 } catch (shareErr: any) {
@@ -380,6 +381,7 @@ const MedicalReport: React.FC<Props> = ({ lang, patient, acuity, colorVision, te
     };
 
     const openWhatsAppWithText = () => {
+        fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/reports_sent/up').catch(e => console.error(e));
         const message = buildReportSummary();
         const encoded = encodeURIComponent(message);
         window.open(`https://wa.me/?text=${encoded}`, '_blank');
@@ -406,6 +408,7 @@ const MedicalReport: React.FC<Props> = ({ lang, patient, acuity, colorVision, te
                         title: `CoVision Report – ${reportId}`,
                         text: `Vision Screening Report for ${patient.fullName}\n\n${buildReportSummary()}`,
                     });
+                    fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/reports_sent/up').catch(e => console.error(e));
                     shareSuccess = true;
                     setEmailStatus('success');
                 } catch (shareErr: any) {
@@ -434,6 +437,7 @@ const MedicalReport: React.FC<Props> = ({ lang, patient, acuity, colorVision, te
                 );
 
                 window.location.href = `mailto:${encodeURIComponent(emailAddress)}?subject=${subject}&body=${body}`;
+                fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/reports_sent/up').catch(e => console.error(e));
                 setEmailStatus('success');
             }
         } catch (err) {

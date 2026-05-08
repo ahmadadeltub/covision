@@ -12,6 +12,30 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
     const t = translations[lang];
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [loaded, setLoaded] = useState(false);
+    const [stats, setStats] = useState({ visitors: 0, tests: 0, reports: 0 });
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                if (!sessionStorage.getItem('covision_visitor_counted')) {
+                    await fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/visitors/up');
+                    sessionStorage.setItem('covision_visitor_counted', 'true');
+                }
+                const [visRes, testsRes, repRes] = await Promise.all([
+                    fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/visitors'),
+                    fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/tests_completed'),
+                    fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/reports_sent')
+                ]);
+                const vis = visRes.ok ? await visRes.json() : { count: 0 };
+                const tests = testsRes.ok ? await testsRes.json() : { count: 0 };
+                const rep = repRes.ok ? await repRes.json() : { count: 0 };
+                setStats({ visitors: vis.count || 0, tests: tests.count || 0, reports: rep.count || 0 });
+            } catch (err) {
+                console.error('Failed to fetch stats', err);
+            }
+        };
+        fetchStats();
+    }, []);
 
     // Animated particle network background
     useEffect(() => {
@@ -326,6 +350,33 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                     }} />
                     <span style={{ position: 'relative', zIndex: 1 }}>{t.begin_screening}</span>
                 </button>
+
+                {/* Live Stats */}
+                <div style={{
+                    display: 'flex', gap: 'clamp(15px, 3vw, 30px)', flexWrap: 'wrap', justifyContent: 'center',
+                    padding: 'clamp(10px, 1.5vh, 16px) clamp(20px, 4vw, 30px)', 
+                    background: 'rgba(15, 23, 42, 0.6)', 
+                    border: '1px solid rgba(255,255,255,0.1)', 
+                    borderRadius: '20px',
+                    backdropFilter: 'blur(10px)',
+                    marginTop: 'clamp(5px, 1vh, 10px)',
+                    flexShrink: 0
+                }}>
+                    <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 'clamp(8px, 1.2vh, 11px)', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.1em' }}>Total Visitors</div>
+                        <div style={{ fontSize: 'clamp(18px, 2.5vh, 24px)', color: 'var(--accent)', fontWeight: 900 }}>{stats.visitors.toLocaleString()}</div>
+                    </div>
+                    <div style={{ width: 1, background: 'rgba(255,255,255,0.1)' }}></div>
+                    <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 'clamp(8px, 1.2vh, 11px)', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.1em' }}>Tests Completed</div>
+                        <div style={{ fontSize: 'clamp(18px, 2.5vh, 24px)', color: '#10b981', fontWeight: 900 }}>{stats.tests.toLocaleString()}</div>
+                    </div>
+                    <div style={{ width: 1, background: 'rgba(255,255,255,0.1)' }}></div>
+                    <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 'clamp(8px, 1.2vh, 11px)', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.1em' }}>Reports Sent</div>
+                        <div style={{ fontSize: 'clamp(18px, 2.5vh, 24px)', color: '#8b5cf6', fontWeight: 900 }}>{stats.reports.toLocaleString()}</div>
+                    </div>
+                </div>
 
                 {/* Version */}
                 <div style={{

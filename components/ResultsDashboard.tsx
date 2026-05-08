@@ -21,6 +21,11 @@ const ResultsDashboard: React.FC<Props> = ({ lang, t, results, onReset }) => {
 
   useEffect(() => {
     generateAiReport();
+    
+    if (!sessionStorage.getItem('covision_test_counted')) {
+      fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/tests_completed/up').catch(e => console.error(e));
+      sessionStorage.setItem('covision_test_counted', 'true');
+    }
   }, []);
 
   const generateAiReport = async () => {
@@ -121,6 +126,7 @@ const ResultsDashboard: React.FC<Props> = ({ lang, t, results, onReset }) => {
           title: 'CoVision Screening Results',
           text: 'Vision screening results report',
         });
+        fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/reports_sent/up').catch(e => console.error(e));
         setEmailStatus('success');
       } else {
         // Fallback: download PDF + open mailto
@@ -138,6 +144,7 @@ const ResultsDashboard: React.FC<Props> = ({ lang, t, results, onReset }) => {
           `\n\n⚠️ This is a preliminary screening report. Please consult a qualified ophthalmologist.`
         );
         window.open(`mailto:${encodeURIComponent(emailAddress)}?subject=${subject}&body=${body}`, '_self');
+        fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/reports_sent/up').catch(e => console.error(e));
         setEmailStatus('success');
       }
     } catch (err) {
