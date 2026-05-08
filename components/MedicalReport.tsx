@@ -184,8 +184,6 @@ const MedicalReport: React.FC<Props> = ({ lang, patient, acuity, colorVision, te
             a.download = `CoVision-Report-${reportId}.pdf`;
             a.click();
             URL.revokeObjectURL(url);
-            // Increment reports_sent counter
-            fetch('https://api.counterapi.dev/v1/covision_final_v2/reports_sent/up').catch(() => {});
         } catch (err) {
             console.error('PDF export failed:', err);
         }

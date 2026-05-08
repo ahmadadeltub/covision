@@ -36,12 +36,8 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
             }
 
             try {
-                const [testsRes, repRes] = await Promise.all([
-                    fetch('https://api.counterapi.dev/v1/covision_final_v2/tests_completed'),
-                    fetch('https://api.counterapi.dev/v1/covision_final_v2/reports_sent')
-                ]);
+                const testsRes = await fetch('https://api.counterapi.dev/v1/covision_final_v2/tests_completed');
                 if (testsRes.ok) { const d = await testsRes.json(); testsCount = d.count || 0; }
-                if (repRes.ok) { const d = await repRes.json(); reportsCount = d.count || 0; }
             } catch (e) {
                 console.warn('Stats API unreachable');
             }
@@ -49,7 +45,7 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
             setStats({
                 visitors: 101 + visCount,
                 tests: 305 + testsCount,
-                reports: 223 + reportsCount,
+                reports: 0,
             });
         };
         fetchStats();
@@ -396,11 +392,6 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                     <div style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: 'clamp(8px, 1.2vh, 11px)', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.1em' }}>Tests Completed</div>
                         <div style={{ fontSize: 'clamp(18px, 2.5vh, 24px)', color: '#10b981', fontWeight: 900 }}>{stats.tests.toLocaleString()}</div>
-                    </div>
-                    <div style={{ width: 1, background: 'rgba(255,255,255,0.1)' }}></div>
-                    <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: 'clamp(8px, 1.2vh, 11px)', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.1em' }}>Reports Sent</div>
-                        <div style={{ fontSize: 'clamp(18px, 2.5vh, 24px)', color: '#8b5cf6', fontWeight: 900 }}>{stats.reports.toLocaleString()}</div>
                     </div>
                 </div>
 

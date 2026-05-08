@@ -458,6 +458,8 @@ const App: React.FC = () => {
             stream={stream}
             onComplete={(result) => {
               setColorResult(result);
+              // Increment tests_completed counter for color vision test
+              fetch('https://api.counterapi.dev/v1/covision_final_v2/tests_completed/up').catch(() => {});
               setStep(AppStep.Calibration);
             }}
           />
