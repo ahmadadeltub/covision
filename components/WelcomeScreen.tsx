@@ -17,21 +17,20 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                // Increment visitor count on every refresh as requested
-                await fetch('https://api.counterapi.dev/v1/covision_final_v2/visitors/up');
+                // Increment visitor count on every refresh and capture the new live count instantly
+                const visUpRes = await fetch('https://api.counterapi.dev/v1/covision_final_v2/visitors/up');
+                const visData = visUpRes.ok ? await visUpRes.json() : { count: 1 };
                 
-                const [visRes, testsRes, repRes] = await Promise.all([
-                    fetch('https://api.counterapi.dev/v1/covision_final_v2/visitors'),
+                const [testsRes, repRes] = await Promise.all([
                     fetch('https://api.counterapi.dev/v1/covision_final_v2/tests_completed'),
                     fetch('https://api.counterapi.dev/v1/covision_final_v2/reports_sent')
                 ]);
-                const vis = visRes.ok ? await visRes.json() : { count: 0 };
                 const tests = testsRes.ok ? await testsRes.json() : { count: 0 };
                 const rep = repRes.ok ? await repRes.json() : { count: 0 };
                 
                 // Absolute base values requested by user + real counter
                 setStats({ 
-                    visitors: 101 + (vis.count || 1), 
+                    visitors: 101 + (visData.count || 1), 
                     tests: 305 + (tests.count || 0), 
                     reports: 223 + (rep.count || 0) 
                 });
@@ -406,7 +405,7 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
             </div>
 
             <div className="absolute bottom-4 right-6 text-[10px] md:text-xs text-slate-600 font-bold tracking-widest uppercase z-10 hidden md:block">
-                CoVision OS v1.3.0 • Final Optimized Update
+                CoVision OS v1.3.1 • Final Optimized Update
             </div>
 
             <style>{`
