@@ -1,0 +1,1036 @@
+/* ============================================
+   Vision Screening — Design System
+   ============================================ */
+
+/* Theme Variables */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --border-color: #e2e8f0;
+  --accent: #06b6d4;
+  --accent-light: #22d3ee;
+  --accent-bg: #eff6ff;
+  --success: #16a34a;
+  --success-bg: #f0fdf4;
+  --warning: #d97706;
+  --warning-bg: #fffbeb;
+  --danger: #dc2626;
+  --danger-bg: #fef2f2;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 4px 25px rgba(0, 0, 0, 0.08);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-lg: 24px;
+  --font-ar: 'Cairo', sans-serif;
+  --font-en: 'Inter', sans-serif;
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0c0f1a;
+  --bg-secondary: #111827;
+  --bg-card: #1e2337;
+  --bg-card-hover: #262d45;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: #2d3555;
+  --accent: #3b82f6;
+  --accent-light: #60a5fa;
+  --accent-bg: rgba(59, 130, 246, 0.1);
+  --success: #22c55e;
+  --success-bg: rgba(34, 197, 94, 0.1);
+  --warning: #f59e0b;
+  --warning-bg: rgba(245, 158, 11, 0.1);
+  --danger: #ef4444;
+  --danger-bg: rgba(239, 68, 68, 0.1);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 4px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-en);
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.3s, color 0.3s;
+}
+
+[dir="rtl"] body,
+[dir="rtl"] {
+  font-family: var(--font-ar);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 10px;
+}
+
+/* App Layout */
+.app-wrapper {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.app-header {
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* Cards */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 32px;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.card-lg {
+  border-radius: var(--radius-lg);
+  padding: 48px;
+  box-shadow: var(--shadow-lg);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 32px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: var(--accent-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
+}
+
+.btn-secondary {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-card-hover);
+}
+
+.btn-lg {
+  padding: 20px 48px;
+  font-size: 20px;
+  border-radius: var(--radius);
+}
+
+.btn-xl {
+  padding: 24px 56px;
+  font-size: 24px;
+  border-radius: var(--radius-lg);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #ffffff;
+}
+
+.btn-success {
+  background: var(--success);
+  color: #ffffff;
+}
+
+/* Direction Buttons (for Tumbling E) */
+.dir-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 24px;
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: 32px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text-primary);
+}
+
+.dir-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  transform: scale(1.03);
+}
+
+.dir-btn:active {
+  transform: scale(0.97);
+}
+
+/* Input Fields */
+.input-field {
+  width: 100%;
+  padding: 14px 18px;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 500;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  font-family: inherit;
+}
+
+.input-field:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.input-label {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+/* Status Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.badge-success {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.badge-warning {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.badge-danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.badge-info {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+/* Distance Indicator */
+.distance-indicator {
+  position: fixed;
+  top: 70px;
+  right: 16px;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: var(--shadow);
+  transition: all 0.3s;
+}
+
+[dir="rtl"] .distance-indicator {
+  right: auto;
+  left: 16px;
+}
+
+/* Warning Overlay */
+.warning-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(220, 38, 38, 0.9);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: white;
+  text-align: center;
+  padding: 32px;
+  animation: pulse-bg 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-bg {
+
+  0%,
+  100% {
+    background: rgba(220, 38, 38, 0.9);
+  }
+
+  50% {
+    background: rgba(220, 38, 38, 0.7);
+  }
+}
+
+/* Camera Preview */
+.camera-preview {
+  width: 160px;
+  height: 120px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 2px solid var(--border-color);
+  box-shadow: var(--shadow);
+  position: relative;
+}
+
+.camera-preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+/* Tumbling E */
+.tumbling-e {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  font-weight: 900;
+  line-height: 1;
+  transition: font-size 0.3s;
+}
+
+/* Color Plate */
+.color-plate {
+  width: min(400px, 80vw);
+  height: min(400px, 80vw);
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  border: 3px solid var(--border-color);
+  margin: 0 auto;
+}
+
+/* Report */
+.report-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  color: #0f172a;
+  padding: 48px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.report-header {
+  text-align: center;
+  border-bottom: 3px solid #2563eb;
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+}
+
+.report-section {
+  margin-bottom: 24px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.report-table th,
+.report-table td {
+  padding: 10px 16px;
+  text-align: start;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 14px;
+}
+
+.report-table th {
+  font-weight: 700;
+  color: #475569;
+  background: #f8fafc;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes countdown-pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+.countdown-pulse {
+  animation: countdown-pulse 1s ease-in-out infinite;
+}
+
+/* Print styles — full report, multi-page layout */
+@media print {
+
+  :root,
+  html,
+  body,
+  [data-theme="dark"],
+  [data-theme="light"] {
+    --bg-primary: #ffffff !important;
+    --bg-secondary: #f8fafc !important;
+    --bg-card: #ffffff !important;
+    --bg-card-hover: #f1f5f9 !important;
+    --text-primary: #000000 !important;
+    --text-secondary: #333333 !important;
+    --text-muted: #666666 !important;
+    --border-color: #cccccc !important;
+    --glass-bg: transparent !important;
+    --card-dark-bg: #ffffff !important;
+    --overlay-bg: #ffffff !important;
+  }
+
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
+
+  .app-header {
+    display: none !important;
+  }
+
+  /* DISABLE HARDWARE FILTERS THAT CRASH NATIVE PRINT RENDERING */
+  * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .distance-indicator {
+    display: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  html,
+  body,
+  .app-wrapper {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 10px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* ----- FORCE DARK TEXT FOR VISIBILITY ON WHITE PAPER ----- */
+  .text-white,
+  .text-slate-100,
+  .text-slate-200,
+  .text-slate-300 {
+    color: #0f172a !important;
+    /* Extremely dark slate */
+  }
+
+  .text-slate-400,
+  .text-slate-500 {
+    color: #475569 !important;
+    /* Medium dark slate */
+  }
+
+  /* Force borders to be visible */
+  .border-white\/5,
+  .border-white\/10 {
+    border-color: #cbd5e1 !important;
+    /* Neutral gray border */
+    background: transparent !important;
+  }
+
+  /* Convert card backgrounds to paper-friendly containers */
+  [style*="var(--bg-card)"] {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+  }
+
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Provide unrolled layout specifically for the app structure */
+  .app-wrapper,
+  .app-main {
+    display: block !important;
+    position: relative !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Target generic scroll containers */
+  .overflow-y-auto,
+  .overflow-hidden,
+  .overflow-auto,
+  .overflow-x-hidden,
+  .overflow-x-auto,
+  .h-full,
+  .h-screen,
+  .min-h-screen {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+    min-height: auto !important;
+  }
+
+  /* Export PDF helper selector */
+  .max-h-\[92vh\],
+  .max-h-\[90vh\],
+  [class*="max-h-"] {
+    max-height: none !important;
+  }
+
+  /* Force background colors and imagery */
+  .print-exact,
+  .print-bg-force,
+  .print-bg-force * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Ensure flex-col containers don't constrain height */
+  .flex-col,
+  .flex.flex-col {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  /* Hide fixed/floating UI elements (bot, background canvases) */
+  .fixed {
+    display: none !important;
+  }
+
+  .fixed.z-\[9999\] {
+    display: none !important;
+  }
+
+  canvas {
+    display: none !important;
+  }
+
+  /* Force all sections visible */
+  .report-container,
+  [class*="rounded-"] {
+    box-shadow: none !important;
+  }
+
+  /* Page breaks for clean sections */
+  .rounded-2xl {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Ensure border colors print */
+  [class*="border"] {
+    border-color: inherit !important;
+  }
+
+  /* Ensure backgrounds print */
+  .glass,
+  [class*="bg-"] {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Keep flex layouts intact */
+  .flex {
+    display: flex !important;
+  }
+
+  .grid {
+    display: grid !important;
+  }
+
+  /* Page break — start Page 2 */
+  .print-page-break {
+    display: block !important;
+    height: 0 !important;
+    break-before: page !important;
+    page-break-before: always !important;
+  }
+
+  /* Show the page-2 header only when printing */
+  .print-only-header {
+    display: flex !important;
+  }
+
+  /* Compact spacing for print fit */
+  .space-y-5>*+* {
+    margin-top: 12px !important;
+  }
+
+  .space-y-4>*+* {
+    margin-top: 8px !important;
+  }
+
+  .space-y-3>*+* {
+    margin-top: 6px !important;
+  }
+
+  /* Page setup — A4 with tight margins for 2-page fit */
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  @page :first {
+    margin-top: 8mm;
+  }
+}
+
+/* Hide page-2 header on screen */
+.print-only-header {
+  display: none;
+}
+
+/* Hide page break marker on screen */
+.print-page-break {
+  display: none;
+}
+
+/* ============================================
+   EXPORT PDF STATE OVERRIDES
+   Preserves the dark theme design for professional PDF output
+   ============================================ */
+.exporting-pdf .no-print {
+  display: none !important;
+}
+
+.exporting-pdf .app-header {
+  display: none !important;
+}
+
+.exporting-pdf .distance-indicator {
+  display: none !important;
+}
+
+.exporting-pdf .print-only-header {
+  display: flex !important;
+}
+
+.exporting-pdf .print-page-break {
+  display: block !important;
+  height: 10px !important;
+  break-before: always !important;
+}
+
+.exporting-pdf html,
+.exporting-pdf body,
+.exporting-pdf #root,
+.exporting-pdf .app-wrapper,
+.exporting-pdf .app-main {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  max-height: none !important;
+  position: static !important;
+}
+
+.exporting-pdf .overflow-y-auto,
+.exporting-pdf .overflow-hidden,
+.exporting-pdf .overflow-auto,
+.exporting-pdf .overflow-x-hidden,
+.exporting-pdf .overflow-x-auto,
+.exporting-pdf .h-full {
+  overflow: visible !important;
+  max-height: none !important;
+  height: auto !important;
+}
+
+.exporting-pdf .flex-col,
+.exporting-pdf .flex.flex-col {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.exporting-pdf video,
+.exporting-pdf canvas {
+  display: none !important;
+}
+
+/* ----- KEEP DARK THEME FOR PDF ----- */
+.exporting-pdf *,
+.exporting-pdf *::before,
+.exporting-pdf *::after {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+/* Force dark background to render */
+.exporting-pdf body {
+  background: #0c0f1a !important;
+}
+
+/* Keep the glass/card backgrounds dark */
+.exporting-pdf .glass {
+  background: rgba(15, 23, 42, 0.6) !important;
+}
+
+.exporting-pdf [style*="var(--bg-card)"] {
+  background-color: #1e2337 !important;
+}
+
+.exporting-pdf .bg-slate-800\/50 {
+  background-color: rgba(30, 41, 59, 0.5) !important;
+}
+
+.exporting-pdf .bg-cyan-600 {
+  background-color: #0891b2 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .app-main {
+    padding: 12px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  .card-lg {
+    padding: 28px;
+  }
+
+  .btn-xl {
+    padding: 18px 32px;
+    font-size: 18px;
+  }
+
+  .camera-preview {
+    width: 120px;
+    height: 90px;
+  }
+}
+
+/* ============================================
+   LIGHT THEME OVERRIDES
+   Recolors hardcoded dark Tailwind classes
+   ============================================ */
+
+/* Extra CSS variables for light theme */
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --card-dark-bg: rgba(255, 255, 255, 0.85);
+  --card-dark-border: rgba(0, 0, 0, 0.1);
+  --overlay-bg: rgba(255, 255, 255, 0.9);
+  --progress-bg: #e2e8f0;
+  --camera-bg: #1e293b;
+}
+
+[data-theme="dark"] {
+  --glass-bg: rgba(15, 23, 42, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --card-dark-bg: rgba(15, 23, 42, 0.5);
+  --card-dark-border: rgba(255, 255, 255, 0.05);
+  --overlay-bg: rgba(0, 0, 0, 0.8);
+  --progress-bg: rgba(30, 41, 59, 0.8);
+  --camera-bg: #000000;
+}
+
+/* ─── Light Theme: Container Backgrounds ─── */
+[data-theme="light"] .bg-slate-950\/20,
+[data-theme="light"] .bg-slate-950\/40 {
+  background-color: rgba(241, 245, 249, 0.5) !important;
+}
+
+[data-theme="light"] .bg-slate-900\/60,
+[data-theme="light"] .bg-slate-900\/40,
+[data-theme="light"] .bg-slate-900\/80,
+[data-theme="light"] .bg-slate-900 {
+  background-color: rgba(248, 250, 252, 0.9) !important;
+}
+
+[data-theme="light"] .bg-slate-800\/90,
+[data-theme="light"] .bg-slate-800\/80,
+[data-theme="light"] .bg-slate-800\/60,
+[data-theme="light"] .bg-slate-800 {
+  background-color: #e2e8f0 !important;
+}
+
+[data-theme="light"] .bg-slate-700 {
+  background-color: #cbd5e1 !important;
+}
+
+/* Camera/video backgrounds should stay dark */
+[data-theme="light"] video {
+  background-color: #000 !important;
+}
+
+/* ─── Light Theme: Black Overlays ─── */
+[data-theme="light"] .bg-black\/80 {
+  background-color: rgba(15, 23, 42, 0.75) !important;
+}
+
+[data-theme="light"] .bg-black\/70 {
+  background-color: rgba(15, 23, 42, 0.65) !important;
+}
+
+[data-theme="light"] .bg-black\/60 {
+  background-color: rgba(15, 23, 42, 0.55) !important;
+}
+
+[data-theme="light"] .bg-black\/50 {
+  background-color: rgba(241, 245, 249, 0.9) !important;
+}
+
+[data-theme="light"] .bg-black\/40 {
+  background-color: rgba(241, 245, 249, 0.85) !important;
+}
+
+[data-theme="light"] .bg-black\/20 {
+  background-color: rgba(241, 245, 249, 0.5) !important;
+}
+
+/* ─── Light Theme: Text Colors ─── */
+[data-theme="light"] .text-white {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .text-white\/70,
+[data-theme="light"] .text-white\/80 {
+  color: rgba(15, 23, 42, 0.7) !important;
+}
+
+[data-theme="light"] .text-white\/30,
+[data-theme="light"] .text-white\/50 {
+  color: rgba(15, 23, 42, 0.35) !important;
+}
+
+/* Exceptions — text on colored/dark backgrounds should stay white */
+[data-theme="light"] .bg-emerald-500 .text-white,
+[data-theme="light"] .bg-cyan-500 .text-white,
+[data-theme="light"] .bg-indigo-600 .text-white,
+[data-theme="light"] .bg-red-500 .text-white,
+[data-theme="light"] .bg-red-600\/90 .text-white,
+[data-theme="light"] .bg-emerald-500\/80 .text-white,
+[data-theme="light"] .bg-red-500\/80 .text-white,
+[data-theme="light"] .bg-gradient-to-r .text-white,
+[data-theme="light"] .bg-gradient-to-r.text-white,
+[data-theme="light"] .from-cyan-600.text-white,
+[data-theme="light"] .from-emerald-600.text-white,
+[data-theme="light"] button.bg-white .text-white {
+  color: #ffffff !important;
+}
+
+/* Button text exceptions — CTA white buttons */
+[data-theme="light"] button.bg-white {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] button.bg-white .text-white {
+  color: #0f172a !important;
+}
+
+/* Slate text gets darker contrast in light mode */
+[data-theme="light"] .text-slate-400 {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .text-slate-500 {
+  color: #64748b !important;
+}
+
+[data-theme="light"] .text-slate-600 {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .text-slate-700 {
+  color: #334155 !important;
+}
+
+[data-theme="light"] .text-slate-800 {
+  color: #1e293b !important;
+}
+
+[data-theme="light"] .text-slate-300 {
+  color: #334155 !important;
+}
+
+/* ─── Light Theme: Borders ─── */
+[data-theme="light"] .border-white\/5,
+[data-theme="light"] .border-white\/10,
+[data-theme="light"] .border-white\/20 {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .border-white\/30 {
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+[data-theme="light"] .border-slate-700\/30,
+[data-theme="light"] .border-slate-700\/50 {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+/* ─── Light Theme: Glass Effect ─── */
+[data-theme="light"] .glass {
+  background: var(--glass-bg) !important;
+  border-color: var(--glass-border) !important;
+}
+
+/* ─── Light Theme: Shadows ─── */
+[data-theme="light"] [class*="shadow-\\[0_0_150px"] {
+  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] [class*="shadow-\\[0_0_100px"] {
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] .shadow-2xl {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .shadow-xl {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ─── Light Theme: Progress Bars ─── */
+[data-theme="light"] .bg-slate-800.h-1\.5,
+[data-theme="light"] .bg-slate-800.h-3,
+[data-theme="light"] .bg-slate-900.h-3 {
+  background-color: #e2e8f0 !important;
+}
+
+/* ─── Light Theme: Header ─── */
+[data-theme="light"] .app-header {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+  backdrop-filter: blur(12px);
+}
+
+/* ─── Light Theme: Distance Indicator ─── */
+[data-theme="light"] .distance-indicator {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+/* ─── Light Theme: Particle Background ─── */
+[data-theme="light"] .app-wrapper>canvas:first-of-type {
+  opacity: 0.3 !important;
+}
+
+/* ─── Light Theme: Scrollbar ─── */
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: #94a3b8 !important;
+}
+
+/* ─── Light Theme: Specific Components ─── */
+
+/* GlobalAIBot & AIBotBubble — keep dark as floating elements */
+[data-theme="light"] .fixed[class*="z-"] .text-white {
+  color: #ffffff !important;
+}
+
+/* MedicalReport — the report always uses dark theme (professional look) */
+[data-theme="light"] [class*="max-w-5xl"].space-y-5 .text-white {
+  color: #0f172a !important;
+}
+
+/* Colored status badges should keep their own text color */
+[data-theme="light"] [class*="rounded-full"][class*="tracking-wider"] .text-white {
+  color: inherit !important;
+}

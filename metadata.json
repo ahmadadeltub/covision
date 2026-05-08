@@ -1,0 +1,7 @@
+{
+  "name": "Covision ",
+  "description": "A bilingual cognitive-systems-based vision and color-blindness screening application using adaptive testing and reliability scoring.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
