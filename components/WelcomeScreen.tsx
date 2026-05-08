@@ -35,7 +35,7 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                 
                 // Absolute base values requested by user + real counter
                 setStats({ 
-                    visitors: 102 + (vis.count || 0), 
+                    visitors: 101 + (vis.count || 1), 
                     tests: 305 + (tests.count || 0), 
                     reports: 223 + (rep.count || 0) 
                 });
