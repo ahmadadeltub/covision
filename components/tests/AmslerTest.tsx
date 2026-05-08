@@ -183,10 +183,10 @@ const AmslerTest: React.FC<Props> = ({ t, stream, onFinish }) => {
 
   // ─── Testing Phase UI ───
   return (
-    <div className="w-full h-full flex flex-row gap-4 animate-in fade-in duration-500 overflow-x-hidden overflow-y-auto relative">
+    <div className="w-full h-full flex flex-col md:flex-row gap-2 md:gap-4 animate-in fade-in duration-500 overflow-x-hidden overflow-y-auto relative">
 
-      {/* ─── LEFT: Info Panel ─── */}
-      <div className="shrink-0 flex flex-col gap-3 items-center" style={{ width: 300 }}>
+      {/* ─── LEFT: Info Panel (hidden on mobile) ─── */}
+      <div className="hidden md:flex shrink-0 flex-col gap-3 items-center" style={{ width: 220 }}>
         <div className="w-full glass rounded-2xl border border-white/5 p-3 space-y-2">
           <div className="text-center">
             <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{currentVariant.label}</div>
@@ -214,9 +214,9 @@ const AmslerTest: React.FC<Props> = ({ t, stream, onFinish }) => {
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
 
         <div className="shrink-0 px-6 py-3">
-          <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight leading-none">{t.amsler_grid}</h3>
-          <p className="text-xs text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
-            {t.amsler_desc}
+          <h3 className="text-base md:text-2xl font-black text-white uppercase tracking-tight leading-none">{t.amsler_grid}</h3>
+          <p className="text-[10px] md:text-xs text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
+            Grid {trialIdx + 1}/{TOTAL_TRIALS} — Focus on center dot
           </p>
         </div>
 
@@ -229,7 +229,7 @@ const AmslerTest: React.FC<Props> = ({ t, stream, onFinish }) => {
 
         {/* Grid Display */}
         <div className="flex-1 min-h-0 flex items-center justify-center p-4">
-          <div className="p-4 md:p-6 rounded-[2.5rem] border-4 border-white/10 shadow-2xl overflow-hidden aspect-square h-[min(80vw,48vh)]"
+          <div className="p-2 md:p-6 rounded-[2.5rem] border-4 border-white/10 shadow-2xl overflow-hidden aspect-square h-[min(70vw,44vh)]"
             style={{ background: currentVariant.bg }}>
             <div className="w-full h-full border relative"
               style={{

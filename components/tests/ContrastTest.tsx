@@ -247,7 +247,7 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
 
   // ─── Testing Phase UI ───
   return (
-    <div className="w-full h-full flex flex-row gap-4 animate-in fade-in duration-500 overflow-x-hidden overflow-y-auto relative">
+    <div className="w-full h-full flex flex-col md:flex-row gap-2 md:gap-4 animate-in fade-in duration-500 overflow-x-hidden overflow-y-auto relative">
 
       {/* ═══ Pause Overlay — Eye Not Covered ═══ */}
       {isEyeUncovered && (
@@ -266,8 +266,8 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
         </div>
       )}
 
-      {/* ─── LEFT: Camera Feed Panel ─── */}
-      <div className="shrink-0 flex flex-col gap-3 items-center" style={{ width: 300 }}>
+      {/* ─── LEFT: Camera Feed Panel (hidden on mobile) ─── */}
+      <div className="hidden md:flex shrink-0 flex-col gap-3 items-center" style={{ width: 260 }}>
         <div className="w-full aspect-[3/4] rounded-2xl overflow-hidden bg-black border-2 border-cyan-500/20 shadow-[0_0_30px_rgba(0,200,255,0.1)] relative">
           <video ref={cameraRef} autoPlay muted playsInline className="w-full h-full object-cover scale-x-[-1] brightness-110" />
           <canvas ref={coverCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
@@ -323,16 +323,16 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
 
         {/* Header Bar */}
-        <div className="shrink-0 px-6 py-3">
-          <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight leading-none">{t.contrast_sensitivity}</h3>
-          <p className="text-xs text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
-            {t.contrast_desc} — {currentEyeLabel}
+        <div className="shrink-0 px-3 md:px-6 py-2 md:py-3">
+          <h3 className="text-base md:text-2xl font-black text-white uppercase tracking-tight leading-none">{t.contrast_sensitivity}</h3>
+          <p className="text-[10px] md:text-xs text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
+            Level {level + 1}/{SAMPLES_PER_EYE} · {currentEyeLabel}
           </p>
         </div>
 
         {/* Progress Bar */}
-        <div className="shrink-0 px-6 pt-2">
-          <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+        <div className="shrink-0 px-3 md:px-6 pt-1 md:pt-2">
+          <div className="w-full bg-slate-800 h-1 md:h-1.5 rounded-full overflow-hidden">
             <div
               className="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full transition-all duration-500 rounded-full"
               style={{ width: `${progressPct}%` }}
@@ -346,7 +346,7 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
             <div className="absolute inset-0 bg-white shadow-inner"></div>
             <div
               className="font-black select-none transition-all duration-300 relative z-10 leading-none"
-              style={{ opacity: CONTRAST_LEVELS[level], color: '#000', fontSize: 'clamp(8rem, 28vh, 24rem)' }}
+              style={{ opacity: CONTRAST_LEVELS[level], color: '#000', fontSize: 'clamp(5rem, 20vw, 18rem)' }}
             >
               {currentLetter}
             </div>
@@ -354,13 +354,13 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
         </div>
 
         {/* Letter Grid + Can't See */}
-        <div className="shrink-0 p-4 pt-0 space-y-2">
-          <div className="grid grid-cols-5 gap-2 max-w-3xl mx-auto">
+        <div className="shrink-0 p-2 md:p-4 pt-0 space-y-2">
+          <div className="grid grid-cols-5 gap-1 md:gap-2 max-w-3xl mx-auto">
             {LETTERS.split('').map(l => (
               <button
                 key={l}
                 onClick={() => handleSelect(l)}
-                className={`py-3 md:py-4 glass border-2 rounded-xl md:rounded-2xl font-black text-2xl md:text-3xl text-white transition-all active:scale-90
+                className={`py-2 md:py-4 glass border-2 rounded-xl md:rounded-2xl font-black text-xl md:text-3xl text-white transition-all active:scale-90
                   ${activeButton === l
                     ? 'border-cyan-400 bg-cyan-500/40 shadow-[0_0_50px_rgba(0,243,255,0.6)]'
                     : 'border-white/10 hover:border-cyan-400 hover:bg-cyan-500/20'}

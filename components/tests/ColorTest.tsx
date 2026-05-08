@@ -213,9 +213,9 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
   if (phase === 'ishihara-testing' && currentIshiharaPlate) {
     const ishiharaProgress = ((ishiharaIdx + 1) / ishiharaPlates.length) * 100;
     return (
-      <div className="w-full h-full flex flex-row gap-4 animate-in fade-in duration-500 overflow-x-hidden overflow-y-auto relative">
-        {/* LEFT: Info Panel */}
-        <div className="shrink-0 flex flex-col gap-3 items-center" style={{ width: 300 }}>
+      <div className="w-full h-full flex flex-col md:flex-row gap-2 md:gap-4 animate-in fade-in duration-500 overflow-x-hidden overflow-y-auto relative">
+        {/* LEFT: Info Panel (hidden on mobile) */}
+        <div className="hidden md:flex shrink-0 flex-col gap-3 items-center" style={{ width: 220 }}>
           <div className="w-full glass rounded-2xl border border-white/5 p-3 space-y-2">
             <div className="text-center">
               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Ishihara Plates</div>
@@ -243,9 +243,9 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
         {/* RIGHT: Ishihara Content */}
         <div className="flex-1 flex flex-col overflow-hidden min-w-0">
           <div className="shrink-0 px-6 py-3">
-            <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight leading-none">Ishihara Color Plates</h3>
-            <p className="text-xs text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
-              Plate {ishiharaIdx + 1} &mdash; BOTH EYES
+            <h3 className="text-base md:text-2xl font-black text-white uppercase tracking-tight leading-none">Ishihara Color Plates</h3>
+            <p className="text-[10px] md:text-xs text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
+              Plate {ishiharaIdx + 1} — BOTH EYES
             </p>
           </div>
 
@@ -259,7 +259,7 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
 
           {/* Ishihara Plate Image */}
           <div className="flex-1 min-h-0 flex items-center justify-center p-4">
-            <div className="w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden shadow-2xl bg-[#f5f0e0] border-4 border-white/10">
+            <div className="w-48 h-48 md:w-72 md:h-72 rounded-full overflow-hidden shadow-2xl bg-[#f5f0e0] border-4 border-white/10 mx-auto">
               <img
                 src={currentIshiharaPlate.imageSrc}
                 alt={`Ishihara Plate ${ishiharaIdx + 1}`}
@@ -311,10 +311,10 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
   const colorHex = ALL_COLORS[currentSample.name] || '#ffffff';
 
   return (
-    <div className="w-full h-full flex flex-row gap-4 animate-in fade-in duration-500 overflow-x-hidden overflow-y-auto relative">
+    <div className="w-full h-full flex flex-col md:flex-row gap-2 md:gap-4 animate-in fade-in duration-500 overflow-x-hidden overflow-y-auto relative">
 
-      {/* LEFT: Info Panel */}
-      <div className="shrink-0 flex flex-col gap-3 items-center" style={{ width: 300 }}>
+      {/* LEFT: Info Panel (hidden on mobile) */}
+      <div className="hidden md:flex shrink-0 flex-col gap-3 items-center" style={{ width: 220 }}>
         <div className="w-full glass rounded-2xl border border-white/5 p-3 space-y-2">
           <div className="text-center">
             <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Color Arrangement</div>
@@ -343,9 +343,9 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
 
         {/* Header */}
         <div className="shrink-0 px-6 py-3">
-          <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight leading-none">Color Arrangement</h3>
-          <p className="text-xs text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
-            Identify the color &mdash; BOTH EYES
+          <h3 className="text-base md:text-2xl font-black text-white uppercase tracking-tight leading-none">Color Arrangement</h3>
+          <p className="text-[10px] md:text-xs text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
+            Sample {sampleIdx + 1}/{TOTAL_SAMPLES} — BOTH EYES
           </p>
         </div>
 
@@ -365,7 +365,7 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
               style={{ background: colorHex, transform: 'scale(1.4)' }} />
             {/* Main circle */}
             <div
-              className="relative w-44 h-44 md:w-56 md:h-56 lg:w-64 lg:h-64 rounded-full border-4 border-white/20 shadow-2xl transition-colors duration-500"
+              className="relative w-36 h-36 md:w-56 md:h-56 lg:w-64 lg:h-64 rounded-full border-4 border-white/20 shadow-2xl transition-colors duration-500"
               style={{
                 background: `radial-gradient(circle at 35% 35%, ${colorHex}ee, ${colorHex}cc, ${colorHex})`,
                 boxShadow: `0 0 60px ${colorHex}50, 0 0 120px ${colorHex}25, inset 0 -8px 25px rgba(0,0,0,0.25), inset 0 8px 25px rgba(255,255,255,0.12)`,
