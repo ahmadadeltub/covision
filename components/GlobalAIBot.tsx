@@ -82,13 +82,15 @@ const GlobalAIBot: React.FC<Props> = ({ globalBotState }) => {
     <div
       className="fixed z-[9999] no-print"
       style={{
-        bottom: 24,
-        right: 24,
+        bottom: window.innerWidth <= 768 ? 8 : 24,
+        right: window.innerWidth <= 768 ? 8 : 24,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-end',
-        gap: 12,
+        gap: window.innerWidth <= 768 ? 6 : 12,
         pointerEvents: 'auto',
+        transform: window.innerWidth <= 768 ? 'scale(0.55)' : 'scale(1)',
+        transformOrigin: 'bottom right',
       }}
     >
       {/* ─── Speech Bubble ─── */}

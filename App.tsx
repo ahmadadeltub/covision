@@ -436,6 +436,8 @@ const App: React.FC = () => {
             distanceStatus={distanceStatus as 'ok' | 'too_close' | 'too_far' | 'no_face'}
             onComplete={(results) => {
               setTestResults(results);
+              // Increment tests_completed counter
+              fetch('https://api.counterapi.dev/v1/covision_final_v2/tests_completed/up').catch(() => {});
               setStep(AppStep.Report);
             }}
           />

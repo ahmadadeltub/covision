@@ -160,27 +160,29 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                 borderRadius: '50%', pointerEvents: 'none', zIndex: 0,
             }} />
 
-            {/* Main content — uses flex to fill viewport without scroll */}
+            {/* Main content — scrollable on mobile to always reach the button */}
             <div style={{
                 position: 'relative', zIndex: 10,
                 width: '100%', maxWidth: 760,
                 height: '100%',
-                padding: '2vh 20px 100px 20px', // Extra padding at bottom to avoid overlapping floating AI Guide
+                padding: '2vh 16px 60px 16px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center',
-                gap: 'clamp(8px, 1.5vh, 20px)',
+                justifyContent: 'flex-start',
+                gap: 'clamp(6px, 1.2vh, 16px)',
                 opacity: loaded ? 1 : 0,
                 transform: loaded ? 'translateY(0)' : 'translateY(30px)',
                 transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+                overflowY: 'auto',
+                overflowX: 'hidden',
             }}>
 
                 {/* AI Eye Logo — big & prominent */}
                 <div style={{
                     position: 'relative',
-                    width: 'clamp(90px, 14vh, 140px)',
-                    height: 'clamp(90px, 14vh, 140px)',
+                    width: 'clamp(60px, 10vh, 120px)',
+                    height: 'clamp(60px, 10vh, 120px)',
                     flexShrink: 0,
                 }}>
                     <div style={{
@@ -287,13 +289,13 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                             }}
                         >
                             <span style={{
-                                fontSize: 'clamp(40px, 6vh, 56px)',
+                                fontSize: 'clamp(28px, 4vh, 48px)',
                                 lineHeight: 1,
                                 flexShrink: 0,
                                 filter: 'drop-shadow(0 0 8px rgba(0,200,255,0.3))',
                             }}>{f.icon}</span>
                             <span style={{
-                                fontSize: 'clamp(17px, 2.2vh, 22px)',
+                                fontSize: 'clamp(13px, 1.8vh, 20px)',
                                 fontWeight: 800,
                                 color: 'var(--text-primary)',
                             }}>{f.label}</span>
@@ -342,10 +344,10 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                         width: '100%',
                         flexShrink: 0,
                         position: 'relative',
-                        padding: 'clamp(18px, 2.8vh, 28px) 40px',
-                        fontSize: 'clamp(24px, 3.5vh, 32px)',
+                        padding: 'clamp(14px, 2.2vh, 24px) 20px',
+                        fontSize: 'clamp(16px, 2.8vh, 28px)',
                         fontWeight: 900,
-                        letterSpacing: '0.15em',
+                        letterSpacing: '0.1em',
                         textTransform: 'uppercase',
                         color: '#0f172a',
                         background: 'linear-gradient(135deg, #ffffff 0%, #a5f3fc 50%, #c7d2fe 100%)',
