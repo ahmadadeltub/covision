@@ -286,27 +286,61 @@ const App: React.FC = () => {
       {/* ─── Gesture Overlay removed — camera now lives inside each test's panel ─── */}
 
       {/* ─── Header ─── */}
-      <header className="app-header no-print" style={{ position: 'relative', zIndex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 24 }}>👁️</span>
+      <header className="app-header no-print" style={{ position: 'relative', zIndex: 200 }}>
+        {/* Logo + Brand */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {/* Animated Eye Logo */}
+          <div style={{
+            width: 36, height: 36,
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #0ea5e9, #6366f1)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 0 16px rgba(56,189,248,0.4)',
+            flexShrink: 0,
+          }}>
+            <span style={{ fontSize: 18, lineHeight: 1 }}>👁️</span>
+          </div>
           <div>
-            <h1 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', margin: 0, lineHeight: 1.2 }}>
+            <h1 style={{
+              fontSize: 'clamp(13px, 2.5vw, 17px)',
+              fontWeight: 800,
+              margin: 0,
+              lineHeight: 1.1,
+              background: 'linear-gradient(90deg, var(--accent), #818cf8)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontFamily: 'Outfit, Inter, sans-serif',
+              letterSpacing: '-0.01em',
+            }}>
               {t.app_title}
             </h1>
-            <p style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', margin: 0 }}>
+            <p style={{
+              fontSize: 'clamp(9px, 1.8vw, 11px)',
+              fontWeight: 500,
+              color: 'var(--text-muted)',
+              margin: 0,
+              letterSpacing: '0.04em',
+            }}>
               {t.app_subtitle}
             </p>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* Controls */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {/* Theme toggle */}
           <button
             onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
             style={{
-              padding: '6px 10px', borderRadius: 8,
-              border: '1px solid var(--border-color)',
-              background: 'var(--bg-secondary)', color: 'var(--text-primary)',
-              fontSize: 16, cursor: 'pointer', transition: 'all 0.2s',
+              width: 34, height: 34,
+              borderRadius: '50%',
+              border: '1.5px solid var(--border-color)',
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-primary)',
+              fontSize: 16,
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.2s',
             }}
           >
             {theme === 'dark' ? '☀️' : '🌙'}

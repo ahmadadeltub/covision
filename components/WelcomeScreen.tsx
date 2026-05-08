@@ -156,261 +156,243 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                 borderRadius: '50%', pointerEvents: 'none', zIndex: 0,
             }} />
 
-            {/* Main content — scrollable on mobile to always reach the button */}
+            {/* Main content */}
             <div style={{
                 position: 'relative', zIndex: 10,
-                width: '100%', maxWidth: 760,
+                width: '100%', maxWidth: 680,
                 height: '100%',
-                padding: '2vh 16px 60px 16px',
+                padding: 'clamp(16px, 3vh, 32px) clamp(12px, 4vw, 24px) 80px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'flex-start',
-                gap: 'clamp(6px, 1.2vh, 16px)',
+                gap: 'clamp(10px, 1.8vh, 20px)',
                 opacity: loaded ? 1 : 0,
-                transform: loaded ? 'translateY(0)' : 'translateY(30px)',
-                transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+                transform: loaded ? 'translateY(0)' : 'translateY(24px)',
+                transition: 'all 0.7s cubic-bezier(0.16, 1, 0.3, 1)',
                 overflowY: 'auto',
                 overflowX: 'hidden',
             }}>
 
-                {/* AI Eye Logo — big & prominent */}
-                <div style={{
-                    position: 'relative',
-                    width: 'clamp(60px, 10vh, 120px)',
-                    height: 'clamp(60px, 10vh, 120px)',
-                    flexShrink: 0,
-                }}>
+                {/* Hero — Logo + Title */}
+                <div style={{ textAlign: 'center', flexShrink: 0, width: '100%' }}>
+                    {/* Animated logo */}
                     <div style={{
-                        position: 'absolute', inset: -8,
-                        borderRadius: '50%',
-                        border: '2.5px solid transparent',
-                        borderTopColor: 'rgba(0,200,255,0.5)',
-                        borderRightColor: 'rgba(0,200,255,0.2)',
-                        animation: 'spin 4s linear infinite',
-                    }} />
-                    <div style={{
-                        position: 'absolute', inset: -18,
-                        borderRadius: '50%',
-                        border: '1.5px solid transparent',
-                        borderBottomColor: 'rgba(99,102,241,0.4)',
-                        borderLeftColor: 'rgba(99,102,241,0.15)',
-                        animation: 'spin 7s linear infinite reverse',
-                    }} />
-                    <div style={{
-                        width: '100%', height: '100%',
-                        borderRadius: '50%',
-                        background: 'linear-gradient(135deg, rgba(0,200,255,0.15) 0%, rgba(99,102,241,0.1) 100%)',
-                        border: '1.5px solid rgba(0,200,255,0.25)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 'clamp(44px, 7vh, 72px)',
-                        boxShadow: '0 0 50px rgba(0,200,255,0.2), inset 0 0 40px rgba(0,200,255,0.06)',
+                        width: 'clamp(64px, 11vh, 100px)',
+                        height: 'clamp(64px, 11vh, 100px)',
+                        margin: '0 auto clamp(12px, 2vh, 20px)',
+                        position: 'relative',
                     }}>
-                        👁️
+                        <div style={{
+                            position: 'absolute', inset: -6,
+                            borderRadius: '50%',
+                            border: '2px solid transparent',
+                            borderTopColor: 'rgba(56,189,248,0.6)',
+                            borderRightColor: 'rgba(56,189,248,0.2)',
+                            animation: 'spin 3s linear infinite',
+                        }} />
+                        <div style={{
+                            position: 'absolute', inset: -14,
+                            borderRadius: '50%',
+                            border: '1.5px solid transparent',
+                            borderBottomColor: 'rgba(129,140,248,0.5)',
+                            animation: 'spin 6s linear infinite reverse',
+                        }} />
+                        <div style={{
+                            width: '100%', height: '100%',
+                            borderRadius: '50%',
+                            background: 'linear-gradient(135deg, rgba(56,189,248,0.15), rgba(129,140,248,0.12))',
+                            border: '1.5px solid rgba(56,189,248,0.3)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 'clamp(32px, 6vh, 52px)',
+                            boxShadow: '0 0 40px rgba(56,189,248,0.2)',
+                        }}>👁️</div>
                     </div>
-                </div>
 
-                {/* Title block */}
-                <div style={{ textAlign: 'center', flexShrink: 0 }}>
+                    {/* Badge */}
                     <div style={{
-                        fontSize: 'clamp(13px, 1.6vh, 16px)',
-                        fontWeight: 800,
-                        letterSpacing: '0.35em',
+                        display: 'inline-flex', alignItems: 'center', gap: 6,
+                        padding: '4px 14px',
+                        background: 'rgba(56,189,248,0.1)',
+                        border: '1px solid rgba(56,189,248,0.2)',
+                        borderRadius: 20,
+                        fontSize: 'clamp(9px, 1.3vh, 12px)',
+                        fontWeight: 700,
+                        letterSpacing: '0.12em',
                         textTransform: 'uppercase',
                         color: 'var(--accent)',
-                        marginBottom: 'clamp(4px, 0.8vh, 10px)',
+                        marginBottom: 'clamp(8px, 1.2vh, 14px)',
                     }}>
-                        {lang === 'ar' ? 'نظام ذكاء اصطناعي متقدم' : 'Advanced AI-Powered System'}
+                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block', animation: 'pulse 2s infinite' }} />
+                        AI-Powered Vision Screening
                     </div>
+
+                    {/* Title */}
                     <h1 style={{
-                        fontSize: 'clamp(20px, 6vw, 48px)',
+                        fontSize: 'clamp(22px, 5.5vw, 44px)',
                         fontWeight: 900,
-                        background: 'linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 50%, #818cf8 100%)',
+                        background: 'linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 60%, #818cf8 100%)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
-                        lineHeight: 1.15,
-                        marginBottom: 'clamp(4px, 0.6vh, 10px)',
+                        lineHeight: 1.12,
+                        margin: '0 0 clamp(6px, 1vh, 12px)',
                         letterSpacing: '-0.02em',
-                        whiteSpace: 'normal',
-                        wordBreak: 'break-word',
-                    }}>
-                        {t.welcome_title}
-                    </h1>
+                        fontFamily: 'Outfit, Inter, sans-serif',
+                    }}>{t.welcome_title}</h1>
+
                     <p style={{
-                        fontSize: 'clamp(17px, 2.4vh, 24px)',
+                        fontSize: 'clamp(13px, 2vh, 17px)',
                         color: 'var(--text-secondary)',
-                        fontWeight: 500,
-                        maxWidth: 500,
+                        fontWeight: 400,
+                        maxWidth: 480,
                         margin: '0 auto',
-                        lineHeight: 1.5,
-                    }}>
-                        {t.welcome_subtitle}
-                    </p>
+                        lineHeight: 1.6,
+                    }}>{t.welcome_subtitle}</p>
                 </div>
 
-                {/* Feature cards — 2x2 grid, bigger icons */}
+                {/* Feature cards — 2×2 grid */}
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(2, 1fr)',
-                    gap: 'clamp(8px, 1.2vh, 14px)',
+                    gap: 'clamp(8px, 1.2vh, 12px)',
                     width: '100%',
                     flexShrink: 0,
                 }}>
                     {features.map((f, i) => (
                         <div key={i} style={{
-                            padding: 'clamp(12px, 2vh, 22px) clamp(14px, 2vw, 22px)',
+                            padding: 'clamp(10px, 1.6vh, 16px) clamp(12px, 2vw, 18px)',
                             background: 'var(--bg-card)',
-                            backdropFilter: 'blur(12px)',
-                            WebkitBackdropFilter: 'blur(12px)',
-                            borderRadius: 16,
+                            backdropFilter: 'blur(16px)',
+                            WebkitBackdropFilter: 'blur(16px)',
+                            borderRadius: 14,
                             border: '1px solid var(--border-color)',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: 'clamp(8px, 1.5vw, 14px)',
-                            transition: 'all 0.3s',
-                            cursor: 'default',
+                            gap: 10,
+                            transition: 'all 0.25s ease',
                             opacity: loaded ? 1 : 0,
-                            transform: loaded ? 'translateY(0)' : 'translateY(20px)',
-                            transitionDelay: `${0.25 + i * 0.08}s`,
+                            transform: loaded ? 'translateY(0)' : 'translateY(16px)',
+                            transitionDelay: `${0.2 + i * 0.06}s`,
                         }}
                             onMouseEnter={e => {
-                                (e.currentTarget as HTMLDivElement).style.background = 'rgba(0,200,255,0.07)';
-                                (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(0,200,255,0.2)';
+                                (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(56,189,248,0.3)';
                                 (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)';
+                                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 24px rgba(56,189,248,0.1)';
                             }}
                             onMouseLeave={e => {
-                                (e.currentTarget as HTMLDivElement).style.background = 'var(--bg-card)';
                                 (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border-color)';
                                 (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)';
+                                (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
                             }}
                         >
-                            <span style={{
-                                fontSize: 'clamp(28px, 4vh, 48px)',
-                                lineHeight: 1,
-                                flexShrink: 0,
-                                filter: 'drop-shadow(0 0 8px rgba(0,200,255,0.3))',
-                            }}>{f.icon}</span>
-                            <span style={{
-                                fontSize: 'clamp(13px, 1.8vh, 20px)',
-                                fontWeight: 800,
-                                color: 'var(--text-primary)',
-                            }}>{f.label}</span>
+                            <span style={{ fontSize: 'clamp(22px, 3.5vh, 34px)', lineHeight: 1, flexShrink: 0 }}>{f.icon}</span>
+                            <span style={{ fontSize: 'clamp(11px, 1.5vh, 15px)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3 }}>{f.label}</span>
                         </div>
                     ))}
                 </div>
 
-                {/* Disclaimer — compact */}
+                {/* Disclaimer */}
                 <div style={{
-                    width: '100%',
-                    padding: 'clamp(10px, 1.2vh, 16px) clamp(14px, 2vw, 20px)',
-                    background: 'rgba(245,158,11,0.06)',
-                    border: '1px solid rgba(245,158,11,0.12)',
+                    width: '100%', flexShrink: 0,
+                    padding: 'clamp(8px, 1.2vh, 14px) clamp(12px, 2vw, 18px)',
+                    background: 'rgba(251,191,36,0.06)',
+                    border: '1px solid rgba(251,191,36,0.15)',
                     borderRadius: 12,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    flexShrink: 0,
-                    textAlign: lang === 'ar' ? 'right' : 'left',
+                    display: 'flex', alignItems: 'flex-start', gap: 10,
                 }}>
-                    <span style={{ fontSize: 'clamp(20px, 3vh, 26px)', flexShrink: 0 }}>⚠️</span>
-                    <p style={{
-                        fontSize: 'clamp(13px, 1.5vh, 16px)',
-                        color: 'var(--text-muted)',
-                        lineHeight: 1.5,
-                        fontWeight: 500,
-                        margin: 0,
-                    }}>
-                        <span style={{ color: '#f59e0b', fontWeight: 800 }}>
-                            {t.disclaimer_title?.replace('⚠️ ', '') || 'Medical Disclaimer'}
-                        </span>
-                        {' — '}
+                    <span style={{ fontSize: 16, flexShrink: 0, marginTop: 1 }}>⚠️</span>
+                    <p style={{ fontSize: 'clamp(11px, 1.4vh, 14px)', color: 'var(--text-muted)', lineHeight: 1.55, fontWeight: 500, margin: 0 }}>
+                        <strong style={{ color: 'var(--warning)', fontWeight: 700 }}>{t.disclaimer_title?.replace('⚠️ ', '') || 'Medical Disclaimer'} — </strong>
                         {t.disclaimer_text}
                     </p>
                 </div>
 
-                {/* CTA Button — big & cinematic */}
+                {/* CTA Button */}
                 <button
                     onClick={async () => {
-                        try {
-                            await requestForToken();
-                        } catch(e) { console.error(e); }
+                        try { await requestForToken(); } catch(e) { console.error(e); }
                         onStart();
                     }}
                     style={{
-                        width: '100%',
-                        flexShrink: 0,
-                        position: 'relative',
-                        padding: 'clamp(14px, 2.2vh, 24px) 20px',
-                        fontSize: 'clamp(16px, 2.8vh, 28px)',
-                        fontWeight: 900,
-                        letterSpacing: '0.1em',
+                        width: '100%', flexShrink: 0, position: 'relative',
+                        padding: 'clamp(14px, 2.2vh, 22px) 20px',
+                        fontSize: 'clamp(15px, 2.4vh, 22px)',
+                        fontWeight: 800,
+                        letterSpacing: '0.08em',
                         textTransform: 'uppercase',
-                        color: '#0f172a',
-                        background: 'linear-gradient(135deg, #ffffff 0%, #a5f3fc 50%, #c7d2fe 100%)',
+                        color: '#fff',
+                        background: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
                         border: 'none',
-                        borderRadius: 20,
+                        borderRadius: 16,
                         cursor: 'pointer',
                         transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                        boxShadow: '0 0 40px rgba(0,200,255,0.2), 0 4px 20px rgba(0,0,0,0.2)',
+                        boxShadow: '0 4px 24px rgba(14,165,233,0.35), 0 1px 4px rgba(0,0,0,0.15)',
                         overflow: 'hidden',
-                        fontFamily: 'inherit',
+                        fontFamily: 'Outfit, Inter, sans-serif',
                     }}
                     onMouseEnter={e => {
-                        (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px) scale(1.01)';
-                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 60px rgba(0,200,255,0.35), 0 8px 30px rgba(0,0,0,0.25)';
+                        (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)';
+                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 32px rgba(14,165,233,0.45), 0 2px 8px rgba(0,0,0,0.2)';
                     }}
                     onMouseLeave={e => {
-                        (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0) scale(1)';
-                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 40px rgba(0,200,255,0.2), 0 4px 20px rgba(0,0,0,0.2)';
+                        (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
+                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 24px rgba(14,165,233,0.35), 0 1px 4px rgba(0,0,0,0.15)';
                     }}
                 >
                     <div style={{
                         position: 'absolute', inset: 0,
-                        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)',
                         transform: 'translateX(-100%)',
-                        animation: 'shimmer 3s ease-in-out infinite',
+                        animation: 'shimmer 2.5s ease-in-out infinite',
                     }} />
-                    <span style={{ position: 'relative', zIndex: 1 }}>{t.begin_screening}</span>
+                    <span style={{ position: 'relative', zIndex: 1 }}>🚀 {t.begin_screening}</span>
                 </button>
 
-                {/* Live Stats */}
+                {/* Live Stats — pill design */}
                 <div style={{
-                    display: 'flex', gap: 'clamp(15px, 3vw, 30px)', flexWrap: 'wrap', justifyContent: 'center',
-                    padding: 'clamp(10px, 1.5vh, 16px) clamp(20px, 4vw, 30px)', 
-                    background: 'rgba(15, 23, 42, 0.6)', 
-                    border: '1px solid rgba(255,255,255,0.1)', 
-                    borderRadius: '20px',
-                    backdropFilter: 'blur(10px)',
-                    marginTop: 'clamp(5px, 1vh, 10px)',
-                    flexShrink: 0
+                    display: 'flex', gap: 0, width: '100%',
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 14,
+                    overflow: 'hidden',
+                    flexShrink: 0,
                 }}>
-                    <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: 'clamp(8px, 1.2vh, 11px)', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.1em' }}>Total Visitors</div>
-                        <div style={{ fontSize: 'clamp(18px, 2.5vh, 24px)', color: 'var(--accent)', fontWeight: 900 }}>{stats.visitors.toLocaleString()}</div>
-                    </div>
-                    <div style={{ width: 1, background: 'rgba(255,255,255,0.1)' }}></div>
-                    <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: 'clamp(8px, 1.2vh, 11px)', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.1em' }}>Tests Completed</div>
-                        <div style={{ fontSize: 'clamp(18px, 2.5vh, 24px)', color: '#10b981', fontWeight: 900 }}>{stats.tests.toLocaleString()}</div>
-                    </div>
+                    {[
+                        { label: 'Total Visitors', value: stats.visitors.toLocaleString(), color: 'var(--accent)', icon: '👥' },
+                        { label: 'Tests Completed', value: stats.tests.toLocaleString(), color: 'var(--success)', icon: '✅' },
+                    ].map((s, i) => (
+                        <div key={i} style={{
+                            flex: 1,
+                            padding: 'clamp(10px, 1.5vh, 14px) 12px',
+                            textAlign: 'center',
+                            borderRight: i === 0 ? '1px solid var(--border-color)' : 'none',
+                        }}>
+                            <div style={{ fontSize: 'clamp(9px, 1.1vh, 11px)', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.1em', marginBottom: 4 }}>
+                                {s.icon} {s.label}
+                            </div>
+                            <div style={{ fontSize: 'clamp(18px, 2.8vh, 26px)', color: s.color, fontWeight: 900, fontFamily: 'Outfit, Inter, sans-serif' }}>
+                                {stats.visitors === 0 ? '—' : s.value}
+                            </div>
+                        </div>
+                    ))}
                 </div>
 
-                {/* Version */}
+                {/* Credits */}
                 <div style={{
-                    fontSize: 'clamp(10px, 1.3vh, 14px)',
-                    fontWeight: 900,
-                    color: 'var(--text-primary)',
-                    letterSpacing: '0.05em',
-                    flexShrink: 0,
+                    fontSize: 'clamp(10px, 1.2vh, 12px)',
+                    fontWeight: 500,
+                    color: 'var(--text-muted)',
                     textAlign: 'center',
-                    lineHeight: 1.5,
+                    lineHeight: 1.6,
+                    flexShrink: 0,
+                    paddingBottom: 8,
                 }}>
-                    This Website Designed By Yousef Al-Qahtani, Fahad Rashid — Supervised: Eng. Ahmad Tubaishat
+                    Designed by Yousef Al-Qahtani, Fahad Rashid · Supervised by Eng. Ahmad Tubaishat
                 </div>
             </div>
 
-            <div className="absolute bottom-4 right-6 text-[10px] md:text-xs text-slate-600 font-bold tracking-widest uppercase z-10 hidden md:block">
-                CoVision OS v1.3.1 • Final Optimized Update
+            <div className="absolute bottom-3 right-4 text-[9px] text-slate-600 font-bold tracking-widest uppercase z-10 hidden md:block">
+                CoVision v1.4.0
             </div>
 
             <style>{`
