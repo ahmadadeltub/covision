@@ -390,6 +390,10 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                 </div>
             </div>
 
+            <div className="absolute bottom-4 right-6 text-[10px] md:text-xs text-slate-600 font-bold tracking-widest uppercase z-10 hidden md:block">
+                CoVision OS v1.2.1 • Mobile Live
+            </div>
+
             <style>{`
                 @keyframes spin {
                     from { transform: rotate(0deg); }
