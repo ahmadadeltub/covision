@@ -78,19 +78,22 @@ const GlobalAIBot: React.FC<Props> = ({ globalBotState }) => {
 
   const showBubble = expanded && bubbleVisible && message;
 
-  return (
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+
+    return (
     <div
       className="fixed z-[9999] no-print"
       style={{
-        bottom: window.innerWidth <= 768 ? 8 : 24,
-        right: window.innerWidth <= 768 ? 8 : 24,
+        ...(isMobile
+          ? { top: 8, left: 8 }
+          : { bottom: 24, right: 24 }),
         display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-end',
-        gap: window.innerWidth <= 768 ? 6 : 12,
+        flexDirection: isMobile ? 'column' : 'column',
+        alignItems: isMobile ? 'flex-start' : 'flex-end',
+        gap: isMobile ? 6 : 12,
         pointerEvents: 'auto',
-        transform: window.innerWidth <= 768 ? 'scale(0.55)' : 'scale(1)',
-        transformOrigin: 'bottom right',
+        transform: isMobile ? 'scale(0.5)' : 'scale(1)',
+        transformOrigin: isMobile ? 'top left' : 'bottom right',
       }}
     >
       {/* ─── Speech Bubble ─── */}
