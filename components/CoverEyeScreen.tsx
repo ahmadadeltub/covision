@@ -312,9 +312,9 @@ const CoverEyeScreen: React.FC<Props> = ({
                     <button
                         onClick={onStart}
                         disabled={!canStart}
-                        className={`group w-full py-5 md:py-7 rounded-[2.5rem] font-black text-lg md:text-3xl uppercase tracking-[0.3em] transition-all transform hover:scale-[1.02] active:scale-95 relative overflow-hidden shadow-2xl ${canStart
-                            ? 'bg-white text-slate-950 hover:bg-cyan-400 hover:shadow-[0_0_80px_rgba(0,243,255,0.5)]'
-                            : 'bg-slate-800 text-slate-600 cursor-not-allowed'
+                        className={`group w-full py-5 md:py-7 rounded-[2.5rem] font-black text-base md:text-3xl uppercase tracking-widest md:tracking-[0.3em] transition-all transform hover:scale-[1.02] active:scale-95 relative overflow-hidden shadow-2xl ${canStart
+                            ? 'bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 hover:shadow-[0_0_60px_rgba(52,211,153,0.5)]'
+                            : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'
                             }`}
                     >
                         <span className="relative z-10">

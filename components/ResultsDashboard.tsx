@@ -239,19 +239,19 @@ const ResultsDashboard: React.FC<Props> = ({ lang, t, results, onReset }) => {
       <div className="shrink-0 pt-6 flex flex-col md:flex-row gap-4 max-w-5xl mx-auto w-full">
         <button
           onClick={() => window.print()}
-          className="flex-1 py-6 md:py-10 bg-gradient-to-r from-cyan-600 to-indigo-700 text-white rounded-[2.5rem] md:rounded-[3.5rem] font-black uppercase text-xl md:text-3xl tracking-[0.4em] hover:shadow-[0_0_60px_rgba(0,243,255,0.4)] transition-all border border-white/10 active:scale-95"
+          className="flex-1 py-5 md:py-10 bg-gradient-to-r from-cyan-600 to-indigo-700 text-white rounded-[2rem] md:rounded-[3.5rem] font-black uppercase text-sm md:text-3xl tracking-widest md:tracking-[0.4em] hover:shadow-[0_0_60px_rgba(0,243,255,0.4)] transition-all border border-white/10 active:scale-95"
         >
           {t.download_report}
         </button>
         <button
           onClick={() => { setShowEmailModal(true); setEmailStatus('idle'); }}
-          className="flex-1 py-6 md:py-10 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-[2.5rem] md:rounded-[3.5rem] font-black uppercase text-xl md:text-3xl tracking-[0.4em] hover:shadow-[0_0_60px_rgba(16,185,129,0.4)] transition-all border border-white/10 active:scale-95"
+          className="flex-1 py-5 md:py-10 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-[2rem] md:rounded-[3.5rem] font-black uppercase text-sm md:text-3xl tracking-widest md:tracking-[0.4em] hover:shadow-[0_0_60px_rgba(16,185,129,0.4)] transition-all border border-white/10 active:scale-95"
         >
           ✉️ {t.send_email}
         </button>
         <button
           onClick={onReset}
-          className="flex-1 py-6 md:py-10 bg-gradient-to-r from-emerald-600 to-cyan-700 text-white rounded-[2.5rem] md:rounded-[3.5rem] font-black uppercase text-xl md:text-3xl tracking-[0.4em] hover:shadow-[0_0_60px_rgba(16,185,129,0.4)] transition-all border border-white/10 active:scale-95"
+          className="flex-1 py-5 md:py-10 bg-gradient-to-r from-emerald-600 to-cyan-700 text-white rounded-[2rem] md:rounded-[3.5rem] font-black uppercase text-sm md:text-3xl tracking-widest md:tracking-[0.4em] hover:shadow-[0_0_60px_rgba(16,185,129,0.4)] transition-all border border-white/10 active:scale-95"
         >
           📋 View Full Report
         </button>

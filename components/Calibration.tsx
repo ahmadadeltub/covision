@@ -510,7 +510,7 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
             <button
               onClick={handleFinish}
               disabled={!canProceed}
-              className={`group w-full py-4 md:py-6 rounded-2xl md:rounded-3xl font-black text-xl md:text-2xl uppercase tracking-[0.3em] transition-all transform hover:scale-[1.02] active:scale-95 relative overflow-hidden shadow-xl flex-1 md:flex-none ${canProceed
+              className={`group w-full py-4 md:py-6 rounded-2xl md:rounded-3xl font-black text-base md:text-2xl uppercase tracking-widest md:tracking-[0.3em] transition-all transform hover:scale-[1.02] active:scale-95 relative overflow-hidden shadow-xl flex-1 md:flex-none ${canProceed
                 ? 'bg-white text-slate-950 hover:bg-cyan-400 hover:shadow-[0_0_80px_rgba(0,243,255,0.7)]'
                 : 'bg-slate-800 text-slate-600 cursor-not-allowed'
                 }`}

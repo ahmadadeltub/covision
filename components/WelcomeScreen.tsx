@@ -17,10 +17,8 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                if (!sessionStorage.getItem('covision_visitor_counted')) {
-                    await fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/visitors/up');
-                    sessionStorage.setItem('covision_visitor_counted', 'true');
-                }
+                await fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/visitors/up');
+                
                 const [visRes, testsRes, repRes] = await Promise.all([
                     fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/visitors'),
                     fetch('https://api.counterapi.dev/v1/covision_41ab1_prod/tests_completed'),

@@ -86,10 +86,10 @@ const TestSelector: React.FC<Props> = ({ lang, t, onComplete }) => {
 
         {/* Footer Action Area */}
         <div className="relative z-10 w-full max-w-4xl mx-auto shrink-0">
-          <button 
+          <button
             disabled={selected.length === 0}
             onClick={() => onComplete(selected)}
-            className="group w-full py-6 md:py-10 bg-white text-slate-950 rounded-[2.5rem] md:rounded-[3.5rem] font-black text-xl md:text-5xl uppercase tracking-[0.4em] hover:bg-cyan-400 hover:shadow-[0_0_100px_rgba(0,243,255,0.7)] disabled:opacity-20 disabled:grayscale transition-all transform hover:scale-[1.01] active:scale-95 relative overflow-hidden shadow-2xl"
+            className="group w-full py-5 md:py-10 bg-white text-slate-950 rounded-[2rem] md:rounded-[3.5rem] font-black text-base md:text-5xl uppercase tracking-widest md:tracking-[0.4em] hover:bg-cyan-400 hover:shadow-[0_0_100px_rgba(0,243,255,0.7)] disabled:opacity-20 disabled:grayscale transition-all transform hover:scale-[1.01] active:scale-95 relative overflow-hidden shadow-2xl"
           >
             <div className="relative z-10 flex items-center justify-center gap-6">
               <span>Initialize System</span>

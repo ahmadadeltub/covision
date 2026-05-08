@@ -907,8 +907,9 @@ const BiometricScan: React.FC<Props> = ({
               <button
                 disabled={!cameraReady || !inRange}
                 onClick={runScan}
-                className={`w-full py-10 md:py-12 rounded-[3.5rem] font-black text-3xl md:text-5xl lg:text-6xl uppercase tracking-[0.4em] transition-all shadow-2xl group relative overflow-hidden
-                ${inRange ? 'bg-emerald-500 text-white hover:bg-emerald-400 hover:shadow-[0_0_80px_rgba(16,185,129,0.6)] cursor-pointer' : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'}`}
+                className={`w-full py-6 md:py-12 rounded-[2.5rem] md:rounded-[3.5rem] font-black text-xl md:text-5xl lg:text-6xl uppercase tracking-widest md:tracking-[0.4em] transition-all shadow-2xl group relative overflow-hidden
+                  ${(manualOverride || distanceStatus === 'ok') 
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-black hover:scale-[1.02] hover:shadow-[0_0_80px_rgba(16,185,129,0.6)] cursor-pointer' : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'}`}
               >
                 <span className="relative z-10">{inRange ? 'AUTHORIZE SCAN' : 'ADJUST DISTANCE'}</span>
                 {inRange && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-300/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>}
@@ -920,8 +921,8 @@ const BiometricScan: React.FC<Props> = ({
                   <div className="w-6 h-6 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.15s] shadow-[0_0_20px_#00f3ff]"></div>
                   <div className="w-6 h-6 bg-cyan-400 rounded-full animate-bounce shadow-[0_0_20px_#00f3ff]"></div>
                 </div>
-                <span className="text-xl md:text-4xl font-black text-cyan-400 uppercase tracking-[0.6em] animate-pulse">
-                  Scanning
+                <span className="text-lg md:text-4xl font-black text-cyan-400 uppercase tracking-[0.2em] md:tracking-[0.6em] animate-pulse">
+                  SCANNING
                 </span>
               </div>
             )}
