@@ -549,10 +549,8 @@ const App: React.FC = () => {
 
       </main>
 
-      {/* ─── Global AI Bot — appears on EVERY page ─── */}
-      {step !== AppStep.Testing && step !== AppStep.Calibration && (
-        <GlobalAIBot globalBotState={globalBotState} />
-      )}
+      {/* ─── Global AI Bot — appears on EVERY page including tests ─── */}
+      <GlobalAIBot globalBotState={globalBotState} />
     </div>
   );
 };

@@ -275,10 +275,10 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
 
   // ─── Testing Phase UI ───
   return (
-    <div className="w-full h-full flex flex-row gap-4 animate-in fade-in duration-500 overflow-x-hidden overflow-y-auto relative">
+    <div className="w-full h-full flex flex-col md:flex-row gap-2 md:gap-4 animate-in fade-in duration-500 overflow-x-hidden overflow-y-auto relative">
 
-      {/* ─── LEFT: Test Info Panel ─── */}
-      <div className="shrink-0 flex flex-col gap-3 items-center" style={{ width: 300 }}>
+      {/* ─── LEFT: Test Info Panel (hidden on mobile) ─── */}
+      <div className="hidden md:flex shrink-0 flex-col gap-3 items-center" style={{ width: 300 }}>
         {/* Test Info Panel */}
         <div className="w-full glass rounded-2xl border border-white/5 p-3 space-y-2">
           <div className="text-center">
@@ -321,16 +321,16 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
 
         {/* Header Bar */}
-        <div className="shrink-0 px-6 py-3">
-          <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight leading-none">{t.visual_acuity}</h3>
-          <p className="text-xs text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
-            {typeLabel} — BOTH EYES
+        <div className="shrink-0 px-3 md:px-6 py-2 md:py-3">
+          <h3 className="text-base md:text-2xl font-black text-white uppercase tracking-tight leading-none">{t.visual_acuity}</h3>
+          <p className="text-[10px] md:text-xs text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
+            Trial {currentIndex + 1}/{totalTrials} · {typeLabel}
           </p>
         </div>
 
         {/* Progress Bar */}
-        <div className="shrink-0 px-6 pt-2">
-          <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+        <div className="shrink-0 px-3 md:px-6 pt-1 md:pt-2">
+          <div className="w-full bg-slate-800 h-1 md:h-1.5 rounded-full overflow-hidden">
             <div
               className="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full transition-all duration-500 rounded-full"
               style={{ width: `${progressPct}%` }}
@@ -339,7 +339,7 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
         </div>
 
         {/* Optotype Display — centered */}
-        <div className="flex-1 min-h-0 flex items-center justify-center p-4 overflow-hidden">
+        <div className="flex-1 min-h-0 flex items-center justify-center p-2 md:p-4 overflow-hidden">
           <div className="flex items-center justify-center transition-all duration-300"
             style={{ width: `${currentTrial.sizePx}px`, height: `${currentTrial.sizePx}px` }}
           >
@@ -389,17 +389,17 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
         </div>
 
         {/* Answer Buttons */}
-        <div className="shrink-0 p-4 pt-0">
+        <div className="shrink-0 p-2 md:p-4 pt-0">
           {currentTrial.type === 'letter' ? (
             /* Letter choice grid — 3 columns × 2 rows */
-            <div className="grid grid-cols-3 gap-3 max-w-2xl mx-auto">
+            <div className="grid grid-cols-3 gap-2 md:gap-3 max-w-2xl mx-auto">
               {letterChoices.map((letter, idx) => (
                 <button
                   key={`${letter}-${idx}`}
                   onClick={() => handleSelect(letter)}
                   className={`
-                    py-4 md:py-5 glass border-2 rounded-2xl md:rounded-3xl
-                    text-3xl md:text-4xl lg:text-5xl font-black transition-all active:scale-95
+                    py-2 md:py-5 glass border-2 rounded-xl md:rounded-3xl
+                    text-xl md:text-4xl lg:text-5xl font-black transition-all active:scale-95
                     ${activeButton === letter
                       ? 'border-cyan-400 bg-cyan-500/40 shadow-[0_0_50px_rgba(0,243,255,0.6)] scale-105'
                       : 'border-white/10 hover:border-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_40px_rgba(0,243,255,0.4)]'}
@@ -412,14 +412,14 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
             </div>
           ) : (
             /* Direction choice grid — 2×2 for Tumbling E / Landolt C */
-            <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
+            <div className="grid grid-cols-2 gap-2 md:gap-3 max-w-md mx-auto">
               {DIRECTIONS.map(dir => (
                 <button
                   key={dir}
                   onClick={() => handleSelect(dir)}
                   className={`
-                    py-5 md:py-7 glass border-2 rounded-2xl md:rounded-3xl
-                    text-4xl md:text-5xl lg:text-6xl transition-all active:scale-95
+                    py-3 md:py-7 glass border-2 rounded-xl md:rounded-3xl
+                    text-2xl md:text-5xl lg:text-6xl transition-all active:scale-95
                     ${activeButton === dir
                       ? 'border-cyan-400 bg-cyan-500/40 shadow-[0_0_50px_rgba(0,243,255,0.6)] scale-105'
                       : 'border-white/10 hover:border-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_40px_rgba(0,243,255,0.4)]'}

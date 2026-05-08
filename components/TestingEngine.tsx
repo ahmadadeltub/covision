@@ -71,7 +71,7 @@ const TestingEngine: React.FC<Props> = ({ lang, t, tests, calibration, stream, d
 
       {/* Global Mini Camera View (Top Right) */}
       {stream && (
-        <div className="absolute top-4 right-4 z-50 w-24 h-32 md:w-32 md:h-40 rounded-xl overflow-hidden border-2 border-white/20 shadow-2xl bg-black/50 backdrop-blur-sm pointer-events-none">
+        <div className="absolute top-2 right-2 md:top-4 md:right-4 z-50 w-16 h-20 md:w-32 md:h-40 rounded-xl overflow-hidden border-2 border-white/20 shadow-2xl bg-black/50 backdrop-blur-sm pointer-events-none">
           <video
             ref={videoRef}
             autoPlay
@@ -86,12 +86,12 @@ const TestingEngine: React.FC<Props> = ({ lang, t, tests, calibration, stream, d
       )}
 
       {/* Progress Header */}
-      <div className="shrink-0 pt-4 pb-2 px-8 space-y-4">
+      <div className="shrink-0 pt-2 md:pt-4 pb-1 md:pb-2 px-3 md:px-8 space-y-2 md:space-y-4">
         <div className="flex justify-between items-end">
           <div className="flex flex-col">
-            <div className="text-xl font-black text-cyan-500 uppercase tracking-[0.4em]">Screening Phase {currentTestIndex + 1} / {tests.length}</div>
+            <div className="text-xs md:text-xl font-black text-cyan-500 uppercase tracking-[0.15em] md:tracking-[0.4em]">Phase {currentTestIndex + 1} / {tests.length}</div>
           </div>
-          <div className="text-xl font-black text-slate-500 uppercase tracking-widest">{Math.round(progress)}%</div>
+          <div className="text-sm md:text-xl font-black text-slate-500 uppercase tracking-widest">{Math.round(progress)}%</div>
         </div>
 
         <div className="w-full bg-slate-900 h-3 rounded-full overflow-hidden border border-white/5 relative">
@@ -103,7 +103,7 @@ const TestingEngine: React.FC<Props> = ({ lang, t, tests, calibration, stream, d
       </div>
 
       {/* Test Area */}
-      <div className="flex-1 min-h-0 relative p-4 md:p-6 lg:p-8 transition-opacity duration-300">
+      <div className="flex-1 min-h-0 relative p-2 md:p-6 lg:p-8 transition-opacity duration-300">
         {currentType === TestType.Acuity && (
           <AcuityTest calibration={calibration} t={t} stream={stream} onFinish={handleTestFinish} />
         )}
