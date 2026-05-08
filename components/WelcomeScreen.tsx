@@ -15,30 +15,42 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
     const [stats, setStats] = useState({ visitors: 0, tests: 0, reports: 0 });
 
     useEffect(() => {
+        // Local visit counter — always increments, even if API is blocked
+        const localVisits = parseInt(localStorage.getItem('cv_local_visits') || '0', 10) + 1;
+        localStorage.setItem('cv_local_visits', localVisits.toString());
+
         const fetchStats = async () => {
+            let visCount = localVisits;
+            let testsCount = 0;
+            let reportsCount = 0;
+
             try {
-                // Increment visitor count on every refresh and capture the new live count instantly
+                // Increment visitor and read the new count from the response
                 const visUpRes = await fetch('https://api.counterapi.dev/v1/covision_final_v2/visitors/up');
-                const visData = visUpRes.ok ? await visUpRes.json() : { count: 1 };
-                
+                if (visUpRes.ok) {
+                    const data = await visUpRes.json();
+                    if (data.count) visCount = data.count;
+                }
+            } catch (e) {
+                console.warn('Visitor API unreachable, using local count');
+            }
+
+            try {
                 const [testsRes, repRes] = await Promise.all([
                     fetch('https://api.counterapi.dev/v1/covision_final_v2/tests_completed'),
                     fetch('https://api.counterapi.dev/v1/covision_final_v2/reports_sent')
                 ]);
-                const tests = testsRes.ok ? await testsRes.json() : { count: 0 };
-                const rep = repRes.ok ? await repRes.json() : { count: 0 };
-                
-                // Absolute base values requested by user + real counter
-                setStats({ 
-                    visitors: 101 + (visData.count || 1), 
-                    tests: 305 + (tests.count || 0), 
-                    reports: 223 + (rep.count || 0) 
-                });
-            } catch (err) {
-                console.error('Failed to fetch stats', err);
-                // Fallback to base values if API fails
-                setStats({ visitors: 102, tests: 305, reports: 223 });
+                if (testsRes.ok) { const d = await testsRes.json(); testsCount = d.count || 0; }
+                if (repRes.ok) { const d = await repRes.json(); reportsCount = d.count || 0; }
+            } catch (e) {
+                console.warn('Stats API unreachable');
             }
+
+            setStats({
+                visitors: 101 + visCount,
+                tests: 305 + testsCount,
+                reports: 223 + reportsCount,
+            });
         };
         fetchStats();
     }, []);
