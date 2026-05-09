@@ -5,6 +5,7 @@ import { translations } from '../translations';
 import { PLATES } from '../utils/ishiharaPlates';
 
 import DistanceBar from './DistanceBar';
+import { useVoiceCommand } from '../hooks/useVoiceCommand';
 
 interface Props {
     lang: Language;
@@ -235,8 +236,34 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
     // Calculate progress for current step
     const progress = ((currentPlateIndex + 1) / 15) * 100;
 
-    // Voice control active only during testing
+    // Voice commands mapping
     const isTesting = step === 'testing_right' || step === 'testing_left';
+
+    const voiceCommands = useMemo(() => {
+        const map: Record<string, string> = {
+            "can't see": "none", "cant see": "none", "nothing": "none", "لا أرى": "none", "لا اعرف": "none", "مش شايف": "none"
+        };
+        const allNumbers = ['2', '3', '5', '6', '7', '8', '9', '12', '15', '16', '25', '29', '35', '42', '45', '74', '96', '97'];
+        allNumbers.forEach(n => {
+            map[n] = n;
+        });
+        const arabicNums: Record<string, string> = {
+            'اثنان': '2', 'اتنين': '2', 'ثلاثة': '3', 'تلاتة': '3', 'خمسة': '5', 'ستة': '6', 'سبعة': '7', 'ثمانية': '8', 'تمانية': '8', 'تسعة': '9',
+            'اثنا عشر': '12', 'اتناشر': '12', 'خمسة عشر': '15', 'خمستاشر': '15', 'ستة عشر': '16', 'ستاشر': '16',
+            'خمسة وعشرون': '25', 'خمسة وعشرين': '25', 'تسعة وعشرون': '29', 'تسعة وعشرين': '29',
+            'خمسة وثلاثون': '35', 'خمسة وتلاتين': '35', 'اثنان وأربعون': '42', 'اتنين واربعين': '42',
+            'خمسة وأربعون': '45', 'خمسة واربعين': '45', 'أربعة وسبعون': '74', 'اربعة وسبعين': '74',
+            'ستة وتسعون': '96', 'ستة وتسعين': '96', 'سبعة وتسعون': '97', 'سبعة وتسعين': '97'
+        };
+        Object.assign(map, arabicNums);
+        return map;
+    }, []);
+
+    const { isListening } = useVoiceCommand({
+        commands: voiceCommands,
+        onCommand: (cmd) => handleAnswer(cmd),
+        isActive: step === 'testing_right' || step === 'testing_left',
+    });
 
 
 
@@ -578,6 +605,10 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
                                 >
                                     {t.cant_see}
                                 </button>
+                                <div className="text-center mt-2 text-xs text-slate-500 uppercase tracking-widest opacity-60 flex items-center justify-center gap-2">
+                                    <span>Voice: Say the number or "can't see"</span>
+                                    {isListening && <span className="text-emerald-400 font-bold animate-pulse">🎤 Listening</span>}
+                                </div>
                             </div>
                         </>
                     )}

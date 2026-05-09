@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { TestResult, CalibrationData } from '../../types';
 
 import { useAIBot } from '../../hooks/useAIBot';
+import { useVoiceCommand } from '../../hooks/useVoiceCommand';
 import AIBotBubble from '../AIBotBubble';
 
 const OPTOTYPES = 'CDHKNORSVZ'.split('');
@@ -74,6 +75,24 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
     if (phase === 'testing') botStart();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
+
+  // Voice commands mapping
+  const voiceCommands = useMemo(() => {
+    const map: Record<string, string> = {
+      "can't see": "__CANT_SEE__", "cant see": "__CANT_SEE__", "i don't know": "__CANT_SEE__", "لا أرى": "__CANT_SEE__", "لا اعرف": "__CANT_SEE__", "مش شايف": "__CANT_SEE__"
+    };
+    OPTOTYPES.forEach(l => {
+      map[l.toLowerCase()] = l;
+      map[`letter ${l.toLowerCase()}`] = l;
+    });
+    return map;
+  }, []);
+
+  const { isListening } = useVoiceCommand({
+    commands: voiceCommands,
+    onCommand: (cmd) => handleSelect(cmd),
+    isActive: phase === 'testing',
+  });
 
   const handleSelect = (letter: string) => {
     if (phase !== 'testing') return;
@@ -248,8 +267,9 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
               </span>
             </button>
           </div>
-          <div className="text-center mt-2 text-xs text-slate-500 uppercase tracking-widest opacity-60">
-            Voice: Say the letter or &quot;can&apos;t see&quot;
+          <div className="text-center mt-2 text-xs text-slate-500 uppercase tracking-widest opacity-60 flex items-center justify-center gap-2">
+            <span>Voice: Say the letter or &quot;can&apos;t see&quot;</span>
+            {isListening && <span className="text-emerald-400 font-bold animate-pulse">🎤 Listening</span>}
           </div>
         </div>
       </div>

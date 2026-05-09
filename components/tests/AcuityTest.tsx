@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { TestResult, CalibrationData } from '../../types';
 
 import { useAIBot } from '../../hooks/useAIBot';
+import { useVoiceCommand } from '../../hooks/useVoiceCommand';
 import AIBotBubble from '../AIBotBubble';
 
 interface Props {
@@ -182,6 +183,31 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
     if (phase === 'testing') botStart();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
+
+  // Voice commands mapping
+  const voiceCommands = useMemo(() => {
+    const map: Record<string, string> = {
+      "can't see": "?", "cant see": "?", "i don't know": "?", "لا أرى": "?", "لا اعرف": "?", "مش شايف": "?"
+    };
+    if (currentTrial.type === 'letter') {
+      ALL_LETTERS.forEach(l => {
+        map[l.toLowerCase()] = l;
+        map[`letter ${l.toLowerCase()}`] = l;
+      });
+    } else {
+      map['up'] = 'up'; map['فوق'] = 'up';
+      map['down'] = 'down'; map['تحت'] = 'down';
+      map['left'] = 'left'; map['يسار'] = 'left'; map['شمال'] = 'left';
+      map['right'] = 'right'; map['يمين'] = 'right';
+    }
+    return map;
+  }, [currentTrial.type]);
+
+  const { isListening } = useVoiceCommand({
+    commands: voiceCommands,
+    onCommand: (cmd) => handleSelect(cmd),
+    isActive: phase === 'testing',
+  });
 
   useEffect(() => { lastTime.current = Date.now(); }, [currentIndex]);
 
@@ -444,8 +470,9 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
               Can't See
             </button>
           </div>
-          <div className="text-center mt-2 text-xs text-slate-500 uppercase tracking-widest opacity-60">
-            Voice: {currentTrial.type === 'letter' ? 'Say the letter' : 'Say "Up", "Down", "Left", "Right"'}
+          <div className="text-center mt-2 text-xs text-slate-500 uppercase tracking-widest opacity-60 flex items-center justify-center gap-2">
+            <span>Voice: {currentTrial.type === 'letter' ? 'Say the letter' : 'Say "Up", "Down", "Left", "Right"'}</span>
+            {isListening && <span className="text-emerald-400 font-bold animate-pulse">🎤 Listening</span>}
           </div>
         </div>
       </div>

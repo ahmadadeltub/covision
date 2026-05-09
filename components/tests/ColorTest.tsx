@@ -4,6 +4,7 @@ import { TestResult } from '../../types';
 import { PLATES } from '../../utils/ishiharaPlates';
 
 import { useAIBot } from '../../hooks/useAIBot';
+import { useVoiceCommand } from '../../hooks/useVoiceCommand';
 import AIBotBubble from '../AIBotBubble';
 
 interface Props {
@@ -92,6 +93,52 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
     if (phase === 'testing') botStart();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Voice commands mapping
+  const voiceCommands = useMemo(() => {
+    const map: Record<string, string> = {};
+    const arabicColors: Record<string, string> = {
+      'Red': 'احمر', 'Green': 'اخضر', 'Blue': 'ازرق', 'Yellow': 'اصفر',
+      'Orange': 'برتقالي', 'Purple': 'بنفسجي', 'Pink': 'وردي', 'Teal': 'تركواز',
+      'Brown': 'بني', 'Gray': 'رمادي', 'Maroon': 'عنابي', 'Gold': 'ذهبي',
+      'Silver': 'فضي', 'Lime': 'ليموني', 'Magenta': 'ارجواني', 'White': 'ابيض'
+    };
+
+    if (phase === 'testing' && currentSample) {
+        [currentSample.name, ...currentSample.confusers].forEach(c => {
+            map[c.toLowerCase()] = c;
+            const arabic = arabicColors[c];
+            if (arabic) {
+                map[arabic] = c;
+                if (arabic.startsWith('ا')) map['أ' + arabic.slice(1)] = c;
+            }
+        });
+    } else if (phase === 'ishihara-testing') {
+        const allNumbers = ['2', '3', '5', '6', '7', '8', '9', '12', '15', '16', '25', '29', '35', '42', '45', '74', '96', '97'];
+        allNumbers.forEach(n => { map[n] = n; });
+        map["can't see"] = "none"; map["cant see"] = "none"; map["nothing"] = "none"; map["لا أرى"] = "none"; map["لا اعرف"] = "none"; map["مش شايف"] = "none";
+        
+        const arabicNums: Record<string, string> = {
+            'اثنان': '2', 'اتنين': '2', 'ثلاثة': '3', 'تلاتة': '3', 'خمسة': '5', 'ستة': '6', 'سبعة': '7', 'ثمانية': '8', 'تمانية': '8', 'تسعة': '9',
+            'اثنا عشر': '12', 'اتناشر': '12', 'خمسة عشر': '15', 'خمستاشر': '15', 'ستة عشر': '16', 'ستاشر': '16',
+            'خمسة وعشرون': '25', 'خمسة وعشرين': '25', 'تسعة وعشرون': '29', 'تسعة وعشرين': '29',
+            'خمسة وثلاثون': '35', 'خمسة وتلاتين': '35', 'اثنان وأربعون': '42', 'اتنين واربعين': '42',
+            'خمسة وأربعون': '45', 'خمسة واربعين': '45', 'أربعة وسبعون': '74', 'اربعة وسبعين': '74',
+            'ستة وتسعون': '96', 'ستة وتسعين': '96', 'سبعة وتسعون': '97', 'سبعة وتسعين': '97'
+        };
+        Object.assign(map, arabicNums);
+    }
+    return map;
+  }, [phase, currentSample]);
+
+  const { isListening } = useVoiceCommand({
+    commands: voiceCommands,
+    onCommand: (cmd) => {
+        if (phase === 'testing') handleSelect(cmd);
+        else if (phase === 'ishihara-testing') handleIshiharaAnswer(cmd);
+    },
+    isActive: phase === 'testing' || phase === 'ishihara-testing',
+  });
 
   /* Selection */
   const handleSelect = (chosen: string) => {
@@ -288,6 +335,10 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
             >
               Can&apos;t See
             </button>
+            <div className="text-center mt-2 text-xs text-slate-500 uppercase tracking-widest opacity-60 flex items-center justify-center gap-2">
+                <span>Voice: Say the number or "can't see"</span>
+                {isListening && <span className="text-emerald-400 font-bold animate-pulse">🎤 Listening</span>}
+            </div>
           </div>
         </div>
       </div>
@@ -404,6 +455,10 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
                 </button>
               );
             })}
+          </div>
+          <div className="text-center mt-2 text-xs text-slate-500 uppercase tracking-widest opacity-60 flex items-center justify-center gap-2">
+              <span>Voice: Say the color</span>
+              {isListening && <span className="text-emerald-400 font-bold animate-pulse">🎤 Listening</span>}
           </div>
         </div>
       </div>
