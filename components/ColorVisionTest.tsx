@@ -33,8 +33,8 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
     const [coverCountdown, setCoverCountdown] = useState<number | null>(null);
 
     // Decks
-    const platesRight = useMemo(() => generateDeck(15), []);
-    const platesLeft = useMemo(() => generateDeck(15), []);
+    const platesRight = useMemo(() => generateDeck(3), []);
+    const platesLeft = useMemo(() => generateDeck(3), []);
 
     // Answers
     const [answersRight, setAnswersRight] = useState<ColorPlateAnswer[]>([]);
@@ -179,7 +179,7 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
 
         if (isRight) {
             setAnswersRight(prev => [...prev, newAnswer]);
-            if (currentPlateIndex < 14) {
+            if (currentPlateIndex < 2) {
                 setCurrentPlateIndex(prev => prev + 1);
             } else {
                 setStep('instruction_left');
@@ -187,13 +187,13 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
         } else {
             setAnswersLeft(prev => {
                 const updated = [...prev, newAnswer];
-                if (currentPlateIndex >= 14) {
+                if (currentPlateIndex >= 2) {
                     // Finished left eye
                     setTimeout(() => finishTest(answersRight, updated), 0);
                 }
                 return updated;
             });
-            if (currentPlateIndex < 14) {
+            if (currentPlateIndex < 2) {
                 setCurrentPlateIndex(prev => prev + 1);
             }
         }
@@ -209,10 +209,10 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
         let classification: ColorVisionResult['classification'];
         let classificationLabel: string;
 
-        if (totalCorrect >= 25) {
+        if (totalCorrect >= 5) {
             classification = 'normal';
             classificationLabel = t.normal_vision;
-        } else if (totalCorrect >= 15) {
+        } else if (totalCorrect >= 3) {
             classification = 'possible_rg_deficiency';
             classificationLabel = t.possible_rg;
         } else {
@@ -226,15 +226,15 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
             totalPlates,
             scoreRight: correctRight,
             scoreLeft: correctLeft,
-            totalRight: 15,
-            totalLeft: 15,
+            totalRight: 3,
+            totalLeft: 3,
             classification,
             classificationLabel,
         });
     };
 
     // Calculate progress for current step
-    const progress = ((currentPlateIndex + 1) / 15) * 100;
+    const progress = ((currentPlateIndex + 1) / 3) * 100;
 
     // Voice commands mapping
     const isTesting = step === 'testing_right' || step === 'testing_left';
@@ -340,7 +340,7 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
                             <div className="h-px bg-white/5"></div>
                             <div className="flex items-center justify-between">
                                 <span className="text-[10px] text-slate-500 uppercase font-bold">Progress</span>
-                                <span className="text-sm font-black text-white">{currentPlateIndex + 1}/15</span>
+                                <span className="text-sm font-black text-white">{currentPlateIndex + 1}/3</span>
                             </div>
                             <div className="flex items-center justify-center pt-1">
                                 <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
@@ -468,7 +468,7 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
                             {/* Right eye score summary */}
                             <div className="px-4 py-2 glass rounded-xl border border-emerald-500/30 text-sm">
                                 <span className="text-slate-400">Right eye completed — </span>
-                                <span className="text-emerald-400 font-black">{answersRight.filter(a => a.correct).length}/15 correct</span>
+                                <span className="text-emerald-400 font-black">{answersRight.filter(a => a.correct).length}/3 correct</span>
                             </div>
 
                             {/* Eye illustration */}

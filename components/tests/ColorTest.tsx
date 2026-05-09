@@ -35,7 +35,7 @@ const COLOR_SAMPLES: { name: string; confusers: string[] }[] = [
   { name: 'Gray',   confusers: ['Silver', 'Blue', 'White'] },
 ];
 
-const TOTAL_SAMPLES = 10;
+const TOTAL_SAMPLES = 3;
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -57,7 +57,7 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
   // Ishihara Plates State
   const ishiharaPlates = useMemo(() => {
     const shuffled = [...PLATES].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, Math.min(11, shuffled.length));
+    return shuffled.slice(0, Math.min(3, shuffled.length));
   }, []);
   const [ishiharaIdx, setIshiharaIdx] = useState(0);
   const [ishiharaResults, setIshiharaResults] = useState<{ plateId: number; correct: boolean; timeMs: number }[]>([]);
@@ -184,15 +184,12 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
     const ishiharaPct = ishResults.length > 0 ? ishiharaOk / ishResults.length : 1;
 
     let findings: string, confidence: number;
-    if (colorOk >= 9 && ishiharaPct >= 0.9) {
+    if (colorOk >= 2 && ishiharaPct >= 0.6) {
       findings = `Excellent color vision \u2014 Arrangement: ${colorOk}/${TOTAL_SAMPLES} (both eyes). Ishihara: ${ishiharaOk}/${ishResults.length}. Normal color discrimination.`;
       confidence = 0.98;
-    } else if (colorOk >= 7 && ishiharaPct >= 0.7) {
+    } else if (colorOk >= 1 && ishiharaPct >= 0.3) {
       findings = `Mild color concern \u2014 Arrangement: ${colorOk}/${TOTAL_SAMPLES} (both eyes). Ishihara: ${ishiharaOk}/${ishResults.length}. Some difficulty with similar hues.`;
       confidence = 0.90;
-    } else if (colorOk >= 4 || ishiharaPct >= 0.4) {
-      findings = `Moderate color deficiency \u2014 Arrangement: ${colorOk}/${TOTAL_SAMPLES} (both eyes). Ishihara: ${ishiharaOk}/${ishResults.length}. Difficulty distinguishing several color pairs.`;
-      confidence = 0.92;
     } else {
       findings = `Significant color deficiency \u2014 Arrangement: ${colorOk}/${TOTAL_SAMPLES} (both eyes). Ishihara: ${ishiharaOk}/${ishResults.length}. Comprehensive examination strongly recommended.`;
       confidence = 0.95;

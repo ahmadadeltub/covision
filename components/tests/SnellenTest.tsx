@@ -26,7 +26,7 @@ const SNELLEN_LEVELS = [
   { label: '20/10',  denom: 10,  sizePx: 14 },
 ];
 
-const TOTAL_SAMPLES = 15;
+const TOTAL_SAMPLES = 5;
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -232,7 +232,7 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
             <span
               key={`both-${levelIdx}`}
               className="font-black text-black select-none leading-none"
-              style={{ fontSize: `${currentLevel.sizePx}px`, fontFamily: "'Courier New', Courier, monospace" }}>
+              style={{ fontSize: `${Math.max(150, 300 - (levelIdx * 25))}px`, fontFamily: "'Courier New', Courier, monospace" }}>
               {targetLetter}
             </span>
           </div>

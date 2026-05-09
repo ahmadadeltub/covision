@@ -14,13 +14,12 @@ interface Props {
 
 const LETTERS = "CDHKNORSVZ";
 
-// 15 Contrast Levels per eye (Logarithmic gradient from 100% to ~1%)
+// 3 Contrast Levels per eye (Easy: 100%, 80%, 60%)
 const CONTRAST_LEVELS = [
-  1.0, 0.82, 0.67, 0.55, 0.45, 0.37, 0.30, 0.24,
-  0.19, 0.15, 0.11, 0.08, 0.05, 0.03, 0.01
+  1.0, 0.8, 0.6
 ];
 
-const SAMPLES_PER_EYE = 15;
+const SAMPLES_PER_EYE = 3;
 
 type Phase = 'cover-right' | 'testing-right' | 'switch-eye' | 'testing-left' | 'done';
 
@@ -151,14 +150,14 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
 
     const rightCS = rightLevel > 0 ? -Math.log10(CONTRAST_LEVELS[rightLevel - 1]) : 0;
     const leftCS = leftLevel > 0 ? -Math.log10(CONTRAST_LEVELS[leftLevel - 1]) : 0;
-    const difficulty = bestLevel >= 10 ? 'hard' : bestLevel >= 5 ? 'medium' : 'easy';
+    const difficulty = bestLevel >= 3 ? 'hard' : bestLevel >= 2 ? 'medium' : 'easy';
 
     let findings: string;
-    if (bestLevel >= 12) {
+    if (bestLevel >= 3) {
       findings = `Excellent contrast sensitivity — Right eye: level ${rightLevel}/${SAMPLES_PER_EYE} (logCS ${rightCS.toFixed(2)}), Left eye: level ${leftLevel}/${SAMPLES_PER_EYE} (logCS ${leftCS.toFixed(2)}). Superior contrast discrimination.`;
-    } else if (bestLevel >= 8) {
+    } else if (bestLevel >= 2) {
       findings = `Good contrast sensitivity — Right eye: level ${rightLevel}/${SAMPLES_PER_EYE}, Left eye: level ${leftLevel}/${SAMPLES_PER_EYE}. Normal range.`;
-    } else if (bestLevel >= 4) {
+    } else if (bestLevel >= 1) {
       findings = `Reduced contrast sensitivity — Right eye: level ${rightLevel}/${SAMPLES_PER_EYE}, Left eye: level ${leftLevel}/${SAMPLES_PER_EYE}. Monitoring recommended.`;
     } else {
       findings = `Low contrast sensitivity — Right eye: level ${rightLevel}/${SAMPLES_PER_EYE}, Left eye: level ${leftLevel}/${SAMPLES_PER_EYE}. Professional evaluation recommended.`;
@@ -183,8 +182,8 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
 
   const currentEyeLabel = phase === 'testing-right' || phase === 'cover-right' ? 'RIGHT EYE' : 'LEFT EYE';
   const progressPct = isTesting ? ((level + 1) / SAMPLES_PER_EYE) * 100 : 0;
-  const difficultyLabel = level < 5 ? 'EASY' : level < 10 ? 'MEDIUM' : 'HARD';
-  const difficultyColor = level < 5 ? '#10b981' : level < 10 ? '#f59e0b' : '#ef4444';
+  const difficultyLabel = level < 1 ? 'EASY' : level < 2 ? 'MEDIUM' : 'HARD';
+  const difficultyColor = level < 1 ? '#10b981' : level < 2 ? '#f59e0b' : '#ef4444';
 
   // ─── Cover Eye Screen ───
   if (phase === 'cover-right') {

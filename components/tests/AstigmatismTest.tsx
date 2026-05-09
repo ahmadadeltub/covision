@@ -20,7 +20,7 @@ const PATTERNS: { key: Pattern; label: string; icon: string }[] = [
   { key: 'parallel', label: 'Parallel Lines', icon: '\u{2261}' },
 ];
 
-const TOTAL_TRIALS = 5;
+const TOTAL_TRIALS = 3;
 
 type Phase = 'testing' | 'done';
 
@@ -71,9 +71,9 @@ const AstigmatismTest: React.FC<Props> = ({ t, stream, onFinish }) => {
     const total = allResults.length;
 
     let findings: string;
-    if (totalIssues >= 4) {
+    if (totalIssues >= 2) {
       findings = `Significant astigmatism indicators \u2014 ${totalIssues}/${TOTAL_TRIALS} blur reports (both eyes). Meridional evaluation strongly recommended.`;
-    } else if (totalIssues >= 2) {
+    } else if (totalIssues >= 1) {
       findings = `Mild astigmatism indicators \u2014 ${totalIssues}/${TOTAL_TRIALS} blur reports (both eyes). Monitoring recommended.`;
     } else {
       findings = `Normal focus patterns \u2014 ${totalIssues}/${TOTAL_TRIALS} blur reports (both eyes). No significant astigmatism detected.`;

@@ -34,61 +34,25 @@ const ROW_TO_SNELLEN = [
   { label: '20/10',  denom: 10 },
 ];
 
-// ─── 15 Letter samples — decreasing size + decreasing opacity (transparency) ───
+// ─── 3 Letter samples — easiest ───
 const LETTER_SAMPLES = [
-  { sizePx: 320, opacity: 1.00, rowMap: 0 },   //  1. Full visibility, extra large
-  { sizePx: 260, opacity: 0.92, rowMap: 1 },   //  2.
-  { sizePx: 210, opacity: 0.85, rowMap: 2 },   //  3.
-  { sizePx: 175, opacity: 0.78, rowMap: 3 },   //  4.
-  { sizePx: 145, opacity: 0.70, rowMap: 4 },   //  5.
-  { sizePx: 120, opacity: 0.62, rowMap: 5 },   //  6.
-  { sizePx: 100, opacity: 0.54, rowMap: 5 },   //  7. Medium
-  { sizePx: 82,  opacity: 0.46, rowMap: 6 },   //  8.
-  { sizePx: 68,  opacity: 0.38, rowMap: 7 },   //  9.
-  { sizePx: 55,  opacity: 0.30, rowMap: 7 },   // 10.
-  { sizePx: 44,  opacity: 0.24, rowMap: 8 },   // 11.
-  { sizePx: 35,  opacity: 0.20, rowMap: 8 },   // 12.
-  { sizePx: 26,  opacity: 0.16, rowMap: 9 },   // 13. Small + faint
-  { sizePx: 20,  opacity: 0.12, rowMap: 9 },   // 14.
-  { sizePx: 16,  opacity: 0.08, rowMap: 10 },  // 15. Tiny + nearly invisible
+  { sizePx: 320, opacity: 1.00, rowMap: 0 },
+  { sizePx: 260, opacity: 0.92, rowMap: 1 },
+  { sizePx: 210, opacity: 0.85, rowMap: 2 },
 ];
 
-// ─── 15 Tumbling E samples — each a unique random size (big → small) ───
+// ─── 3 Tumbling E samples — easiest ───
 const TUMBLING_E_SIZES = [
-  { sizePx: 320, rowMap: 0 },   //  1. Extra large
-  { sizePx: 280, rowMap: 0 },   //  2. Very large
-  { sizePx: 240, rowMap: 1 },   //  3. Large
-  { sizePx: 200, rowMap: 2 },   //  4.
-  { sizePx: 170, rowMap: 3 },   //  5.
-  { sizePx: 145, rowMap: 4 },   //  6.
-  { sizePx: 120, rowMap: 5 },   //  7. Medium-large
-  { sizePx: 100, rowMap: 5 },   //  8. Medium
-  { sizePx: 82,  rowMap: 6 },   //  9.
-  { sizePx: 68,  rowMap: 7 },   // 10.
-  { sizePx: 55,  rowMap: 7 },   // 11. Medium-small
-  { sizePx: 44,  rowMap: 8 },   // 12.
-  { sizePx: 34,  rowMap: 9 },   // 13. Small
-  { sizePx: 24,  rowMap: 9 },   // 14. Very small
-  { sizePx: 16,  rowMap: 10 },  // 15. Tiny
+  { sizePx: 320, rowMap: 0 },
+  { sizePx: 280, rowMap: 0 },
+  { sizePx: 240, rowMap: 1 },
 ];
 
-// ─── 15 Landolt C samples — each a unique random size (big → small) ───
+// ─── 3 Landolt C samples — easiest ───
 const LANDOLT_C_SIZES = [
-  { sizePx: 300, rowMap: 0 },   //  1. Extra large
-  { sizePx: 260, rowMap: 1 },   //  2. Very large
-  { sizePx: 220, rowMap: 2 },   //  3. Large
-  { sizePx: 190, rowMap: 2 },   //  4.
-  { sizePx: 160, rowMap: 3 },   //  5.
-  { sizePx: 135, rowMap: 4 },   //  6.
-  { sizePx: 110, rowMap: 5 },   //  7. Medium-large
-  { sizePx: 92,  rowMap: 5 },   //  8. Medium
-  { sizePx: 76,  rowMap: 6 },   //  9.
-  { sizePx: 62,  rowMap: 7 },   // 10.
-  { sizePx: 50,  rowMap: 7 },   // 11. Medium-small
-  { sizePx: 40,  rowMap: 8 },   // 12.
-  { sizePx: 30,  rowMap: 9 },   // 13. Small
-  { sizePx: 22,  rowMap: 9 },   // 14. Very small
-  { sizePx: 14,  rowMap: 10 },  // 15. Tiny
+  { sizePx: 300, rowMap: 0 },
+  { sizePx: 260, rowMap: 1 },
+  { sizePx: 220, rowMap: 2 },
 ];
 
 interface Trial {
