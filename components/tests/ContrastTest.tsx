@@ -31,6 +31,7 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
 
   const [results, setResults] = useState<{ correct: boolean; timeMs: number; level: number }[]>([]);
   const [activeButton, setActiveButton] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
   const start = useRef(Date.now());
   const cameraRef = useRef<HTMLVideoElement>(null);
   const coverCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -62,36 +63,47 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
   }, [phase]);
 
   const handleSelect = useCallback((letter: string) => {
-    if (!isTesting) return;
+    if (!isTesting || feedback !== null) return;
     setActiveButton(letter);
     setTimeout(() => setActiveButton(null), 250);
 
     const timeMs = Date.now() - start.current;
     const isCorrect = letter === currentLetter;
-    botRecordTrial(isCorrect, level, SAMPLES_PER_EYE);
-    const entry = { correct: isCorrect, timeMs, level };
+    
+    setFeedback(isCorrect ? 'correct' : 'incorrect');
 
-    const updated = [...results, entry];
-    setResults(updated);
-    if (!isCorrect || level >= SAMPLES_PER_EYE - 1) {
-        finishTest(updated);
-        return;
-    }
-    setLevel(l => l + 1);
+    setTimeout(() => {
+        setFeedback(null);
+        botRecordTrial(isCorrect, level, SAMPLES_PER_EYE);
+        const entry = { correct: isCorrect, timeMs, level };
+
+        const updated = [...results, entry];
+        setResults(updated);
+        if (!isCorrect || level >= SAMPLES_PER_EYE - 1) {
+            finishTest(updated);
+            return;
+        }
+        setLevel(l => l + 1);
+    }, 1000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, currentLetter, level, results, isTesting]);
+  }, [phase, currentLetter, level, results, isTesting, feedback]);
 
   const handleCantSee = useCallback(() => {
-    if (!isTesting) return;
+    if (!isTesting || feedback !== null) return;
     const timeMs = Date.now() - start.current;
-    botRecordTrial(false, level, SAMPLES_PER_EYE);
-    const entry = { correct: false, timeMs, level };
+    setFeedback('incorrect');
 
-    const updated = [...results, entry];
-    setResults(updated);
-    finishTest(updated);
+    setTimeout(() => {
+        setFeedback(null);
+        botRecordTrial(false, level, SAMPLES_PER_EYE);
+        const entry = { correct: false, timeMs, level };
+
+        const updated = [...results, entry];
+        setResults(updated);
+        finishTest(updated);
+    }, 1000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, level, results, isTesting]);
+  }, [phase, level, results, isTesting, feedback]);
 
   const finishTest = (finalResults: typeof results) => {
     setPhase('done');
@@ -215,7 +227,16 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
       </div>
 
       {/* ─── RIGHT: Test Content ─── */}
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+      <div className="flex-1 flex flex-col glass rounded-[2rem] border border-white/10 bg-slate-900/40 overflow-hidden relative">
+        
+        {/* Feedback Overlay */}
+        {feedback && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-900/40 backdrop-blur-[2px] rounded-[2rem] animate-in fade-in duration-200 pointer-events-none">
+            <div className={`w-32 h-32 rounded-full flex items-center justify-center text-6xl shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in zoom-in duration-300 ${feedback === 'correct' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
+              {feedback === 'correct' ? '✅' : '❌'}
+            </div>
+          </div>
+        )}
 
         {/* Header Bar */}
         <div className="shrink-0 px-3 md:px-6 py-2 md:py-3">

@@ -126,6 +126,7 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
   const [results, setResults] = useState<{ answer: string; correct: boolean; timeMs: number; rowIndex: number }[]>([]);
   const [wrongInRow, setWrongInRow] = useState(0);
   const [activeButton, setActiveButton] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
   const lastTime = useRef(Date.now());
 
   const currentTrial = trialSequence[currentIndex] || trialSequence[0];
@@ -177,7 +178,7 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
 
   // ─── Handle answer (letter OR direction) ───
   const handleSelect = useCallback((answer: string) => {
-    if (phase !== 'testing') return;
+    if (phase !== 'testing' || feedback !== null) return;
 
     setActiveButton(answer);
     setTimeout(() => setActiveButton(null), 250);
@@ -187,20 +188,25 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
       ? answer === currentTrial.letter
       : answer === currentTrial.direction;
 
-    botRecordTrial(isCorrect, currentIndex, totalTrials);
-    const entry = { answer, correct: isCorrect, timeMs, rowIndex: currentTrial.rowIndex };
-    const newWrong = isCorrect ? 0 : wrongInRow + 1;
-    setWrongInRow(newWrong);
+    setFeedback(isCorrect ? 'correct' : 'incorrect');
 
-    const updated = [...results, entry];
-    setResults(updated);
-    if (newWrong >= 3 || currentIndex >= totalTrials - 1) {
-      finishTest(updated);
-      return;
-    }
-    setCurrentIndex(prev => prev + 1);
+    setTimeout(() => {
+        setFeedback(null);
+        botRecordTrial(isCorrect, currentIndex, totalTrials);
+        const entry = { answer, correct: isCorrect, timeMs, rowIndex: currentTrial.rowIndex };
+        const newWrong = isCorrect ? 0 : wrongInRow + 1;
+        setWrongInRow(newWrong);
+
+        const updated = [...results, entry];
+        setResults(updated);
+        if (newWrong >= 3 || currentIndex >= totalTrials - 1) {
+          finishTest(updated);
+          return;
+        }
+        setCurrentIndex(i => i + 1);
+    }, 1000);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, currentTrial, currentIndex, results, wrongInRow, totalTrials]);
+  }, [phase, currentIndex, totalTrials, currentTrial, results, wrongInRow, botRecordTrial, feedback]);
 
   const finishTest = (allResults: typeof results) => {
     setPhase('done');
@@ -308,7 +314,16 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
       </div>
 
       {/* ─── RIGHT: Test Content ─── */}
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0 relative">
+        
+        {/* Feedback Overlay */}
+        {feedback && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-900/40 backdrop-blur-[2px] rounded-[2rem] animate-in fade-in duration-200 pointer-events-none">
+            <div className={`w-32 h-32 rounded-full flex items-center justify-center text-6xl shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in zoom-in duration-300 ${feedback === 'correct' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
+              {feedback === 'correct' ? '✅' : '❌'}
+            </div>
+          </div>
+        )}
 
         {/* Header Bar */}
         <div className="shrink-0 px-3 md:px-6 py-2 md:py-3">

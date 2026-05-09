@@ -38,6 +38,7 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
     // Answers
     const [answers, setAnswers] = useState<ColorPlateAnswer[]>([]);
     const lastInteractionTimeRef = useRef<number | null>(null);
+    const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
 
     const [isPaused, setIsPaused] = useState(false);
 
@@ -138,25 +139,30 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
         setIsEyeUncovered(false);
     }, [step, eyeCoverStatus, coverConfidence]);
     const handleAnswer = useCallback((answerStr: string) => {
-        if (step !== 'testing' || isPaused) return;
+        if (step !== 'testing' || isPaused || feedback !== null) return;
 
         const isCorrect = answerStr === plate.correctAnswer;
+        setFeedback(isCorrect ? 'correct' : 'incorrect');
+
         const newAnswer: ColorPlateAnswer = { plateIndex: currentPlateIndex, correctAnswer: plate.correctAnswer, userAnswer: answerStr, correct: isCorrect };
 
         lastInteractionTimeRef.current = Date.now();
 
-        setAnswers(prev => {
-            const updated = [...prev, newAnswer];
-            if (currentPlateIndex >= 4) {
-                setTimeout(() => finishTest(updated), 0);
-            }
-            return updated;
-        });
+        setTimeout(() => {
+            setFeedback(null);
+            setAnswers(prev => {
+                const updated = [...prev, newAnswer];
+                if (currentPlateIndex >= 4) {
+                    setTimeout(() => finishTest(updated), 0);
+                }
+                return updated;
+            });
 
-        if (currentPlateIndex < 4) {
-            setCurrentPlateIndex(prev => prev + 1);
-        }
-    }, [step, isPaused, plate, currentPlateIndex]);
+            if (currentPlateIndex < 4) {
+                setCurrentPlateIndex(prev => prev + 1);
+            }
+        }, 1000);
+    }, [step, isPaused, plate, currentPlateIndex, feedback]);
 
     const finishTest = (finalAnswers: ColorPlateAnswer[]) => {
         setStep('finished');
@@ -326,7 +332,15 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
                             </div>
 
                             {/* Plate + question */}
-                            <div className="flex-1 min-h-0 flex flex-col items-center justify-center p-4 gap-3">
+                            <div className="flex-1 min-h-0 flex flex-col items-center justify-center p-4 gap-3 relative">
+                                {/* Feedback Overlay */}
+                                {feedback && (
+                                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-900/40 backdrop-blur-[2px] rounded-[2rem] animate-in fade-in duration-200">
+                                        <div className={`w-32 h-32 rounded-full flex items-center justify-center text-6xl shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in zoom-in duration-300 ${feedback === 'correct' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
+                                            {feedback === 'correct' ? '✅' : '❌'}
+                                        </div>
+                                    </div>
+                                )}
                                 {/* Ishihara Plate Image */}
                                 <div className="w-full max-w-sm aspect-square relative rounded-full overflow-hidden shadow-2xl bg-[#f5f0e0] border-4 border-white/5">
                                     <img
