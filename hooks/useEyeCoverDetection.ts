@@ -31,7 +31,7 @@ interface UseEyeCoverDetectionReturn {
  * 
  * ── DISABLED ── Set to false to re-enable eye cover enforcement.
  */
-const EYE_COVER_DISABLED = true;
+const EYE_COVER_DISABLED = false;
 
 export function useEyeCoverDetection({
   phase,
