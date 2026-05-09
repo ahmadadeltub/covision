@@ -423,7 +423,7 @@ const App: React.FC = () => {
                 dateTime: new Date().toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US'),
                 deviceInfo: navigator.userAgent,
               });
-              setStep(AppStep.ColorIntro);
+              setStep(AppStep.Calibration);
             }}
           />
         )}
@@ -467,7 +467,7 @@ const App: React.FC = () => {
               setColorResult(result);
               // Increment tests_completed counter for color vision test
               fetch('https://api.counterapi.dev/v1/covision_final_v2/tests_completed/up').catch(() => {});
-              setStep(AppStep.Calibration);
+              setStep(AppStep.Testing);
             }}
           />
         )}
@@ -487,7 +487,7 @@ const App: React.FC = () => {
             isStable={isStable}
             onComplete={(data) => {
               setCalibration(data);
-              setStep(AppStep.Testing);
+              setStep(AppStep.ColorIntro);
             }}
           />
         )}
