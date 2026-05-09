@@ -35,23 +35,41 @@ export function useVoiceCommand({ commands, onCommand, isActive, language = 'en-
     const recognition = new SpeechRecognition();
     recognition.lang = language;
     recognition.continuous = true;
-    recognition.interimResults = false;
+    recognition.continuous = true;
+    recognition.interimResults = true; // Enable fast interim results
 
     recognition.onresult = async (event: any) => {
       const current = event.resultIndex;
-      const transcript = event.results[current][0].transcript.trim().toLowerCase();
+      const result = event.results[current];
+      const transcript = result[0].transcript.trim().toLowerCase();
+      const isFinal = result.isFinal;
       
-      console.log(`Voice heard: "${transcript}"`);
+      console.log(`Voice heard (final: ${isFinal}): "${transcript}"`);
 
       // Find the first matching command locally
       for (const [key, value] of Object.entries(commands)) {
-        if (transcript.includes(key.toLowerCase())) {
+        const keyLower = key.toLowerCase();
+        let isMatch = false;
+        
+        if (keyLower.length === 1) {
+          // Use word boundaries for single letters to prevent "can't" matching "c"
+          isMatch = new RegExp(`\\b${keyLower}\\b`, 'i').test(transcript);
+        } else {
+          isMatch = transcript.includes(keyLower);
+        }
+
+        if (isMatch) {
+          console.log(`Local match found for: "${keyLower}"`);
           onCommand(value);
+          // Stop recognition to clear buffer; onend will automatically restart it
+          try { recognition.stop(); } catch(e) {}
           return;
         }
       }
 
-      // If no local match, use Gemini AI to intelligently classify the intent
+      // If no local match, use Gemini AI to intelligently classify the intent (ONLY ON FINAL)
+      if (!isFinal) return;
+
       try {
         console.log(`No direct match found. Asking Gemini AI to classify "${transcript}"...`);
         // We use import.meta.env to get the API key
@@ -83,6 +101,7 @@ Output ONLY the mapped command or "NONE". Do not include quotes or punctuation.`
 
         if (aiCommand !== 'NONE' && validValues.includes(aiCommand)) {
             onCommand(aiCommand);
+            try { recognition.stop(); } catch(e) {}
         }
       } catch (err) {
         console.error("Gemini AI voice processing failed:", err);
