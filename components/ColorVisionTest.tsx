@@ -13,7 +13,7 @@ interface Props {
     onComplete: (result: ColorVisionResult) => void;
 }
 
-type TestStep = 'intro' | 'instruction_right' | 'testing_right' | 'instruction_left' | 'testing_left' | 'finished';
+type TestStep = 'intro' | 'testing' | 'finished';
 
 // Helper to generate a random deck of 15 plates
 function generateDeck(count: number) {
@@ -32,13 +32,12 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
     const [currentPlateIndex, setCurrentPlateIndex] = useState(0);
     const [coverCountdown, setCoverCountdown] = useState<number | null>(null);
 
-    // Decks
-    const platesRight = useMemo(() => generateDeck(5), []);
-    const platesLeft = useMemo(() => generateDeck(5), []);
+    // Deck
+    const plates = useMemo(() => generateDeck(5), []);
 
     // Answers
-    const [answersRight, setAnswersRight] = useState<ColorPlateAnswer[]>([]);
-    const [answersLeft, setAnswersLeft] = useState<ColorPlateAnswer[]>([]);
+    const [answers, setAnswers] = useState<ColorPlateAnswer[]>([]);
+    const lastInteractionTimeRef = useRef<number | null>(null);
 
     const [isPaused, setIsPaused] = useState(false);
 
@@ -60,7 +59,7 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
     const cameraRef = useRef<HTMLVideoElement>(null);
 
     // Current active plate based on step
-    const currentDeck = step === 'testing_right' ? platesRight : step === 'testing_left' ? platesLeft : [];
+    const currentDeck = step === 'testing' ? plates : [];
     const plate = currentDeck[currentPlateIndex];
 
     const options = useMemo(() => {
@@ -135,84 +134,42 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
 
     // ─── Check eye cover compliance during testing ───
     useEffect(() => {
-        // ── DISABLED: eye cover enforcement paused ──
-        if (EYE_COVER_DISABLED) {
-            setIsEyeUncovered(false);
-            return;
-        }
+        // Disabled completely
+        setIsEyeUncovered(false);
+    }, [step, eyeCoverStatus, coverConfidence]);
+    const handleAnswer = useCallback((answerStr: string) => {
+        if (step !== 'testing' || isPaused) return;
 
-        const isTesting = step === 'testing_right' || step === 'testing_left';
-        if (!isTesting) {
-            setIsEyeUncovered(false);
-            return;
-        }
+        const isCorrect = answerStr === plate.correctAnswer;
+        const newAnswer: ColorPlateAnswer = { plateIndex: currentPlateIndex, correctAnswer: plate.correctAnswer, userAnswer: answerStr, correct: isCorrect };
 
-        if (step === 'testing_right') {
-            // Need LEFT eye covered (so user sees with RIGHT eye)
-            // left_covered or both_covered is OK
-            const ok = eyeCoverStatus === 'left_covered' || eyeCoverStatus === 'both_covered' || eyeCoverStatus === 'no_detection';
-            setIsEyeUncovered(!ok && coverConfidence > 60);
-        } else if (step === 'testing_left') {
-            // Need RIGHT eye covered (so user sees with LEFT eye)
-            const ok = eyeCoverStatus === 'right_covered' || eyeCoverStatus === 'both_covered' || eyeCoverStatus === 'no_detection';
-            setIsEyeUncovered(!ok && coverConfidence > 60);
-        }
-    }, [eyeCoverStatus, step, coverConfidence, EYE_COVER_DISABLED]);
+        lastInteractionTimeRef.current = Date.now();
 
-    const handleAnswer = useCallback((answer: string) => {
-        const isRight = step === 'testing_right';
-        const isLeft = step === 'testing_left';
-
-        if (!isRight && !isLeft) return;
-
-        const deck = isRight ? platesRight : platesLeft;
-        const plate = deck[currentPlateIndex];
-
-        if (!plate) return;
-
-        const newAnswer: ColorPlateAnswer = {
-            plateIndex: currentPlateIndex,
-            correctAnswer: plate.correctAnswer,
-            userAnswer: answer,
-            correct: answer === plate.correctAnswer,
-        };
-
-        if (isRight) {
-            setAnswersRight(prev => [...prev, newAnswer]);
-            if (currentPlateIndex < 4) {
-                setCurrentPlateIndex(prev => prev + 1);
-            } else {
-                setStep('instruction_left');
+        setAnswers(prev => {
+            const updated = [...prev, newAnswer];
+            if (currentPlateIndex >= 4) {
+                setTimeout(() => finishTest(updated), 0);
             }
-        } else {
-            setAnswersLeft(prev => {
-                const updated = [...prev, newAnswer];
-                if (currentPlateIndex >= 4) {
-                    // Finished left eye
-                    setTimeout(() => finishTest(answersRight, updated), 0);
-                }
-                return updated;
-            });
-            if (currentPlateIndex < 4) {
-                setCurrentPlateIndex(prev => prev + 1);
-            }
-        }
-    }, [step, currentPlateIndex, platesRight, platesLeft, answersRight]);
+            return updated;
+        });
 
-    const finishTest = (rightResults: ColorPlateAnswer[], leftResults: ColorPlateAnswer[]) => {
-        const correctRight = rightResults.filter(a => a.correct).length;
-        const correctLeft = leftResults.filter(a => a.correct).length;
-        const totalCorrect = correctRight + correctLeft;
-        const totalPlates = rightResults.length + leftResults.length;
-        const allAnswers = [...rightResults, ...leftResults];
+        if (currentPlateIndex < 4) {
+            setCurrentPlateIndex(prev => prev + 1);
+        }
+    }, [step, isPaused, plate, currentPlateIndex]);
+
+    const finishTest = (finalAnswers: ColorPlateAnswer[]) => {
+        setStep('finished');
+        const correct = finalAnswers.filter(a => a.correct).length;
+        const totalPlates = finalAnswers.length;
 
         let classification: ColorVisionResult['classification'];
         let classificationLabel: string;
 
-        if (totalCorrect >= 8) {
+        if (correct >= 4) {
             classification = 'normal';
             classificationLabel = t.normal_vision;
-        } else if (totalCorrect >= 5) {
+        } else if (correct >= 2) {
             classification = 'possible_rg_deficiency';
             classificationLabel = t.possible_rg;
         } else {
@@ -221,11 +178,10 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
         }
 
         onComplete({
-            answers: allAnswers,
-            totalCorrect,
+            testName: 'Ishihara Color Vision',
             totalPlates,
-            scoreRight: correctRight,
-            scoreLeft: correctLeft,
+            scoreRight: correct,
+            scoreLeft: correct,
             totalRight: 5,
             totalLeft: 5,
             classification,
@@ -237,7 +193,7 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
     const progress = ((currentPlateIndex + 1) / 5) * 100;
 
     // Voice commands mapping
-    const isTesting = step === 'testing_right' || step === 'testing_left';
+    const isTesting = step === 'testing';
 
     const voiceCommands = useMemo(() => {
         const map: Record<string, string> = {
@@ -262,43 +218,8 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
     const { isListening } = useVoiceCommand({
         commands: voiceCommands,
         onCommand: (cmd) => handleAnswer(cmd),
-        isActive: step === 'testing_right' || step === 'testing_left',
+        isActive: isTesting,
     });
-
-
-
-    const startRight = () => {
-        setStep('instruction_right');
-    };
-
-    const beginCoverCountdown = (forEye: 'right' | 'left') => {
-        setCoverCountdown(5);
-        const interval = setInterval(() => {
-            setCoverCountdown(prev => {
-                if (prev === null || prev <= 1) {
-                    clearInterval(interval);
-                    setCoverCountdown(null);
-                    if (forEye === 'right') {
-                        startTestingRight();
-                    } else {
-                        startTestingLeft();
-                    }
-                    return null;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-    };
-
-    const startTestingRight = () => {
-        setCurrentPlateIndex(0);
-        setStep('testing_right');
-    };
-
-    const startTestingLeft = () => {
-        setCurrentPlateIndex(0);
-        setStep('testing_left');
-    };
 
     return (
         <div className="w-full h-full flex flex-row gap-4 animate-in fade-in duration-500 overflow-hidden">
@@ -344,7 +265,7 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
                             </div>
                             <div className="flex items-center justify-center pt-1">
                                 <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
-                                    {step === 'testing_right' ? 'RIGHT EYE' : 'LEFT EYE'}
+                                    BOTH EYES
                                 </span>
                             </div>
                         </>
@@ -385,183 +306,14 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
                             <p className="text-slate-300 max-w-lg">
                                 We will test each eye separately. You will need to cover one eye at a time with your hand or an eye patch.
                             </p>
-                            <button onClick={startRight} className="px-8 py-4 bg-cyan-500 hover:bg-cyan-400 text-black font-black rounded-full text-lg transition-transform hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(6,182,212,0.5)]">
+                            <button onClick={() => setStep('testing')} className="px-8 py-4 bg-cyan-500 hover:bg-cyan-400 text-black font-black rounded-full text-lg transition-transform hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(6,182,212,0.5)]">
                                 Start Test
                             </button>
                         </div>
                     )}
 
-                    {step === 'instruction_right' && (
-                        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-5 animate-in fade-in duration-700">
-                            {/* Step indicator */}
-                            <div className="flex items-center gap-3 mb-2">
-                                <div className="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center text-sm font-black text-black">1</div>
-                                <div className="w-16 h-0.5 bg-slate-700"></div>
-                                <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold text-slate-500">2</div>
-                            </div>
-
-                            {/* Eye illustration */}
-                            <div className="relative w-64 h-40">
-                                {/* Face outline */}
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-48 h-36 rounded-[50%] border-2 border-slate-600 relative">
-                                        {/* Right eye - open */}
-                                        <div className="absolute top-[35%] left-[22%] w-10 h-6 rounded-full border-2 border-cyan-400 bg-cyan-500/10 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.4)] animate-pulse">
-                                            <div className="w-3 h-3 rounded-full bg-cyan-400"></div>
-                                        </div>
-                                        {/* Left eye - covered with hand */}
-                                        <div className="absolute top-[28%] right-[15%] w-14 h-10 rounded-xl bg-amber-700/80 border-2 border-amber-600 flex items-center justify-center shadow-[0_0_20px_rgba(217,119,6,0.3)]">
-                                            <span className="text-lg">🤚</span>
-                                        </div>
-                                        {/* Nose hint */}
-                                        <div className="absolute top-[50%] left-1/2 -translate-x-1/2 w-2 h-4 rounded-full bg-slate-600/30"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <h2 className="text-2xl md:text-3xl font-black text-white">Testing RIGHT Eye</h2>
-
-                            {/* Instruction card */}
-                            <div className="max-w-md w-full p-4 glass border-2 border-yellow-500/40 rounded-2xl space-y-3">
-                                <div className="flex items-center gap-3 text-yellow-400">
-                                    <span className="text-2xl">⚠️</span>
-                                    <span className="text-lg font-bold">Cover your LEFT eye</span>
-                                </div>
-                                <div className="flex items-start gap-3 text-slate-300 text-sm">
-                                    <span className="text-cyan-400 font-bold mt-0.5">1.</span>
-                                    <span>Use your right hand to gently cover your <strong className="text-white">LEFT</strong> eye</span>
-                                </div>
-                                <div className="flex items-start gap-3 text-slate-300 text-sm">
-                                    <span className="text-cyan-400 font-bold mt-0.5">2.</span>
-                                    <span>Do <strong className="text-white">NOT</strong> press on the eyelid — just block the light</span>
-                                </div>
-                                <div className="flex items-start gap-3 text-slate-300 text-sm">
-                                    <span className="text-cyan-400 font-bold mt-0.5">3.</span>
-                                    <span>Keep both eyes relaxed and look at the screen</span>
-                                </div>
-                            </div>
-
-                            {coverCountdown !== null ? (
-                                <div className="flex flex-col items-center gap-2">
-                                    <div className="w-20 h-20 rounded-full border-4 border-cyan-400 flex items-center justify-center bg-cyan-500/10 shadow-[0_0_40px_rgba(6,182,212,0.4)] animate-pulse">
-                                        <span className="text-4xl font-black text-cyan-400">{coverCountdown}</span>
-                                    </div>
-                                    <span className="text-sm text-slate-400 font-bold uppercase tracking-widest">Starting soon...</span>
-                                </div>
-                            ) : (
-                                <button onClick={() => beginCoverCountdown('right')} className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black rounded-full text-lg transition-transform hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(16,185,129,0.5)]">
-                                    ✋ I've Covered My Left Eye
-                                </button>
-                            )}
-                        </div>
-                    )}
-
-                    {step === 'instruction_left' && (
-                        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-5 animate-in fade-in duration-700">
-                            {/* Step indicator */}
-                            <div className="flex items-center gap-3 mb-2">
-                                <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-sm font-black text-black">✓</div>
-                                <div className="w-16 h-0.5 bg-cyan-500"></div>
-                                <div className="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center text-sm font-black text-black">2</div>
-                            </div>
-
-                            {/* Right eye score summary */}
-                            <div className="px-4 py-2 glass rounded-xl border border-emerald-500/30 text-sm">
-                                <span className="text-slate-400">Right eye completed — </span>
-                                <span className="text-emerald-400 font-black">{answersRight.filter(a => a.correct).length}/5 correct</span>
-                            </div>
-
-                            {/* Eye illustration */}
-                            <div className="relative w-64 h-40">
-                                {/* Face outline */}
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-48 h-36 rounded-[50%] border-2 border-slate-600 relative">
-                                        {/* Right eye - covered with hand */}
-                                        <div className="absolute top-[28%] left-[15%] w-14 h-10 rounded-xl bg-amber-700/80 border-2 border-amber-600 flex items-center justify-center shadow-[0_0_20px_rgba(217,119,6,0.3)]">
-                                            <span className="text-lg">🤚</span>
-                                        </div>
-                                        {/* Left eye - open */}
-                                        <div className="absolute top-[35%] right-[22%] w-10 h-6 rounded-full border-2 border-cyan-400 bg-cyan-500/10 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.4)] animate-pulse">
-                                            <div className="w-3 h-3 rounded-full bg-cyan-400"></div>
-                                        </div>
-                                        {/* Nose hint */}
-                                        <div className="absolute top-[50%] left-1/2 -translate-x-1/2 w-2 h-4 rounded-full bg-slate-600/30"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <h2 className="text-2xl md:text-3xl font-black text-white">Now Testing LEFT Eye</h2>
-
-                            {/* Instruction card */}
-                            <div className="max-w-md w-full p-4 glass border-2 border-yellow-500/40 rounded-2xl space-y-3">
-                                <div className="flex items-center gap-3 text-yellow-400">
-                                    <span className="text-2xl">⚠️</span>
-                                    <span className="text-lg font-bold">Switch — Cover your RIGHT eye</span>
-                                </div>
-                                <div className="flex items-start gap-3 text-slate-300 text-sm">
-                                    <span className="text-cyan-400 font-bold mt-0.5">1.</span>
-                                    <span>Use your left hand to gently cover your <strong className="text-white">RIGHT</strong> eye</span>
-                                </div>
-                                <div className="flex items-start gap-3 text-slate-300 text-sm">
-                                    <span className="text-cyan-400 font-bold mt-0.5">2.</span>
-                                    <span>Do <strong className="text-white">NOT</strong> press on the eyelid — just block the light</span>
-                                </div>
-                                <div className="flex items-start gap-3 text-slate-300 text-sm">
-                                    <span className="text-cyan-400 font-bold mt-0.5">3.</span>
-                                    <span>Keep both eyes relaxed and look at the screen</span>
-                                </div>
-                            </div>
-
-                            {coverCountdown !== null ? (
-                                <div className="flex flex-col items-center gap-2">
-                                    <div className="w-20 h-20 rounded-full border-4 border-cyan-400 flex items-center justify-center bg-cyan-500/10 shadow-[0_0_40px_rgba(6,182,212,0.4)] animate-pulse">
-                                        <span className="text-4xl font-black text-cyan-400">{coverCountdown}</span>
-                                    </div>
-                                    <span className="text-sm text-slate-400 font-bold uppercase tracking-widest">Starting soon...</span>
-                                </div>
-                            ) : (
-                                <button onClick={() => beginCoverCountdown('left')} className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black rounded-full text-lg transition-transform hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(16,185,129,0.5)]">
-                                    ✋ I've Covered My Right Eye
-                                </button>
-                            )}
-                        </div>
-                    )}
-
-                    {(step === 'testing_right' || step === 'testing_left') && (
+                    {step === 'testing' && plate && (
                         <>
-                            {/* Eye Uncovered Pause Overlay */}
-                            {isEyeUncovered && (
-                                <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 backdrop-blur-md rounded-[2rem]">
-                                    <div className="flex flex-col items-center gap-5 p-8 text-center animate-in fade-in zoom-in-95 duration-300">
-                                        <div className="w-24 h-24 rounded-full bg-red-500/20 border-4 border-red-500 flex items-center justify-center animate-pulse">
-                                            <span className="text-5xl">⏸️</span>
-                                        </div>
-                                        <h3 className="text-2xl font-black text-white">Test Paused</h3>
-                                        <p className="text-lg text-red-400 font-bold">
-                                            Please cover your <span className="underline decoration-2 underline-offset-4">{step === 'testing_right' ? 'LEFT' : 'RIGHT'}</span> eye
-                                        </p>
-                                        <div className="flex items-center gap-3 px-5 py-3 glass rounded-2xl border border-white/10">
-                                            <div className="relative w-16 h-10">
-                                                <div className="absolute inset-0 flex items-center justify-center">
-                                                    {step === 'testing_right' ? (
-                                                        <>
-                                                            <div className="w-5 h-3 rounded-full border-2 border-cyan-400 bg-cyan-500/20 mr-3"><div className="w-1.5 h-1.5 rounded-full bg-cyan-400 mx-auto mt-0.5"></div></div>
-                                                            <div className="w-7 h-5 rounded-lg bg-amber-700/80 border border-amber-600 flex items-center justify-center text-[10px]">🤚</div>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <div className="w-7 h-5 rounded-lg bg-amber-700/80 border border-amber-600 flex items-center justify-center text-[10px]">🤚</div>
-                                                            <div className="w-5 h-3 rounded-full border-2 border-cyan-400 bg-cyan-500/20 ml-3"><div className="w-1.5 h-1.5 rounded-full bg-cyan-400 mx-auto mt-0.5"></div></div>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <span className="text-sm text-slate-300 font-bold">AI is monitoring your eyes</span>
-                                        </div>
-                                        <p className="text-xs text-slate-500">The test will resume automatically once your eye is covered</p>
-                                    </div>
-                                </div>
-                            )}
 
                             {/* Progress Bar */}
                             <div className="shrink-0 px-6 pt-2">

@@ -21,7 +21,7 @@ const CONTRAST_LEVELS = [
 
 const SAMPLES_PER_EYE = 3;
 
-type Phase = 'cover-right' | 'testing-right' | 'switch-eye' | 'testing-left' | 'done';
+type Phase = 'intro' | 'testing' | 'done';
 
 const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
   const [phase, setPhase] = useState<Phase>('cover-right');
@@ -29,17 +29,15 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
   const [currentLetter, setCurrentLetter] = useState('');
   const [countdown, setCountdown] = useState(5);
 
-  const [rightResults, setRightResults] = useState<{ correct: boolean; timeMs: number; level: number }[]>([]);
-  const [leftResults, setLeftResults] = useState<{ correct: boolean; timeMs: number; level: number }[]>([]);
+  const [results, setResults] = useState<{ correct: boolean; timeMs: number; level: number }[]>([]);
   const [activeButton, setActiveButton] = useState<string | null>(null);
   const start = useRef(Date.now());
   const cameraRef = useRef<HTMLVideoElement>(null);
   const coverCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  const isTesting = phase === 'testing-right' || phase === 'testing-left';
+  const isTesting = phase === 'testing';
 
-  const { isEyeUncovered } = useEyeCoverDetection({ phase, isTesting, cameraRef, coverCanvasRef, stream });
-  const { botState, botStart, botSwitchEye, botRecordTrial, botFinish } = useAIBot();
+  const { botState, botStart, botRecordTrial, botFinish } = useAIBot();
 
   // Generate a random letter for each level
   useEffect(() => {
@@ -57,44 +55,14 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
     vid.play().catch(() => { });
   }, [stream, isTesting]);
 
-  // Countdown for cover and switch phases
-  useEffect(() => {
-    if (phase !== 'cover-right' && phase !== 'switch-eye') return;
-    setCountdown(5);
-    const interval = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          if (phase === 'cover-right') setPhase('testing-right');
-          else setPhase('testing-left');
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [phase]);
-
-  // Reset level when switching to left eye
-  useEffect(() => {
-    if (phase === 'testing-left') {
-      setLevel(0);
-      start.current = Date.now();
-    }
-  }, [phase]);
-
   // AI Bot lifecycle
   useEffect(() => {
-    if (phase === 'testing-right') botStart();
-    if (phase === 'switch-eye') {
-      const rightOk = rightResults.filter(r => r.correct).length;
-      botSwitchEye(rightOk, rightResults.length);
-    }
+    if (phase === 'testing') botStart();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
   const handleSelect = useCallback((letter: string) => {
-    if (!isTesting || isEyeUncovered) return;
+    if (!isTesting) return;
     setActiveButton(letter);
     setTimeout(() => setActiveButton(null), 250);
 
@@ -103,77 +71,59 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
     botRecordTrial(isCorrect, level, SAMPLES_PER_EYE);
     const entry = { correct: isCorrect, timeMs, level };
 
-    if (phase === 'testing-right') {
-      const updated = [...rightResults, entry];
-      setRightResults(updated);
-      if (!isCorrect || level >= SAMPLES_PER_EYE - 1) {
-        setPhase('switch-eye');
+    const updated = [...results, entry];
+    setResults(updated);
+    if (!isCorrect || level >= SAMPLES_PER_EYE - 1) {
+        finishTest(updated);
         return;
-      }
-    } else {
-      const updated = [...leftResults, entry];
-      setLeftResults(updated);
-      if (!isCorrect || level >= SAMPLES_PER_EYE - 1) {
-        finishTest(rightResults, updated);
-        return;
-      }
     }
     setLevel(l => l + 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, currentLetter, level, rightResults, leftResults, isTesting]);
+  }, [phase, currentLetter, level, results, isTesting]);
 
   const handleCantSee = useCallback(() => {
-    if (!isTesting || isEyeUncovered) return;
+    if (!isTesting) return;
     const timeMs = Date.now() - start.current;
     botRecordTrial(false, level, SAMPLES_PER_EYE);
     const entry = { correct: false, timeMs, level };
 
-    if (phase === 'testing-right') {
-      setRightResults(prev => [...prev, entry]);
-      setPhase('switch-eye');
-    } else {
-      const updated = [...leftResults, entry];
-      setLeftResults(updated);
-      finishTest(rightResults, updated);
-    }
+    const updated = [...results, entry];
+    setResults(updated);
+    finishTest(updated);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, level, rightResults, leftResults, isTesting]);
+  }, [phase, level, results, isTesting]);
 
-  const finishTest = (rRes: typeof rightResults, lRes: typeof leftResults) => {
+  const finishTest = (finalResults: typeof results) => {
     setPhase('done');
-    const rightLevel = rRes.filter(r => r.correct).length;
-    const leftLevel = lRes.filter(r => r.correct).length;
-    const bestLevel = Math.max(rightLevel, leftLevel);
-    const totalCorrect = rightLevel + leftLevel;
-    const totalAttempted = rRes.length + lRes.length;
-    const allTimes = [...rRes.map(r => r.timeMs), ...lRes.map(r => r.timeMs)];
+    const correctCount = finalResults.filter(r => r.correct).length;
+    const totalAttempted = finalResults.length;
+    const allTimes = finalResults.map(r => r.timeMs);
 
-    const rightCS = rightLevel > 0 ? -Math.log10(CONTRAST_LEVELS[rightLevel - 1]) : 0;
-    const leftCS = leftLevel > 0 ? -Math.log10(CONTRAST_LEVELS[leftLevel - 1]) : 0;
-    const difficulty = bestLevel >= 3 ? 'hard' : bestLevel >= 2 ? 'medium' : 'easy';
+    const cs = correctCount > 0 ? -Math.log10(CONTRAST_LEVELS[correctCount - 1]) : 0;
+    const difficulty = correctCount >= 3 ? 'hard' : correctCount >= 2 ? 'medium' : 'easy';
 
     let findings: string;
-    if (bestLevel >= 3) {
-      findings = `Excellent contrast sensitivity — Right eye: level ${rightLevel}/${SAMPLES_PER_EYE} (logCS ${rightCS.toFixed(2)}), Left eye: level ${leftLevel}/${SAMPLES_PER_EYE} (logCS ${leftCS.toFixed(2)}). Superior contrast discrimination.`;
-    } else if (bestLevel >= 2) {
-      findings = `Good contrast sensitivity — Right eye: level ${rightLevel}/${SAMPLES_PER_EYE}, Left eye: level ${leftLevel}/${SAMPLES_PER_EYE}. Normal range.`;
-    } else if (bestLevel >= 1) {
-      findings = `Reduced contrast sensitivity — Right eye: level ${rightLevel}/${SAMPLES_PER_EYE}, Left eye: level ${leftLevel}/${SAMPLES_PER_EYE}. Monitoring recommended.`;
+    if (correctCount >= 3) {
+      findings = `Excellent contrast sensitivity — level ${correctCount}/${SAMPLES_PER_EYE} (logCS ${cs.toFixed(2)}) (both eyes). Superior contrast discrimination.`;
+    } else if (correctCount >= 2) {
+      findings = `Good contrast sensitivity — level ${correctCount}/${SAMPLES_PER_EYE} (both eyes). Normal range.`;
+    } else if (correctCount >= 1) {
+      findings = `Reduced contrast sensitivity — level ${correctCount}/${SAMPLES_PER_EYE} (both eyes). Monitoring recommended.`;
     } else {
-      findings = `Low contrast sensitivity — Right eye: level ${rightLevel}/${SAMPLES_PER_EYE}, Left eye: level ${leftLevel}/${SAMPLES_PER_EYE}. Professional evaluation recommended.`;
+      findings = `Low contrast sensitivity — level ${correctCount}/${SAMPLES_PER_EYE} (both eyes). Professional evaluation recommended.`;
     }
 
-    botFinish(totalCorrect, totalAttempted);
+    botFinish(correctCount, totalAttempted);
 
     onFinish({
       testName: 'Contrast Sensitivity',
-      score: totalCorrect,
+      score: correctCount,
       total: totalAttempted,
       confidence: 0.9,
       findings,
       difficulty: difficulty as 'easy' | 'medium' | 'hard',
       timestamps: allTimes,
-      perSampleScores: [...rRes, ...lRes].map((r, i) => ({ sample: i + 1, correct: r.correct, timeMs: r.timeMs })),
+      perSampleScores: finalResults.map((r, i) => ({ sample: i + 1, correct: r.correct, timeMs: r.timeMs })),
       rawResponseTimes: allTimes,
     });
   };
@@ -186,57 +136,20 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
   const difficultyColor = level < 1 ? '#10b981' : level < 2 ? '#f59e0b' : '#ef4444';
 
   // ─── Cover Eye Screen ───
-  if (phase === 'cover-right') {
+  if (phase === 'intro') {
     return (
       <div className="w-full h-full flex items-center justify-center animate-in fade-in duration-700">
         <div className="flex flex-col items-center gap-6 text-center p-8 max-w-lg">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center text-sm font-black text-black">1</div>
-            <div className="w-16 h-0.5 bg-slate-700"></div>
-            <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold text-slate-500">2</div>
-          </div>
-          <div className="text-6xl animate-pulse">🫣</div>
+          <div className="text-6xl animate-pulse">👁️</div>
           <h2 className="text-2xl md:text-3xl font-black text-white">Contrast Sensitivity Test</h2>
-          <div className="max-w-md w-full p-4 glass border-2 border-yellow-500/40 rounded-2xl space-y-3">
-            <div className="flex items-center gap-3 text-yellow-400">
-              <span className="text-2xl">⚠️</span>
-              <span className="text-lg font-bold">Cover your LEFT eye</span>
-            </div>
-            <p className="text-slate-300 text-sm">Testing RIGHT eye first. Letters will fade progressively.</p>
+          <div className="max-w-md w-full p-4 glass border-2 border-cyan-500/40 rounded-2xl space-y-3">
+            <p className="text-slate-300 text-sm">Testing both eyes together. Letters will fade progressively.</p>
           </div>
-          <div className="w-20 h-20 rounded-full border-4 border-cyan-400 flex items-center justify-center bg-cyan-500/10 shadow-[0_0_40px_rgba(6,182,212,0.4)] animate-pulse">
-            <span className="text-4xl font-black text-cyan-400">{countdown}</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ─── Switch Eye Screen ───
-  if (phase === 'switch-eye') {
-    return (
-      <div className="w-full h-full flex items-center justify-center animate-in fade-in duration-700">
-        <div className="flex flex-col items-center gap-6 text-center p-8 max-w-lg">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-sm font-black text-black">✓</div>
-            <div className="w-16 h-0.5 bg-cyan-500"></div>
-            <div className="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center text-sm font-black text-black">2</div>
-          </div>
-          <div className="px-4 py-2 glass rounded-xl border border-emerald-500/30 text-sm">
-            <span className="text-slate-400">Right eye — </span>
-            <span className="text-emerald-400 font-black">{rightResults.filter(r => r.correct).length}/{rightResults.length} levels passed</span>
-          </div>
-          <div className="text-6xl animate-pulse">🔄</div>
-          <h2 className="text-2xl md:text-3xl font-black text-white">Now Testing LEFT Eye</h2>
-          <div className="max-w-md w-full p-4 glass border-2 border-yellow-500/40 rounded-2xl space-y-3">
-            <div className="flex items-center gap-3 text-yellow-400">
-              <span className="text-2xl">⚠️</span>
-              <span className="text-lg font-bold">Cover your RIGHT eye</span>
-            </div>
-          </div>
-          <div className="w-20 h-20 rounded-full border-4 border-cyan-400 flex items-center justify-center bg-cyan-500/10 shadow-[0_0_40px_rgba(6,182,212,0.4)] animate-pulse">
-            <span className="text-4xl font-black text-cyan-400">{countdown}</span>
-          </div>
+          <button
+              onClick={() => { setPhase('testing'); start.current = Date.now(); }}
+              className="w-full max-w-md py-4 bg-white text-slate-950 rounded-2xl font-black text-xl hover:bg-cyan-400 transition-colors uppercase tracking-widest mt-4">
+              Start Test
+          </button>
         </div>
       </div>
     );
@@ -248,23 +161,6 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
   return (
     <div className="w-full h-full flex flex-col md:flex-row gap-2 md:gap-4 animate-in fade-in duration-500 overflow-x-hidden overflow-y-auto relative">
 
-      {/* ═══ Pause Overlay — Eye Not Covered ═══ */}
-      {isEyeUncovered && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm rounded-3xl">
-          <div className="glass p-8 rounded-3xl border-2 border-red-500/50 text-center max-w-sm animate-in fade-in duration-300">
-            <div className="text-6xl mb-4">⚠️</div>
-            <h3 className="text-2xl font-black text-red-400 mb-2">Eye Not Covered!</h3>
-            <p className="text-slate-300 text-sm">
-              Please keep your <span className="font-black text-white">{phase === 'testing-right' ? 'LEFT' : 'RIGHT'}</span> eye covered to continue the test.
-            </p>
-            <div className="mt-4 flex items-center justify-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-red-400 animate-pulse"></div>
-              <span className="text-xs text-red-400 font-bold uppercase tracking-widest">Test Paused</span>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* ─── LEFT: Camera Feed Panel (hidden on mobile) ─── */}
       <div className="hidden md:flex shrink-0 flex-col gap-3 items-center" style={{ width: 260 }}>
         <div className="w-full aspect-[3/4] rounded-2xl overflow-hidden bg-black border-2 border-cyan-500/20 shadow-[0_0_30px_rgba(0,200,255,0.1)] relative">
@@ -275,9 +171,9 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
             <span className="text-[8px] font-bold text-cyan-400 uppercase tracking-widest">LIVE</span>
           </div>
           <div className="absolute bottom-2 left-2 right-2 glass px-2 py-1 rounded-full border border-white/10 flex items-center justify-center gap-1">
-            <div className={`w-1.5 h-1.5 rounded-full ${isEyeUncovered ? 'bg-red-400' : 'bg-emerald-400'} animate-pulse`}></div>
-            <span className={`text-[7px] font-bold uppercase tracking-widest ${isEyeUncovered ? 'text-red-400' : 'text-emerald-400'}`}>
-              {isEyeUncovered ? 'COVER EYE' : '🤖 AI MONITORING'}
+            <div className={`w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse`}></div>
+            <span className={`text-[7px] font-bold uppercase tracking-widest text-emerald-400`}>
+              🤖 AI MONITORING
             </span>
           </div>
           <div className="absolute inset-0 pointer-events-none p-3">
@@ -301,7 +197,7 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
           </div>
           <div className="flex items-center justify-center pt-1 gap-2">
             <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
-              {currentEyeLabel}
+              BOTH EYES
             </span>
             <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider"
               style={{ background: difficultyColor + '20', color: difficultyColor, border: `1px solid ${difficultyColor}40` }}>
@@ -315,7 +211,7 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
             <span>Select the letter below</span>
           </div>
         </div>
-        <AIBotBubble botState={botState} isEyeUncovered={isEyeUncovered} coverEye={phase === 'testing-right' ? 'left' : 'right'} />
+        <AIBotBubble botState={botState} isEyeUncovered={false} coverEye={undefined} />
       </div>
 
       {/* ─── RIGHT: Test Content ─── */}
@@ -325,7 +221,7 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
         <div className="shrink-0 px-3 md:px-6 py-2 md:py-3">
           <h3 className="text-base md:text-2xl font-black text-white uppercase tracking-tight leading-none">{t.contrast_sensitivity}</h3>
           <p className="text-[10px] md:text-xs text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
-            Level {level + 1}/{SAMPLES_PER_EYE} · {currentEyeLabel}
+            Level {level + 1}/{SAMPLES_PER_EYE} · BOTH EYES
           </p>
         </div>
 
