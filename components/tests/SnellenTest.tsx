@@ -88,7 +88,7 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
     return map;
   }, []);
 
-  const { isListening } = useVoiceCommand({
+  const { isListening, transcript } = useVoiceCommand({
     commands: voiceCommands,
     onCommand: (cmd) => handleSelect(cmd),
     isActive: phase === 'testing',
@@ -205,7 +205,7 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
             <span>Select the letter below</span>
           </div>
         </div>
-        <AIBotBubble botState={botState} isEyeUncovered={false} coverEye={undefined} />
+        <AIBotBubble botState={botState} isEyeUncovered={false} coverEye={undefined} isListening={isListening} transcript={transcript} />
       </div>
 
       {/* ─── RIGHT: Test Content ─── */}

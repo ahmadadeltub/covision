@@ -221,7 +221,7 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
         return map;
     }, []);
 
-    const { isListening } = useVoiceCommand({
+    const { isListening, transcript } = useVoiceCommand({
         commands: voiceCommands,
         onCommand: (cmd) => handleAnswer(cmd),
         isActive: isTesting,

@@ -3,6 +3,7 @@ import { TestResult, CalibrationData } from '../../types';
 
 import { useAIBot } from '../../hooks/useAIBot';
 import { useEyeCoverDetection } from '../../hooks/useEyeCoverDetection';
+import { useVoiceCommand } from '../../hooks/useVoiceCommand';
 import AIBotBubble from '../AIBotBubble';
 
 interface Props {
@@ -61,6 +62,27 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
     if (phase === 'testing') botStart();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
+
+  // Voice commands mapping
+  const voiceCommands = React.useMemo(() => {
+    const map: Record<string, string> = {
+      "can't see": "__CANT_SEE__", "cant see": "__CANT_SEE__", "i don't know": "__CANT_SEE__", "لا أرى": "__CANT_SEE__", "لا اعرف": "__CANT_SEE__", "مش شايف": "__CANT_SEE__"
+    };
+    LETTERS.split('').forEach(l => {
+      map[l.toLowerCase()] = l;
+      map[`letter ${l.toLowerCase()}`] = l;
+    });
+    return map;
+  }, []);
+
+  const { isListening, transcript } = useVoiceCommand({
+    commands: voiceCommands,
+    onCommand: (cmd) => {
+      if (cmd === '__CANT_SEE__') handleCantSee();
+      else handleSelect(cmd);
+    },
+    isActive: isTesting,
+  });
 
   const handleSelect = useCallback((letter: string) => {
     if (!isTesting || feedback !== null) return;
@@ -223,7 +245,7 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
             <span>Select the letter below</span>
           </div>
         </div>
-        <AIBotBubble botState={botState} isEyeUncovered={false} coverEye={undefined} />
+        <AIBotBubble botState={botState} isEyeUncovered={false} coverEye={undefined} isListening={isListening} transcript={transcript} />
       </div>
 
       {/* ─── RIGHT: Test Content ─── */}

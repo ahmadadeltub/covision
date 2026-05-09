@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { TestResult } from '../../types';
 
 import { useAIBot } from '../../hooks/useAIBot';
+import { useVoiceCommand } from '../../hooks/useVoiceCommand';
 import AIBotBubble from '../AIBotBubble';
 
 interface Props {
@@ -39,6 +40,27 @@ const AstigmatismTest: React.FC<Props> = ({ t, stream, onFinish }) => {
     if (phase === 'testing') botStart();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const voiceCommands = React.useMemo(() => {
+    return {
+      'clear': 'clear',
+      'sharp': 'clear',
+      'واضح': 'clear',
+      'blur': 'blur',
+      'blurry': 'blur',
+      'مشوش': 'blur'
+    };
+  }, []);
+
+  const { isListening, transcript } = useVoiceCommand({
+    commands: voiceCommands,
+    onCommand: (cmd) => {
+      if (showBlurSelect) return;
+      if (cmd === 'clear') handleChoice(false);
+      else if (cmd === 'blur') handleChoice(true);
+    },
+    isActive: phase === 'testing' && !showBlurSelect,
+  });
 
   const handleChoice = (hasIssues: boolean, skipPositionSelect = false) => {
     if (hasIssues && !showBlurSelect && !skipPositionSelect) {
@@ -176,7 +198,7 @@ const AstigmatismTest: React.FC<Props> = ({ t, stream, onFinish }) => {
             <span>Tap &quot;Sharp&quot; or &quot;Blurred&quot; below</span>
           </div>
         </div>
-        <AIBotBubble botState={botState} isEyeUncovered={false} coverEye={undefined} />
+        <AIBotBubble botState={botState} isEyeUncovered={false} coverEye={undefined} isListening={isListening} transcript={transcript} />
       </div>
 
       {/* RIGHT: Test Content */}

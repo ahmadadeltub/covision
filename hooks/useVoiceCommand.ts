@@ -12,6 +12,7 @@ interface UseVoiceCommandProps {
 
 export function useVoiceCommand({ commands, onCommand, isActive, language = 'en-US' }: UseVoiceCommandProps) {
   const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState('');
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
@@ -41,10 +42,11 @@ export function useVoiceCommand({ commands, onCommand, isActive, language = 'en-
     recognition.onresult = async (event: any) => {
       const current = event.resultIndex;
       const result = event.results[current];
-      const transcript = result[0].transcript.trim().toLowerCase();
+      const transcriptText = result[0].transcript.trim().toLowerCase();
       const isFinal = result.isFinal;
       
-      console.log(`Voice heard (final: ${isFinal}): "${transcript}"`);
+      setTranscript(transcriptText);
+      console.log(`Voice heard (final: ${isFinal}): "${transcriptText}"`);
 
       // Find the first matching command locally
       for (const [key, value] of Object.entries(commands)) {
@@ -53,9 +55,9 @@ export function useVoiceCommand({ commands, onCommand, isActive, language = 'en-
         
         if (keyLower.length === 1) {
           // Use word boundaries for single letters to prevent "can't" matching "c"
-          isMatch = new RegExp(`\\b${keyLower}\\b`, 'i').test(transcript);
+          isMatch = new RegExp(`\\b${keyLower}\\b`, 'i').test(transcriptText);
         } else {
-          isMatch = transcript.includes(keyLower);
+          isMatch = transcriptText.includes(keyLower);
         }
 
         if (isMatch) {
@@ -71,7 +73,7 @@ export function useVoiceCommand({ commands, onCommand, isActive, language = 'en-
       if (!isFinal) return;
 
       try {
-        console.log(`No direct match found. Asking Gemini AI to classify "${transcript}"...`);
+        console.log(`No direct match found. Asking Gemini AI to classify "${transcriptText}"...`);
         // We use import.meta.env to get the API key
         const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || (window as any).process?.env?.API_KEY;
         if (!apiKey) {
@@ -84,7 +86,7 @@ export function useVoiceCommand({ commands, onCommand, isActive, language = 'en-
         // Build the list of valid commands and map back to values
         const validValues = Array.from(new Set(Object.values(commands)));
         
-        const prompt = `The user said: "${transcript}".
+        const prompt = `The user said: "${transcriptText}".
 You are a voice command interpreter for a medical vision test application.
 Map the user's speech to one of the following exact command values: ${validValues.map(v => `"${v}"`).join(', ')}.
 If the user's intent clearly matches one of these commands (even if they used synonyms, mispronounced words, or spoke in Arabic/English), output ONLY that exact command value from the list.
@@ -141,5 +143,5 @@ Output ONLY the mapped command or "NONE". Do not include quotes or punctuation.`
     };
   }, [isActive, commands, onCommand, language]);
 
-  return { isListening };
+  return { isListening, transcript };
 }

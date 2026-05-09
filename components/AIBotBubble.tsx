@@ -7,13 +7,17 @@ interface Props {
   isEyeUncovered?: boolean;
   /** Which eye should be covered: 'left' or 'right' */
   coverEye?: 'left' | 'right';
+  /** Whether the microphone is actively listening */
+  isListening?: boolean;
+  /** What the microphone currently hears */
+  transcript?: string;
 }
 
 /**
  * Floating AI Robot Bot — shows real-time accuracy feedback
  * AND eye-cover coaching instructions. LARGE size for visibility.
  */
-const AIBotBubble: React.FC<Props> = ({ botState, isEyeUncovered = false, coverEye = 'left' }) => {
+const AIBotBubble: React.FC<Props> = ({ botState, isEyeUncovered = false, coverEye = 'left', isListening, transcript }) => {
   const { message, accuracy, correct, total, mood, streak } = botState;
   const [visible, setVisible] = useState(false);
   const [animKey, setAnimKey] = useState(0);
@@ -143,11 +147,23 @@ const AIBotBubble: React.FC<Props> = ({ botState, isEyeUncovered = false, coverE
       </div>
 
       {/* ─── Label ─── */}
-      <div className="flex items-center gap-2.5">
-        <div className={`w-3 h-3 rounded-full ${isEyeUncovered ? 'bg-red-400 animate-ping' : 'bg-cyan-400 animate-pulse'}`} />
-        <span className={`text-sm font-black uppercase tracking-[0.2em] ${isEyeUncovered ? 'text-red-400' : 'text-cyan-400'}`}>
-          {isEyeUncovered ? 'COVER EYE!' : 'AI ASSISTANT'}
-        </span>
+      <div className="flex flex-col items-center gap-1.5 mt-2">
+        <div className="flex items-center gap-2.5">
+          <div className={`w-3 h-3 rounded-full ${isEyeUncovered ? 'bg-red-400 animate-ping' : 'bg-cyan-400 animate-pulse'}`} />
+          <span className={`text-sm font-black uppercase tracking-[0.2em] ${isEyeUncovered ? 'text-red-400' : 'text-cyan-400'}`}>
+            {isEyeUncovered ? 'COVER EYE!' : 'AI ASSISTANT'}
+          </span>
+        </div>
+
+        {/* Mic Status Indicator */}
+        {isListening !== undefined && (
+          <div className={`flex items-center gap-2 px-3 py-1 rounded-full border ${isListening ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-slate-800/50 border-white/10 text-slate-500'}`}>
+            <span className={`text-xs ${isListening ? 'animate-pulse' : ''}`}>🎤</span>
+            <span className="text-[9px] font-black uppercase tracking-widest truncate max-w-[150px]">
+              {isListening ? (transcript ? `"${transcript}"` : 'Listening...') : 'Mic Off'}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* ─── Stats Card — LARGE ─── */}
