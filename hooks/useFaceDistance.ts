@@ -536,9 +536,11 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
                 if (handResults?.landmarks?.length > 0) {
                     handLandmarksStateRef.current = handResults.landmarks;
                     (window as any).__sharedHandLandmarks = handResults.landmarks;
+                    (window as any).__sharedHandednesses = handResults.handednesses;
                 } else {
                     handLandmarksStateRef.current = null;
                     (window as any).__sharedHandLandmarks = null;
+                    (window as any).__sharedHandednesses = null;
                 }
             } catch (e: any) {
                 // Silently fail

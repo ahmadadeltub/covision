@@ -162,6 +162,7 @@ export function useEyeCoverDetection({
 
           // Draw Hand Landmarks if available
           const hands = (window as any).__sharedHandLandmarks;
+          const handednesses = (window as any).__sharedHandednesses;
           if (hands && hands.length > 0) {
             ctx.lineWidth = 2;
             ctx.strokeStyle = 'rgba(16, 185, 129, 0.6)';
@@ -174,7 +175,7 @@ export function useEyeCoverDetection({
               [13,17],[17,18],[18,19],[19,20], // Pinky
               [0,17] // Base
             ];
-            hands.forEach((hand: any[]) => {
+            hands.forEach((hand: any[], idx: number) => {
               // Draw lines
               ctx.beginPath();
               connections.forEach(([start, end]) => {
@@ -186,11 +187,29 @@ export function useEyeCoverDetection({
               });
               ctx.stroke();
               // Draw joints
-              hand.forEach(joint => {
+              hand.forEach((joint: any) => {
                 ctx.beginPath();
                 ctx.arc(joint.x * canvas.width, joint.y * canvas.height, 3, 0, Math.PI * 2);
                 ctx.fill();
               });
+
+              // Draw Left/Right label at wrist (joint 0)
+              if (handednesses && handednesses[idx] && handednesses[idx].length > 0) {
+                 const label = handednesses[idx][0].categoryName;
+                 const score = Math.round(handednesses[idx][0].score * 100);
+                 const wrist = hand[0];
+                 ctx.save();
+                 ctx.translate(wrist.x * canvas.width, wrist.y * canvas.height);
+                 // Need to scale back x because canvas is mirrored (-1) so text isn't backwards
+                 ctx.scale(-1, 1);
+                 ctx.font = 'bold 14px Inter, sans-serif';
+                 ctx.fillStyle = '#10b981';
+                 ctx.shadowBlur = 4;
+                 ctx.shadowColor = '#000';
+                 ctx.textAlign = 'center';
+                 ctx.fillText(`${label} Hand (${score}%)`, 0, 20);
+                 ctx.restore();
+              }
             });
           }
 
