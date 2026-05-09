@@ -14,17 +14,17 @@ interface Props {
 
 const LETTERS = "CDHKNORSVZ";
 
-// 3 Contrast Levels per eye (Easy: 100%, 80%, 60%)
+// 5 Contrast Levels
 const CONTRAST_LEVELS = [
-  1.0, 0.8, 0.6
+  1.0, 0.8, 0.6, 0.4, 0.2
 ];
 
-const SAMPLES_PER_EYE = 3;
+const SAMPLES_PER_EYE = 5;
 
 type Phase = 'intro' | 'testing' | 'done';
 
 const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
-  const [phase, setPhase] = useState<Phase>('cover-right');
+  const [phase, setPhase] = useState<Phase>('intro');
   const [level, setLevel] = useState(0);
   const [currentLetter, setCurrentLetter] = useState('');
   const [countdown, setCountdown] = useState(5);
