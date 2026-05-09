@@ -119,26 +119,7 @@ export const translations: Record<string, Record<string, string>> = {
     feature_distance: "AI Analysis",
     feature_report: "Professional Medical Report",
 
-    // Screen Calibration
-    screen_cal_title: "Screen Calibration",
-    screen_cal_subtitle: "Step 1 for Precise Measurement",
-    device_type: "Device Type",
-    laptop_13: "Laptop 13\"",
-    laptop_14: "Laptop 14\"",
-    laptop_15: "Laptop 15\"",
-    laptop_16: "Laptop 16\"",
-    monitor_24: "Monitor 24\"",
-    monitor_27: "Monitor 27\"",
-    tablet_11: "Tablet 11\"",
-    tablet_13: "Tablet 13\"",
-    credit_card_cal: "Credit Card Calibration",
-    credit_card_desc: "Place your card on screen and match the rectangle",
-    ipd_profile: "Inter-Pupillary Distance",
-    ipd_adult: "Adult (63 mm)",
-    ipd_teen: "Teen (60 mm)",
-    ipd_child: "Child (55 mm)",
-    confirm_calibration: "Confirm Calibration",
-    recalibrate: "Recalibrate",
+
 
     // Distance Enforcement
     distance_live: "Current Distance",
@@ -293,26 +274,7 @@ export const translations: Record<string, Record<string, string>> = {
     feature_distance: "AI Analysis",
     feature_report: "Professional Medical Report",
 
-    // Screen Calibration
-    screen_cal_title: "Screen Calibration",
-    screen_cal_subtitle: "Step 1 for Precise Measurement",
-    device_type: "Device Type",
-    laptop_13: "Laptop 13\"",
-    laptop_14: "Laptop 14\"",
-    laptop_15: "Laptop 15\"",
-    laptop_16: "Laptop 16\"",
-    monitor_24: "Monitor 24\"",
-    monitor_27: "Monitor 27\"",
-    tablet_11: "Tablet 11\"",
-    tablet_13: "Tablet 13\"",
-    credit_card_cal: "Credit Card Calibration",
-    credit_card_desc: "Place your card on screen and match the rectangle",
-    ipd_profile: "Inter-Pupillary Distance",
-    ipd_adult: "Adult (63 mm)",
-    ipd_teen: "Teen (60 mm)",
-    ipd_child: "Child (55 mm)",
-    confirm_calibration: "Confirm Calibration",
-    recalibrate: "Recalibrate",
+
 
     // Distance Enforcement
     distance_live: "Current Distance",

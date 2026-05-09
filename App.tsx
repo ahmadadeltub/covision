@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Language, AppStep, PatientInfo, UserProfile, TestType, CalibrationData, TestResult, AcuityResult, ColorVisionResult, ScreenCalibrationData, DistanceCompliance } from './types';
+import { Language, AppStep, PatientInfo, UserProfile, TestType, CalibrationData, TestResult, AcuityResult, ColorVisionResult, DistanceCompliance } from './types';
 import { translations } from './translations';
 import { useFaceDistance } from './hooks/useFaceDistance';
 
@@ -21,7 +21,7 @@ import TumblingETest from './components/TumblingETest';
 import ColorVisionIntro from './components/ColorVisionIntro';
 import ColorVisionTest from './components/ColorVisionTest';
 import MedicalReport from './components/MedicalReport';
-import ScreenCalibrationWizard from './components/ScreenCalibrationWizard';
+
 import GlobalAIBot from './components/GlobalAIBot';
 import { useGlobalBot } from './hooks/useGlobalBot';
 import { onMessageListener } from './firebase';
@@ -35,13 +35,12 @@ import { onMessageListener } from './firebase';
  * 2. TestSelection — pick which tests (original, moved early)
  * 3. BiometricScan — AI face scan with mesh (original)
  * 4. Profile — sync profile data (original)
- * 5. ScreenCalibration — screen pixel calibration (new)
- * 6. CoverEye — cover eye + camera preview (new)
- * 7. ColorIntro — lighting guidance (new)
- * 8. ColorTest — Ishihara plates (new)
- * 9. Calibration — 2m distance calibration (original, moved before acuity)
- * 10. Testing — Visual Acuity + other tests (original)
- * 11. Results — AI insights dashboard (original)
+ * 5. CoverEye — cover eye + camera preview (new)
+ * 6. ColorIntro — lighting guidance (new)
+ * 7. ColorTest — Ishihara plates (new)
+ * 8. Calibration — 2m distance calibration (original, moved before acuity)
+ * 9. Testing — Visual Acuity + other tests (original)
+ * 10. Results — AI insights dashboard (original)
  * 12. Report — medical PDF report (new)
  */
 
@@ -70,7 +69,7 @@ const App: React.FC = () => {
   const [patient, setPatient] = useState<PatientInfo | null>(null);
   const [acuityResult, setAcuityResult] = useState<AcuityResult | null>(null);
   const [colorResult, setColorResult] = useState<ColorVisionResult | null>(null);
-  const [screenCalibration, setScreenCalibration] = useState<ScreenCalibrationData | null>(null);
+
 
   // ─── Face Distance ───
   const {
@@ -88,8 +87,6 @@ const App: React.FC = () => {
     setDebugMode,
     debugMode
   } = useFaceDistance({
-    pxPerMm: screenCalibration?.pxPerMm,
-    ipdMm: screenCalibration?.ipdMm,
     stream: stream,
     targetDistanceM: step === AppStep.BiometricScan ? 0.55 : (IS_DEV ? DEV_DISTANCE : 2.0),
     toleranceM: step === AppStep.BiometricScan ? 0.35 : (IS_DEV ? 0.3 : 0.15),
@@ -428,21 +425,12 @@ const App: React.FC = () => {
                 dateTime: new Date().toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US'),
                 deviceInfo: navigator.userAgent,
               });
-              setStep(AppStep.ScreenCalibration);
+              setStep(AppStep.CoverEye);
             }}
           />
         )}
 
-        {/* Step 5: Screen Calibration (NEW) */}
-        {step === AppStep.ScreenCalibration && (
-          <ScreenCalibrationWizard
-            lang={lang}
-            onComplete={(data) => {
-              setScreenCalibration(data);
-              setStep(AppStep.Calibration);
-            }}
-          />
-        )}
+
 
         {/* Step 6: Cover Eye (ENHANCED — live distance + stability) */}
         {step === AppStep.CoverEye && (

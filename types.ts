@@ -7,7 +7,6 @@ export enum AppStep {
   BiometricScan = 'BIOMETRIC_SCAN',
   Profile = 'PROFILE',
   TestSelection = 'TEST_SELECTION',
-  ScreenCalibration = 'SCREEN_CALIBRATION',
   Calibration = 'CALIBRATION',
   CoverEye = 'COVER_EYE',
   Testing = 'TESTING',
@@ -40,13 +39,6 @@ export interface UserProfile {
   mood?: string;
 }
 
-// ─────────── Screen Calibration (PPI + IPD) ───────────
-export interface ScreenCalibrationData {
-  pxPerMm: number;
-  screenSizeInches: number;
-  method: 'device-select' | 'credit-card';
-  ipdMm: number; // 55 | 60 | 63
-}
 
 // ─────────── Calibration Data ───────────
 export interface CalibrationData {

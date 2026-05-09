@@ -94,14 +94,7 @@ const PAGE_MESSAGES: Record<AppStep, { intro: GlobalBotMessage; tips: Omit<Globa
       { text: "Accurate information leads to more reliable screening results.", emoji: '✅', color: '#10b981' },
     ],
   },
-  [AppStep.ScreenCalibration]: {
-    intro: { text: "Let's calibrate your screen! This ensures the test symbols appear at the correct size.", emoji: '📏', color: '#f59e0b', id: 0 },
-    tips: [
-      { text: "Use a standard credit card or ID card for best calibration accuracy.", emoji: '💳', color: '#06b6d4' },
-      { text: "Screen size calibration is crucial — it affects all measurement accuracy.", emoji: '🎯', color: '#10b981' },
-      { text: "Make sure your card is flat against the screen during calibration.", emoji: '📐', color: '#8b5cf6' },
-    ],
-  },
+
   [AppStep.Calibration]: {
     intro: { text: "Position yourself at the correct distance from the screen. I'll help you stay in range!", emoji: '📐', color: '#06b6d4', id: 0 },
     tips: [
