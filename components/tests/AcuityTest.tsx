@@ -110,7 +110,10 @@ function buildTrialSequence(): Trial[] {
     return arr;
   };
 
-  return [...shuffle(eTrials), ...shuffle(cTrials), ...shuffle(letterTrials)];
+  const allTrials = [...shuffle(eTrials), ...shuffle(cTrials), ...shuffle(letterTrials)];
+  
+  // Return exactly 5 samples by shuffling the combined list and taking 5
+  return shuffle(allTrials).slice(0, 5);
 }
 
 // ─── Phases ───

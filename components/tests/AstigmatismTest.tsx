@@ -20,7 +20,7 @@ const PATTERNS: { key: Pattern; label: string; icon: string }[] = [
   { key: 'parallel', label: 'Parallel Lines', icon: '\u{2261}' },
 ];
 
-const TOTAL_TRIALS = 3;
+const TOTAL_TRIALS = 5;
 
 type Phase = 'testing' | 'done';
 
