@@ -317,7 +317,7 @@ const BiometricScan: React.FC<Props> = ({
       ctx.moveTo(p.x * w, p.y * h);
       ctx.arc(p.x * w, p.y * h, 0.8 * distScale, 0, Math.PI * 2);
     });
-    ctx.fillStyle = `rgba(0, 180, 255, ${0.4 * pulse})`;
+    ctx.fillStyle = `rgba(16, 185, 129, ${0.4 * pulse})`; // Emerald green
     ctx.fill();
 
     // ═══════════════════════════════════════════
@@ -325,8 +325,8 @@ const BiometricScan: React.FC<Props> = ({
     // ═══════════════════════════════════════════
     const ovalIdx = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109, 10];
     ctx.shadowBlur = (15 * distScale) * pulse;
-    ctx.shadowColor = '#00f3ff';
-    drawPath(ovalIdx, `rgba(0, 243, 255, ${0.8 * pulse})`, 4.0, true);
+    ctx.shadowColor = '#10b981'; // Emerald glow
+    drawPath(ovalIdx, `rgba(16, 185, 129, ${0.8 * pulse})`, 3.0, true);
     ctx.shadowBlur = 0;
 
     // ═══════════════════════════════════════════
@@ -347,64 +347,64 @@ const BiometricScan: React.FC<Props> = ({
       });
       ctx.closePath();
     });
-    ctx.fillStyle = `rgba(0, 243, 255, ${0.1 * pulse})`;
+    ctx.fillStyle = `rgba(52, 211, 153, ${0.1 * pulse})`; // Light emerald
     ctx.fill();
 
     // Eye outlines
-    ctx.shadowBlur = 20 * distScale;
+    ctx.shadowBlur = 15 * distScale;
     ctx.shadowColor = '#fff';
-    drawPath(rightEye, `rgba(255, 255, 255, ${0.9 * pulse})`, 3.5, true);
-    drawPath(leftEye, `rgba(255, 255, 255, ${0.9 * pulse})`, 3.5, true);
+    drawPath(rightEye, `rgba(255, 255, 255, ${0.9 * pulse})`, 2.5, true);
+    drawPath(leftEye, `rgba(255, 255, 255, ${0.9 * pulse})`, 2.5, true);
     ctx.shadowBlur = 10 * distScale;
-    ctx.shadowColor = '#00f3ff';
-    drawPath([133, 155, 154, 153, 145, 144, 163, 7, 33], `rgba(0, 200, 255, 0.9)`, 2.5);
-    drawPath([362, 382, 381, 380, 374, 373, 390, 249, 263], `rgba(0, 200, 255, 0.9)`, 2.5);
+    ctx.shadowColor = '#34d399'; // Emerald bright glow
+    drawPath([133, 155, 154, 153, 145, 144, 163, 7, 33], `rgba(16, 185, 129, 0.9)`, 2.0);
+    drawPath([362, 382, 381, 380, 374, 373, 390, 249, 263], `rgba(16, 185, 129, 0.9)`, 2.0);
 
     // ═══════════════════════════════════════════
     // 4. EYEBROWS & FOREHEAD
     // ═══════════════════════════════════════════
     const rightBrow = [70, 63, 105, 66, 107, 55, 65, 52, 53, 46];
     const leftBrow = [300, 293, 334, 296, 336, 285, 295, 282, 283, 276];
-    ctx.shadowBlur = (12 * distScale) * pulse;
-    ctx.shadowColor = '#aa00ff';
-    drawPath(rightBrow, `rgba(180, 0, 255, ${0.9 * pulse})`, 4.0);
-    drawPath(leftBrow, `rgba(180, 0, 255, ${0.9 * pulse})`, 4.0);
+    ctx.shadowBlur = (10 * distScale) * pulse;
+    ctx.shadowColor = '#10b981';
+    drawPath(rightBrow, `rgba(16, 185, 129, ${0.9 * pulse})`, 3.0);
+    drawPath(leftBrow, `rgba(16, 185, 129, ${0.9 * pulse})`, 3.0);
 
     // Forehead cyber-grid
-    drawPath([10, 67, 109, 10], `rgba(0, 150, 255, ${0.6 * pulse})`, 2.0);
-    drawPath([10, 103, 54, 21], `rgba(0, 150, 255, ${0.6 * pulse})`, 2.0);
-    drawPath([10, 338, 297, 332], `rgba(0, 150, 255, ${0.6 * pulse})`, 2.0);
-    drawPath([10, 151, 9, 8, 168], `rgba(0, 200, 255, ${0.7 * pulse})`, 2.5); // Center line
+    drawPath([10, 67, 109, 10], `rgba(52, 211, 153, ${0.6 * pulse})`, 1.5);
+    drawPath([10, 103, 54, 21], `rgba(52, 211, 153, ${0.6 * pulse})`, 1.5);
+    drawPath([10, 338, 297, 332], `rgba(52, 211, 153, ${0.6 * pulse})`, 1.5);
+    drawPath([10, 151, 9, 8, 168], `rgba(16, 185, 129, ${0.7 * pulse})`, 2.0); // Center line
 
     // ═══════════════════════════════════════════
     // 5. NOSE
     // ═══════════════════════════════════════════
     ctx.shadowBlur = 8 * distScale;
-    ctx.shadowColor = '#00f3ff';
-    drawPath([168, 6, 197, 195, 5, 4, 1, 19], `rgba(0, 243, 255, ${0.9 * pulse})`, 3.5);
-    drawPath([48, 115, 220, 45, 4, 275, 440, 344, 278], `rgba(0, 200, 255, ${0.7 * pulse})`, 2.5);
-    drawPath([94, 19, 1, 4, 5], `rgba(0, 243, 255, ${0.8 * pulse})`, 3.0);
+    ctx.shadowColor = '#10b981';
+    drawPath([168, 6, 197, 195, 5, 4, 1, 19], `rgba(16, 185, 129, ${0.9 * pulse})`, 2.5);
+    drawPath([48, 115, 220, 45, 4, 275, 440, 344, 278], `rgba(52, 211, 153, ${0.7 * pulse})`, 2.0);
+    drawPath([94, 19, 1, 4, 5], `rgba(16, 185, 129, ${0.8 * pulse})`, 2.0);
 
     // ═══════════════════════════════════════════
     // 6. LIPS (Inner & Outer)
     // ═══════════════════════════════════════════
     const lipsOuter = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146, 61];
     const lipsInner = [78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95, 78];
-    ctx.shadowBlur = (15 * distScale) * pulse;
-    ctx.shadowColor = '#00ff88';
-    drawPath(lipsOuter, `rgba(0, 255, 136, ${0.8 * pulse})`, 3.5, true);
-    drawPath(lipsInner, `rgba(0, 220, 120, ${0.6 * pulse})`, 2.5, true);
+    ctx.shadowBlur = (12 * distScale) * pulse;
+    ctx.shadowColor = '#059669'; // Deeper emerald glow for lips
+    drawPath(lipsOuter, `rgba(16, 185, 129, ${0.8 * pulse})`, 2.5, true);
+    drawPath(lipsInner, `rgba(52, 211, 153, ${0.6 * pulse})`, 1.5, true);
 
     // ═══════════════════════════════════════════
     // 7. CHEEKBONE & JAW TOPOLOGY
     // ═══════════════════════════════════════════
     ctx.shadowBlur = 0;
-    drawPath([127, 234, 93, 132, 58, 172, 136, 150, 149, 176, 148, 152], `rgba(0, 180, 255, ${0.5 * pulse})`, 2.5);
-    drawPath([356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152], `rgba(0, 180, 255, ${0.5 * pulse})`, 2.5);
+    drawPath([127, 234, 93, 132, 58, 172, 136, 150, 149, 176, 148, 152], `rgba(52, 211, 153, ${0.5 * pulse})`, 1.5);
+    drawPath([356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152], `rgba(52, 211, 153, ${0.5 * pulse})`, 1.5);
 
     // Diagonal cheek vectors
-    drawPath([234, 227, 116, 117, 118, 100, 47], `rgba(0, 150, 255, ${0.4 * pulse})`, 1.5);
-    drawPath([454, 447, 345, 346, 347, 329, 277], `rgba(0, 150, 255, ${0.4 * pulse})`, 1.5);
+    drawPath([234, 227, 116, 117, 118, 100, 47], `rgba(52, 211, 153, ${0.4 * pulse})`, 1.0);
+    drawPath([454, 447, 345, 346, 347, 329, 277], `rgba(52, 211, 153, ${0.4 * pulse})`, 1.0);
 
     // ═══════════════════════════════════════════
     // 8. CRITICAL NODES (Glowing intersection points)
@@ -415,7 +415,7 @@ const BiometricScan: React.FC<Props> = ({
       const scaledSize = size * distScale;
       ctx.beginPath();
       ctx.fillStyle = color;
-      ctx.shadowBlur = scaledSize * 6;
+      ctx.shadowBlur = scaledSize * 5;
       ctx.shadowColor = color;
       ctx.arc(p.x * w, p.y * h, scaledSize, 0, Math.PI * 2);
       ctx.fill();
@@ -423,11 +423,11 @@ const BiometricScan: React.FC<Props> = ({
 
     // Major anchors (Pupils, Nose tip, Chin, Sides)
     const anchors = [468, 473, 1, 152, 234, 454];
-    anchors.forEach(idx => drawSpark(idx, 4.0, '#fff'));
+    anchors.forEach(idx => drawSpark(idx, 3.0, '#fff'));
 
     // Secondary tracking points (Eyes, Brows, Lips)
     const activeNodes = [33, 263, 133, 362, 10, 61, 291, 168, 0, 17, 105, 334];
-    activeNodes.forEach(idx => drawSpark(idx, 2.5, `rgba(0, 243, 255, ${0.9 * pulseFast})`));
+    activeNodes.forEach(idx => drawSpark(idx, 2.0, `rgba(52, 211, 153, ${0.9 * pulseFast})`));
 
     ctx.restore();
   };
