@@ -519,6 +519,9 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
                 const poseResults = poseLandmarkerRef.current.detectForVideo(video, timestamp);
                 if (poseResults?.landmarks?.length > 0) {
                     poseLandmarksRef.current = poseResults.landmarks[0];
+                    (window as any).__sharedPoseLandmarks = poseResults.landmarks[0];
+                } else {
+                    (window as any).__sharedPoseLandmarks = null;
                 }
             } catch (e: any) {
                 // Silently fail — pose is optional overlay
@@ -532,8 +535,10 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
                 const handResults = handLandmarkerRef.current.detectForVideo(video, timestamp);
                 if (handResults?.landmarks?.length > 0) {
                     handLandmarksStateRef.current = handResults.landmarks;
+                    (window as any).__sharedHandLandmarks = handResults.landmarks;
                 } else {
                     handLandmarksStateRef.current = null;
+                    (window as any).__sharedHandLandmarks = null;
                 }
             } catch (e: any) {
                 // Silently fail

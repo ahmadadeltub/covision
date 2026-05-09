@@ -143,6 +143,57 @@ export function useEyeCoverDetection({
             x: (faceLm[263].x + faceLm[362].x) / 2,
             y: (faceLm[386].y + faceLm[374].y) / 2,
           };
+
+          // Draw Eye Mesh (dots)
+          ctx.fillStyle = 'rgba(6, 182, 212, 0.5)';
+          const drawDots = (indices: number[]) => {
+            indices.forEach(idx => {
+              if (faceLm[idx]) {
+                ctx.beginPath();
+                ctx.arc(faceLm[idx].x * canvas.width, faceLm[idx].y * canvas.height, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+              }
+            });
+          };
+          drawDots([33, 159, 158, 160, 133, 145, 144, 153]); // Right Eye
+          drawDots([263, 386, 385, 387, 362, 374, 373, 380]); // Left Eye
+          // Draw Face Oval (some points)
+          drawDots([10, 152, 234, 454]); 
+
+          // Draw Hand Landmarks if available
+          const hands = (window as any).__sharedHandLandmarks;
+          if (hands && hands.length > 0) {
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgba(16, 185, 129, 0.6)';
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.8)';
+            const connections = [
+              [0,1],[1,2],[2,3],[3,4], // Thumb
+              [0,5],[5,6],[6,7],[7,8], // Index
+              [5,9],[9,10],[10,11],[11,12], // Middle
+              [9,13],[13,14],[14,15],[15,16], // Ring
+              [13,17],[17,18],[18,19],[19,20], // Pinky
+              [0,17] // Base
+            ];
+            hands.forEach((hand: any[]) => {
+              // Draw lines
+              ctx.beginPath();
+              connections.forEach(([start, end]) => {
+                const s = hand[start], e = hand[end];
+                if (s && e) {
+                  ctx.moveTo(s.x * canvas.width, s.y * canvas.height);
+                  ctx.lineTo(e.x * canvas.width, e.y * canvas.height);
+                }
+              });
+              ctx.stroke();
+              // Draw joints
+              hand.forEach(joint => {
+                ctx.beginPath();
+                ctx.arc(joint.x * canvas.width, joint.y * canvas.height, 3, 0, Math.PI * 2);
+                ctx.fill();
+              });
+            });
+          }
+
           drawZone(rightEyeCenter, rightClosed, 'R');
           drawZone(leftEyeCenter, leftClosed, 'L');
           ctx.restore();
