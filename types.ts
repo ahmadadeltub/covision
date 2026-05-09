@@ -8,7 +8,6 @@ export enum AppStep {
   Profile = 'PROFILE',
   TestSelection = 'TEST_SELECTION',
   Calibration = 'CALIBRATION',
-  CoverEye = 'COVER_EYE',
   Testing = 'TESTING',
   ColorIntro = 'COLOR_INTRO',
   ColorTest = 'COLOR_TEST',

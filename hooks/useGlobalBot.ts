@@ -103,14 +103,6 @@ const PAGE_MESSAGES: Record<AppStep, { intro: GlobalBotMessage; tips: Omit<Globa
       { text: "I'll show a green indicator when you're at the perfect distance.", emoji: '✅', color: '#06b6d4' },
     ],
   },
-  [AppStep.CoverEye]: {
-    intro: { text: "We test each eye separately. Cover one eye gently with your palm — don't press!", emoji: '🤚', color: '#f59e0b', id: 0 },
-    tips: [
-      { text: "Cover your eye gently — pressing on the eyelid can temporarily blur your vision.", emoji: '⚠️', color: '#ef4444' },
-      { text: "Use your palm, not your fingers, for a better seal without pressure.", emoji: '✋', color: '#06b6d4' },
-      { text: "I'll be watching to make sure your eye stays properly covered!", emoji: '👁️', color: '#10b981' },
-    ],
-  },
   [AppStep.ColorIntro]: {
     intro: { text: "Color vision test coming up! Make sure your screen brightness is at maximum.", emoji: '🌈', color: '#8b5cf6', id: 0 },
     tips: [
@@ -188,7 +180,7 @@ export function useGlobalBot(currentStep: AppStep, distanceInput?: DistanceInput
 
   // ─── Distance-reactive coaching ───
   // Steps where distance matters
-  const distanceActiveSteps = [AppStep.Calibration, AppStep.CoverEye, AppStep.Testing];
+  const distanceActiveSteps = [AppStep.Calibration, AppStep.Testing];
   const isDistanceActive = distanceActiveSteps.includes(currentStep) && !!distanceInput;
 
   useEffect(() => {

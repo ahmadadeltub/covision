@@ -23,9 +23,7 @@ export const translations: Record<string, Record<string, string>> = {
     enter_name: "Enter full name",
     enter_age: "Enter age",
 
-    // Cover Eye
-    cover_eye_title: "Testing the Eyes Cover",
-    cover_eye_desc: "Cover your right eye with your hand or a clean cloth",
+    // Distance Enforcement
     distance_req: "Maintain 2 meters distance from the screen",
     distance_warning: "Please do not move closer. Keep 2 meters distance.",
     anti_cheat: "You must maintain the required distance for valid results",
@@ -178,9 +176,7 @@ export const translations: Record<string, Record<string, string>> = {
     enter_name: "Enter full name",
     enter_age: "Enter age",
 
-    // Cover Eye
-    cover_eye_title: "Testing the Eyes Cover",
-    cover_eye_desc: "Cover your right eye with your hand or a clean cloth",
+    // Distance Enforcement
     distance_req: "Maintain 2 meters distance from the screen",
     distance_warning: "Please do not move closer. Keep 2 meters distance.",
     anti_cheat: "You must maintain the required distance for valid results",

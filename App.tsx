@@ -16,7 +16,6 @@ import FloatingBackground from './components/FloatingBackground';
 // ─── New Improved Components ───
 import WelcomeScreen from './components/WelcomeScreen';
 import PatientForm from './components/PatientForm';
-import CoverEyeScreen from './components/CoverEyeScreen';
 import TumblingETest from './components/TumblingETest';
 import ColorVisionIntro from './components/ColorVisionIntro';
 import ColorVisionTest from './components/ColorVisionTest';
@@ -35,7 +34,6 @@ import { onMessageListener } from './firebase';
  * 2. TestSelection — pick which tests (original, moved early)
  * 3. BiometricScan — AI face scan with mesh (original)
  * 4. Profile — sync profile data (original)
- * 5. CoverEye — cover eye + camera preview (new)
  * 6. ColorIntro — lighting guidance (new)
  * 7. ColorTest — Ishihara plates (new)
  * 8. Calibration — 2m distance calibration (original, moved before acuity)
@@ -168,11 +166,11 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (step === AppStep.BiometricScan || step === AppStep.Calibration || step === AppStep.CoverEye || step === AppStep.Testing || step === AppStep.ColorIntro || step === AppStep.ColorTest) {
+    if (step === AppStep.BiometricScan || step === AppStep.Calibration || step === AppStep.Testing || step === AppStep.ColorIntro || step === AppStep.ColorTest) {
       initCamera();
     }
-    // Also start face distance camera for BiometricScan / Calibration / CoverEye / Testing
-    if (step === AppStep.BiometricScan || step === AppStep.Calibration || step === AppStep.CoverEye || step === AppStep.Testing) {
+    // Also start face distance camera for BiometricScan / Calibration / Testing
+    if (step === AppStep.BiometricScan || step === AppStep.Calibration || step === AppStep.Testing) {
       startCamera();
     }
   }, [step, initCamera, startCamera]);
@@ -346,7 +344,7 @@ const App: React.FC = () => {
       </header>
 
       {/* ─── Distance Indicator (during coverage / testing) ─── */}
-      {(step === AppStep.CoverEye || step === AppStep.Testing) && (
+      {step === AppStep.Testing && (
         <div className="distance-indicator no-print" style={{
           background: distanceStatus === 'ok' ? 'var(--success-bg)' :
             distanceStatus === 'too_close' ? 'var(--danger-bg)' :
@@ -425,26 +423,13 @@ const App: React.FC = () => {
                 dateTime: new Date().toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US'),
                 deviceInfo: navigator.userAgent,
               });
-              setStep(AppStep.CoverEye);
+              setStep(AppStep.ColorIntro);
             }}
           />
         )}
 
 
 
-        {/* Step 6: Cover Eye (ENHANCED — live distance + stability) */}
-        {step === AppStep.CoverEye && (
-          <CoverEyeScreen
-            lang={lang}
-            distanceStatus={distanceStatus}
-            distanceM={distanceM}
-            isStable={isStable}
-            videoRef={videoRef}
-            stream={stream}
-            poseLandmarksRef={poseLandmarksRef}
-            onStart={() => setStep(AppStep.ColorIntro)}
-          />
-        )}
 
         {/* Step 7: Testing Engine — runs selected tests (ORIGINAL) */}
         {step === AppStep.Testing && calibration && (
