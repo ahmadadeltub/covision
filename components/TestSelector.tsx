@@ -9,7 +9,7 @@ interface Props {
 }
 
 const TestSelector: React.FC<Props> = ({ lang, t, onComplete }) => {
-  const [selected, setSelected] = useState<TestType[]>([TestType.Acuity, TestType.Snellen, TestType.Contrast, TestType.Astigmatism, TestType.Amsler]);
+  const [selected, setSelected] = useState<TestType[]>([TestType.Acuity, TestType.Color, TestType.Snellen, TestType.Contrast, TestType.Astigmatism, TestType.Amsler]);
 
   const toggle = (type: TestType) => {
     setSelected(prev => 
@@ -19,6 +19,7 @@ const TestSelector: React.FC<Props> = ({ lang, t, onComplete }) => {
 
   const testOptions = [
     { type: TestType.Acuity, label: t.visual_acuity, icon: '👁️' },
+    { type: TestType.Color, label: t.color_arrangement || 'Color Arrangement', icon: '🎨' },
     { type: TestType.Snellen, label: t.snellen_chart || 'Snellen Chart', icon: '🔤' },
     { type: TestType.Contrast, label: t.contrast_sensitivity, icon: '🌗' },
     { type: TestType.Astigmatism, label: t.astigmatism_test, icon: '✴️' },
