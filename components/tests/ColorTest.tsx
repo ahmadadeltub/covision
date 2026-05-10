@@ -35,7 +35,7 @@ const COLOR_SAMPLES: { name: string; confusers: string[] }[] = [
   { name: 'Gray',   confusers: ['Silver', 'Blue', 'White'] },
 ];
 
-const TOTAL_SAMPLES = 3;
+const TOTAL_SAMPLES = 5;
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -152,8 +152,8 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
     if (sampleIdx < TOTAL_SAMPLES - 1) {
       setSampleIdx(prev => prev + 1);
     } else {
-      // Move to Ishihara phase
-      setPhase('ishihara-intro');
+      // Finish test directly — no Ishihara phase (handled by standalone ColorVisionTest)
+      finishColorTest(newResults);
     }
   };
 
@@ -175,39 +175,33 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
     }
   };
 
-  const finishTestWithIshihara = (colorResults: typeof results, ishResults: typeof ishiharaResults) => {
+  const finishColorTest = (colorResults: typeof results) => {
     setPhase('done');
     const colorOk = colorResults.filter(r => r.correct).length;
-    const ishiharaOk = ishResults.filter(r => r.correct).length;
-    const totalOk = colorOk + ishiharaOk;
-    const total = colorResults.length + ishResults.length;
-    const ishiharaPct = ishResults.length > 0 ? ishiharaOk / ishResults.length : 1;
+    const total = colorResults.length;
 
     let findings: string, confidence: number;
-    if (colorOk >= 2 && ishiharaPct >= 0.6) {
-      findings = `Excellent color vision \u2014 Arrangement: ${colorOk}/${TOTAL_SAMPLES} (both eyes). Ishihara: ${ishiharaOk}/${ishResults.length}. Normal color discrimination.`;
+    if (colorOk >= 4) {
+      findings = `Excellent color vision — Arrangement: ${colorOk}/${TOTAL_SAMPLES} (both eyes). Normal color discrimination.`;
       confidence = 0.98;
-    } else if (colorOk >= 1 && ishiharaPct >= 0.3) {
-      findings = `Mild color concern \u2014 Arrangement: ${colorOk}/${TOTAL_SAMPLES} (both eyes). Ishihara: ${ishiharaOk}/${ishResults.length}. Some difficulty with similar hues.`;
+    } else if (colorOk >= 3) {
+      findings = `Mild color concern — Arrangement: ${colorOk}/${TOTAL_SAMPLES} (both eyes). Some difficulty with similar hues.`;
       confidence = 0.90;
     } else {
-      findings = `Significant color deficiency \u2014 Arrangement: ${colorOk}/${TOTAL_SAMPLES} (both eyes). Ishihara: ${ishiharaOk}/${ishResults.length}. Comprehensive examination strongly recommended.`;
+      findings = `Significant color deficiency — Arrangement: ${colorOk}/${TOTAL_SAMPLES} (both eyes). Comprehensive examination strongly recommended.`;
       confidence = 0.95;
     }
 
-    const allTimes = [...colorResults.map(r => r.timeMs), ...ishResults.map(r => r.timeMs)];
-    botFinish(totalOk, total);
+    const allTimes = colorResults.map(r => r.timeMs);
+    botFinish(colorOk, total);
 
     onFinish({
       testName: 'Color Arrangement',
-      score: totalOk,
+      score: colorOk,
       total,
       confidence,
       findings,
-      perSampleScores: [
-        ...colorResults.map((r, i) => ({ sample: i + 1, correct: r.correct, timeMs: r.timeMs })),
-        ...ishResults.map((r, i) => ({ sample: colorResults.length + i + 1, correct: r.correct, timeMs: r.timeMs })),
-      ],
+      perSampleScores: colorResults.map((r, i) => ({ sample: i + 1, correct: r.correct, timeMs: r.timeMs })),
       rawResponseTimes: allTimes,
     });
   };
