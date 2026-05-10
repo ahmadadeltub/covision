@@ -5,7 +5,7 @@ import { useAIBot } from '../../hooks/useAIBot';
 import { useVoiceCommand } from '../../hooks/useVoiceCommand';
 import AIBotBubble from '../AIBotBubble';
 
-const OPTOTYPES = 'CDHKNORSVZ'.split('');
+const OPTOTYPES = ['E', 'F', 'P', 'T', 'O', 'Z', 'L', 'D', 'C'];
 
 // 15 Snellen levels (size + label) — from large to tiny
 const SNELLEN_LEVELS = [
@@ -48,6 +48,14 @@ interface Props {
 
 const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
   const [phase, setPhase] = useState<Phase>('testing');
+  
+  // Generate a random sequence of 5 different levels
+  const trialSequence = useMemo(() => {
+    // Pick 5 levels across the spectrum (large, medium, small)
+    const indices = [0, 3, 5, 8, 11]; // 20/200, 20/100, 20/70, 20/40, 20/20
+    return shuffle(indices.map(idx => ({ ...SNELLEN_LEVELS[idx], originalIdx: idx })));
+  }, []);
+
   const [levelIdx, setLevelIdx] = useState(0);
   const [targetLetter, setTargetLetter] = useState('E');
   const [choiceLetters, setChoiceLetters] = useState<string[]>([]);
@@ -56,11 +64,11 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
   const startTime = useRef(Date.now());
 
   const { botState, botStart, botRecordTrial, botFinish } = useAIBot();
-  const currentLevel = SNELLEN_LEVELS[levelIdx] || SNELLEN_LEVELS[0];
+  const currentTrial = trialSequence[levelIdx];
 
   // Generate new target + shuffled choices
   useEffect(() => {
-    if (phase === 'testing') {
+    if (phase === 'testing' && currentTrial) {
       const letter = OPTOTYPES[Math.floor(Math.random() * OPTOTYPES.length)];
       setTargetLetter(letter);
       const others = OPTOTYPES.filter(l => l !== letter);
@@ -68,7 +76,7 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
       setChoiceLetters(shuffle([letter, ...picks]));
       startTime.current = Date.now();
     }
-  }, [levelIdx, phase]);
+  }, [levelIdx, phase, currentTrial]);
 
   // AI Bot lifecycle
   useEffect(() => {
@@ -102,7 +110,7 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
     const time = Date.now() - startTime.current;
     const isCorrect = letter === targetLetter;
     botRecordTrial(isCorrect, levelIdx, TOTAL_SAMPLES);
-    const entry = { level: levelIdx, correct: isCorrect, time };
+    const entry = { level: currentTrial.originalIdx, correct: isCorrect, time };
 
     const updated = [...results, entry];
     setResults(updated);
@@ -159,8 +167,8 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
   };
 
   const progressPct = phase === 'testing' ? ((levelIdx + 1) / TOTAL_SAMPLES) * 100 : 0;
-  const difficultyLabel = levelIdx < 5 ? 'EASY' : levelIdx < 10 ? 'MEDIUM' : 'HARD';
-  const difficultyColor = levelIdx < 5 ? '#10b981' : levelIdx < 10 ? '#f59e0b' : '#ef4444';
+  const difficultyLabel = currentTrial?.originalIdx < 5 ? 'EASY' : currentTrial?.originalIdx < 10 ? 'MEDIUM' : 'HARD';
+  const difficultyColor = currentTrial?.originalIdx < 5 ? '#10b981' : currentTrial?.originalIdx < 10 ? '#f59e0b' : '#ef4444';
 
   if (phase === 'done') {
     return (
@@ -183,7 +191,7 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
         <div className="w-full glass rounded-2xl border border-white/5 p-3 space-y-2">
           <div className="text-center">
             <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Snellen</div>
-            <div className="text-lg font-black text-white">{currentLevel.label}</div>
+            <div className="text-lg font-black text-white">{currentTrial?.label}</div>
           </div>
           <div className="h-px bg-white/5"></div>
           <div className="flex items-center justify-between">
@@ -214,7 +222,7 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
         <div className="shrink-0 px-6 py-3">
           <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight leading-none">Snellen Visual Acuity</h3>
           <p className="text-xs text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
-            {currentLevel.label} — BOTH EYES
+            {currentTrial?.label} — BOTH EYES
           </p>
         </div>
 
@@ -228,11 +236,11 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
         {/* Letter Display */}
         <div className="flex-1 min-h-0 flex items-center justify-center p-4">
           <div className="bg-white rounded-[2rem] md:rounded-[3rem] flex items-center justify-center shadow-2xl border-4 border-white/10 px-8 md:px-16"
-            style={{ minWidth: `${currentLevel.sizePx + 80}px`, minHeight: `${currentLevel.sizePx + 60}px`, maxWidth: '90%', maxHeight: '100%' }}>
+            style={{ minWidth: `${(currentTrial?.sizePx || 0) + 80}px`, minHeight: `${(currentTrial?.sizePx || 0) + 60}px`, maxWidth: '90%', maxHeight: '100%' }}>
             <span
               key={`both-${levelIdx}`}
               className="font-black text-black select-none leading-none"
-              style={{ fontSize: `${Math.max(150, 300 - (levelIdx * 25))}px`, fontFamily: "'Courier New', Courier, monospace" }}>
+              style={{ fontSize: `${currentTrial?.sizePx}px`, fontFamily: "'Courier New', Courier, monospace" }}>
               {targetLetter}
             </span>
           </div>
