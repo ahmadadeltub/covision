@@ -799,32 +799,14 @@ const MedicalReport: React.FC<Props> = ({ lang, patient, acuity, colorVision, te
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {/* Acuity row */}
-                                    <tr>
-                                        <td className="text-xs text-slate-400 py-2 pl-3 rounded-l-lg" style={{ background: 'var(--bg-card)' }}>1</td>
-                                        <td className="text-xs font-bold text-white py-2" style={{ background: 'var(--bg-card)' }}>Visual Acuity</td>
-                                        <td className="text-xs text-slate-300 py-2 text-center" style={{ background: 'var(--bg-card)' }}>{acuity.totalCorrect}/{acuity.totalTrials}</td>
-                                        <td className="text-xs text-slate-300 py-2 text-center" style={{ background: 'var(--bg-card)' }}>{acuity.totalTrials > 0 ? ((acuity.totalCorrect / acuity.totalTrials) * 100).toFixed(0) : 0}%</td>
-                                        <td className="text-xs text-slate-300 py-2 text-center" style={{ background: 'var(--bg-card)' }}>—</td>
-                                        <td className="text-xs py-2 text-center rounded-r-lg" style={{ background: 'var(--bg-card)', color: acuityInterp.color }}><StatusBadge status={acuityInterp.status} color={acuityInterp.color} /></td>
-                                    </tr>
-                                    {/* Color row */}
-                                    <tr>
-                                        <td className="text-xs text-slate-400 py-2 pl-3 rounded-l-lg" style={{ background: 'var(--bg-card)' }}>2</td>
-                                        <td className="text-xs font-bold text-white py-2" style={{ background: 'var(--bg-card)' }}>Color Vision</td>
-                                        <td className="text-xs text-slate-300 py-2 text-center" style={{ background: 'var(--bg-card)' }}>{colorVision.totalCorrect}/{colorVision.totalPlates}</td>
-                                        <td className="text-xs text-slate-300 py-2 text-center" style={{ background: 'var(--bg-card)' }}>{colorVision.totalPlates > 0 ? ((colorVision.totalCorrect / colorVision.totalPlates) * 100).toFixed(0) : 0}%</td>
-                                        <td className="text-xs text-slate-300 py-2 text-center" style={{ background: 'var(--bg-card)' }}>—</td>
-                                        <td className="text-xs py-2 text-center rounded-r-lg" style={{ background: 'var(--bg-card)' }}><StatusBadge status={colorInterp.status} color={colorInterp.color} /></td>
-                                    </tr>
-                                    {/* Test result rows */}
+                                    {/* Test result rows (Exactly the 6 standardized tests) */}
                                     {testResults.map((r, i) => {
                                         const pct = r.total > 0 ? (r.score / r.total) * 100 : 0;
                                         const sc = pct >= 80 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
                                         const sl = pct >= 80 ? 'Pass' : pct >= 50 ? 'Borderline' : 'Fail';
                                         return (
                                             <tr key={i}>
-                                                <td className="text-xs text-slate-400 py-2 pl-3 rounded-l-lg" style={{ background: 'var(--bg-card)' }}>{i + 3}</td>
+                                                <td className="text-xs text-slate-400 py-2 pl-3 rounded-l-lg" style={{ background: 'var(--bg-card)' }}>{i + 1}</td>
                                                 <td className="text-xs font-bold text-white py-2" style={{ background: 'var(--bg-card)' }}>{r.testName}</td>
                                                 <td className="text-xs text-slate-300 py-2 text-center" style={{ background: 'var(--bg-card)' }}>{r.score}/{r.total}</td>
                                                 <td className="text-xs py-2 text-center" style={{ background: 'var(--bg-card)', color: sc }}>{pct.toFixed(0)}%</td>
@@ -838,18 +820,13 @@ const MedicalReport: React.FC<Props> = ({ lang, patient, acuity, colorVision, te
                         </div>
                         {/* Quick stats */}
                         <div className="grid grid-cols-3 gap-3 mt-4">
-                            <StatCard label="Total Tests" value={String(testResults.length + 2)} color="#06b6d4" />
+                            <StatCard label="Total Tests" value={String(testResults.length)} color="#06b6d4" />
                             <StatCard label="Tests Passed" value={String(
-                                (acuity.finalLogMAR <= 0.3 ? 1 : 0) +
-                                (colorVision.classification === 'normal' ? 1 : 0) +
                                 testResults.filter(r => r.total > 0 && (r.score / r.total) >= 0.6).length
                             )} color="#10b981" />
                             <StatCard label="Overall Score" value={`${(() => {
-                                const allScores = [
-                                    acuity.totalTrials > 0 ? (acuity.totalCorrect / acuity.totalTrials) * 100 : 0,
-                                    colorVision.totalPlates > 0 ? (colorVision.totalCorrect / colorVision.totalPlates) * 100 : 0,
-                                    ...testResults.map(r => r.total > 0 ? (r.score / r.total) * 100 : 0),
-                                ];
+                                const allScores = testResults.map(r => r.total > 0 ? (r.score / r.total) * 100 : 0);
+                                if (allScores.length === 0) return 0;
                                 return (allScores.reduce((a, b) => a + b, 0) / allScores.length).toFixed(0);
                             })()}%`} color={risk.color} />
                         </div>
