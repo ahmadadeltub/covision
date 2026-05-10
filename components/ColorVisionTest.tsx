@@ -229,6 +229,18 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, distanceM: propDistanc
         isActive: isTesting,
     });
 
+    const [introCountdown, setIntroCountdown] = useState(5);
+
+    useEffect(() => {
+        if (step !== 'intro') return;
+        if (introCountdown <= 0) {
+            setStep('testing');
+            return;
+        }
+        const timer = setTimeout(() => setIntroCountdown(prev => prev - 1), 1000);
+        return () => clearTimeout(timer);
+    }, [step, introCountdown]);
+
     return (
         <div className="w-full h-full flex flex-row gap-4 animate-in fade-in duration-500 overflow-hidden">
 
@@ -310,14 +322,21 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, distanceM: propDistanc
 
                     {/* Content Logic */}
                     {step === 'intro' && (
-                        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-6">
-                            <h2 className="text-3xl font-black text-white">Bilateral Vision Test</h2>
-                            <p className="text-slate-300 max-w-lg">
-                                We will test each eye separately. You will need to cover one eye at a time with your hand or an eye patch.
-                            </p>
-                            <button onClick={() => setStep('testing')} className="px-8 py-4 bg-cyan-500 hover:bg-cyan-400 text-black font-black rounded-full text-lg transition-transform hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(6,182,212,0.5)]">
-                                Start Test
-                            </button>
+                        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-8">
+                            <div className="space-y-4">
+                                <h2 className="text-3xl font-black text-white">Bilateral Vision Test</h2>
+                                <p className="text-slate-300 max-w-lg mx-auto">
+                                    We will test each eye separately. You will need to cover one eye at a time with your hand or an eye patch.
+                                </p>
+                            </div>
+                            
+                            <div className="flex flex-col items-center gap-2">
+                                <div className="w-24 h-24 rounded-full border-4 border-cyan-500/30 flex items-center justify-center relative">
+                                    <div className="absolute inset-0 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin" style={{ animationDuration: '2s' }}></div>
+                                    <span className="text-4xl font-black text-white">{introCountdown}</span>
+                                </div>
+                                <p className="text-cyan-400 font-black uppercase tracking-[0.2em] text-sm">Starting Test</p>
+                            </div>
                         </div>
                     )}
 
