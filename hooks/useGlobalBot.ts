@@ -180,7 +180,7 @@ export function useGlobalBot(currentStep: AppStep, distanceInput?: DistanceInput
 
   // ─── Distance-reactive coaching ───
   // Steps where distance matters
-  const distanceActiveSteps = [AppStep.Calibration, AppStep.Testing];
+  const distanceActiveSteps = [AppStep.Calibration, AppStep.Testing, AppStep.ColorIntro, AppStep.ColorTest];
   const isDistanceActive = distanceActiveSteps.includes(currentStep) && !!distanceInput;
 
   useEffect(() => {

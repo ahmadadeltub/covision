@@ -10,6 +10,8 @@ import { useVoiceCommand } from '../hooks/useVoiceCommand';
 interface Props {
     lang: Language;
     stream?: MediaStream | null;
+    distanceM?: number;
+    distanceStatus?: DistanceStatus;
     onComplete: (result: ColorVisionResult) => void;
 }
 
@@ -26,7 +28,7 @@ function generateDeck(count: number) {
     return deck;
 }
 
-const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
+const ColorVisionTest: React.FC<Props> = ({ lang, stream, distanceM: propDistanceM = 0, distanceStatus: propDistanceStatus = 'no_face', onComplete }) => {
     const t = translations[lang];
     const [step, setStep] = useState<TestStep>('intro');
     const [currentPlateIndex, setCurrentPlateIndex] = useState(0);
@@ -53,7 +55,7 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
     const coverCanvasRef = useRef<HTMLCanvasElement>(null);
 
     const handleDistanceStatusChange = useCallback((status: DistanceStatus) => {
-        setIsPaused(status !== 'ok');
+        setIsPaused(status === 'too_close');
     }, []);
 
     // Camera refs
@@ -282,13 +284,14 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, onComplete }) => {
             {/* ─── RIGHT: Test Content ─── */}
             <div className="flex-1 flex flex-col glass rounded-[2rem] border border-white/10 bg-slate-900/40 overflow-hidden min-w-0 relative">
 
-                {/* Distance Bar - Enforcing 60-70cm */}
+                {/* Distance Bar - Enforcing 1m distance (same as calibration) */}
                 {stream && (
                     <div className="shrink-0 px-6 pt-4 pb-0 z-20">
                         <DistanceBar
-                            stream={stream}
-                            targetM={0.65}
-                            toleranceM={0.05}
+                            distanceM={propDistanceM}
+                            status={propDistanceStatus}
+                            targetM={1.0}
+                            toleranceM={0.15}
                             onStatusChange={handleDistanceStatusChange}
                             showPauseOverlay={true}
                         />

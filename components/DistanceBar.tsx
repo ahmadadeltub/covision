@@ -47,7 +47,7 @@ const DistanceBar: React.FC<Props> = ({
     const statusText = status === 'ok' ? 'DISTANCE OK' : status === 'too_close' ? 'TOO CLOSE — Move Back' : status === 'too_far' ? 'TOO FAR — Move Closer' : 'Looking for face…';
 
     const minM = 0;
-    const maxM = 3;
+    const maxM = 2;
     const fillPct = distanceM > 0 ? Math.min(((distanceM - minM) / (maxM - minM)) * 100, 100) : 0;
     const targetPct = ((targetM - minM) / (maxM - minM)) * 100;
     const zoneLeft = (((targetM - toleranceM) - minM) / (maxM - minM)) * 100;

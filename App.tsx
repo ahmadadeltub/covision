@@ -169,8 +169,8 @@ const App: React.FC = () => {
     if (step === AppStep.BiometricScan || step === AppStep.Calibration || step === AppStep.Testing || step === AppStep.ColorIntro || step === AppStep.ColorTest) {
       initCamera();
     }
-    // Also start face distance camera for BiometricScan / Calibration / Testing
-    if (step === AppStep.BiometricScan || step === AppStep.Calibration || step === AppStep.Testing) {
+    // Also start face distance camera for BiometricScan / Calibration / Testing / ColorTest
+    if (step === AppStep.BiometricScan || step === AppStep.Calibration || step === AppStep.Testing || step === AppStep.ColorIntro || step === AppStep.ColorTest) {
       startCamera();
     }
   }, [step, initCamera, startCamera]);
@@ -463,6 +463,8 @@ const App: React.FC = () => {
           <ColorVisionTest
             lang={lang}
             stream={stream}
+            distanceM={distanceM}
+            distanceStatus={distanceStatus}
             onComplete={(result) => {
               setColorResult(result);
               // Increment tests_completed counter for color vision test
