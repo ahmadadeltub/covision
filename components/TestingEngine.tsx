@@ -102,8 +102,8 @@ const TestingEngine: React.FC<Props> = ({ lang, t, tests, calibration, stream, d
         </div>
       </div>
 
-      {/* Test Area */}
-      <div className="flex-1 min-h-0 relative p-2 md:p-6 lg:p-8 transition-opacity duration-300">
+      {/* Test Area — blurred & locked when too close */}
+      <div className={`flex-1 min-h-0 relative p-2 md:p-6 lg:p-8 transition-all duration-300 ${isPaused ? 'opacity-30 pointer-events-none blur-sm' : ''}`}>
         {currentType === TestType.Acuity && (
           <AcuityTest calibration={calibration} t={t} stream={stream} onFinish={handleTestFinish} />
         )}
@@ -123,6 +123,16 @@ const TestingEngine: React.FC<Props> = ({ lang, t, tests, calibration, stream, d
           <AmslerTest t={t} stream={stream} onFinish={handleTestFinish} />
         )}
       </div>
+
+      {/* PAUSED Overlay — shown when user is too close */}
+      {isPaused && (
+        <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none" style={{ top: '40%' }}>
+          <div className="px-8 py-4 bg-red-600/95 rounded-2xl border-2 border-red-400 shadow-[0_0_60px_rgba(239,68,68,0.6)] animate-pulse flex flex-col items-center gap-2">
+            <span className="text-white font-black text-xl md:text-2xl uppercase tracking-[0.3em]">⚠️ TEST PAUSED</span>
+            <span className="text-red-200 font-bold text-sm md:text-base uppercase tracking-widest">Step back to 1 meter distance</span>
+          </div>
+        </div>
+      )}
 
       <style>{`
         @keyframes shimmer {
