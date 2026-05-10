@@ -12,8 +12,8 @@ interface Props {
   onFinish: (result: TestResult) => void;
 }
 
-// ─── Letters only (no E or C) ───
-const ALL_LETTERS = ['D', 'F', 'H', 'K', 'L', 'N', 'O', 'P', 'R', 'S', 'T', 'V', 'Z'];
+// ─── Only C and E letters ───
+const ALL_LETTERS = ['C', 'E'];
 
 // ─── Row-to-Snellen lookup (for acuity calculation) ───
 const ROW_TO_SNELLEN = [
