@@ -50,9 +50,11 @@ interface Trial {
 }
 
 function buildTrialSequence(): Trial[] {
-  // Pick 5 random unique letters and assign each to a size level
+  // Pick 5 random unique letters
   const shuffledLetters = [...ALL_LETTERS].sort(() => Math.random() - 0.5);
-  return LETTER_LEVELS.map((level, i) => ({
+  
+  // Create trials for each size level
+  const trials = LETTER_LEVELS.map((level, i) => ({
     type: 'letter' as const,
     sizePx: level.sizePx,
     rowIndex: level.rowMap,
@@ -61,6 +63,9 @@ function buildTrialSequence(): Trial[] {
     label: ROW_TO_SNELLEN[level.rowMap]?.label,
     denom: ROW_TO_SNELLEN[level.rowMap]?.denom,
   }));
+
+  // Shuffle the trials so they appear in a random order of sizes
+  return trials.sort(() => Math.random() - 0.5);
 }
 
 // ─── Phases ───
