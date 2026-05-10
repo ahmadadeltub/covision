@@ -12,12 +12,8 @@ interface Props {
   onFinish: (result: TestResult) => void;
 }
 
-// ─── Trial Types ───
-type TrialType = 'letter' | 'tumbling-e' | 'landolt-c';
-type Direction = 'up' | 'down' | 'left' | 'right';
-const DIRECTIONS: Direction[] = ['up', 'down', 'left', 'right'];
-
-const ALL_LETTERS = ['C', 'D', 'E', 'F', 'L', 'O', 'P', 'T', 'Z'];
+// ─── Letters only (no E or C) ───
+const ALL_LETTERS = ['D', 'F', 'H', 'K', 'L', 'N', 'O', 'P', 'R', 'S', 'T', 'V', 'Z'];
 
 // ─── Row-to-Snellen lookup (for acuity calculation) ───
 const ROW_TO_SNELLEN = [
@@ -34,86 +30,37 @@ const ROW_TO_SNELLEN = [
   { label: '20/10',  denom: 10 },
 ];
 
-// ─── 3 Letter samples — easiest ───
-const LETTER_SAMPLES = [
-  { sizePx: 320, opacity: 1.00, rowMap: 0 },
-  { sizePx: 260, opacity: 0.92, rowMap: 1 },
-  { sizePx: 210, opacity: 0.85, rowMap: 2 },
-];
-
-// ─── 3 Tumbling E samples — easiest ───
-const TUMBLING_E_SIZES = [
-  { sizePx: 320, rowMap: 0 },
-  { sizePx: 280, rowMap: 0 },
-  { sizePx: 240, rowMap: 1 },
-];
-
-// ─── 3 Landolt C samples — easiest ───
-const LANDOLT_C_SIZES = [
-  { sizePx: 300, rowMap: 0 },
-  { sizePx: 260, rowMap: 1 },
-  { sizePx: 220, rowMap: 2 },
+// ─── 5 Letter sizes from large to small ───
+const LETTER_LEVELS = [
+  { sizePx: 300, opacity: 1.00, rowMap: 0 },  // 20/200 — largest
+  { sizePx: 220, opacity: 1.00, rowMap: 2 },  // 20/70
+  { sizePx: 160, opacity: 1.00, rowMap: 4 },  // 20/40
+  { sizePx: 110, opacity: 1.00, rowMap: 6 },  // 20/25
+  { sizePx: 70,  opacity: 1.00, rowMap: 7 },  // 20/20 — smallest
 ];
 
 interface Trial {
-  type: TrialType;
+  type: 'letter';
   sizePx: number;
   rowIndex: number;
-  letter?: string;
-  direction?: Direction;
+  letter: string;
   label?: string;
   denom?: number;
   opacity?: number;
 }
 
 function buildTrialSequence(): Trial[] {
-  const trials: Trial[] = [];
-
-  // Letter trials with varying size and transparency (15 total)
-  LETTER_SAMPLES.forEach((sample) => {
-    const letter = ALL_LETTERS[Math.floor(Math.random() * ALL_LETTERS.length)];
-    trials.push({
-      type: 'letter', sizePx: sample.sizePx, rowIndex: sample.rowMap,
-      letter, opacity: sample.opacity,
-      label: ROW_TO_SNELLEN[sample.rowMap]?.label,
-      denom: ROW_TO_SNELLEN[sample.rowMap]?.denom,
-    });
-  });
-
-  // Tumbling E trials (15 unique sizes)
-  TUMBLING_E_SIZES.forEach((level) => {
-    trials.push({
-      type: 'tumbling-e', sizePx: level.sizePx, rowIndex: level.rowMap,
-      direction: DIRECTIONS[Math.floor(Math.random() * 4)],
-    });
-  });
-
-  // Landolt C trials (15 unique sizes)
-  LANDOLT_C_SIZES.forEach((level) => {
-    trials.push({
-      type: 'landolt-c', sizePx: level.sizePx, rowIndex: level.rowMap,
-      direction: DIRECTIONS[Math.floor(Math.random() * 4)],
-    });
-  });
-
-  // Group by type: Tumbling E first, then Landolt C, then Letters
-  const eTrials = trials.filter(t => t.type === 'tumbling-e');
-  const cTrials = trials.filter(t => t.type === 'landolt-c');
-  const letterTrials = trials.filter(t => t.type === 'letter');
-
-  // Shuffle within each group
-  const shuffle = (arr: Trial[]) => {
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-  };
-
-  const allTrials = [...shuffle(eTrials), ...shuffle(cTrials), ...shuffle(letterTrials)];
-  
-  // Return exactly 5 samples by shuffling the combined list and taking 5
-  return shuffle(allTrials).slice(0, 5);
+  // Pick 5 random unique letters and assign each to a size level
+  const shuffledLetters = [...ALL_LETTERS].sort(() => Math.random() - 0.5);
+  return LETTER_LEVELS.map((level, i) => ({
+    type: 'letter' as const,
+    sizePx: level.sizePx,
+    rowIndex: level.rowMap,
+    letter: shuffledLetters[i % shuffledLetters.length],
+    opacity: level.opacity,
+    label: ROW_TO_SNELLEN[level.rowMap]?.label,
+    denom: ROW_TO_SNELLEN[level.rowMap]?.denom,
+  }));
 }
 
 // ─── Phases ───
@@ -152,24 +99,17 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
-  // Voice commands mapping
+  // Voice commands mapping — letters only
   const voiceCommands = useMemo(() => {
     const map: Record<string, string> = {
       "can't see": "?", "cant see": "?", "i don't know": "?", "لا أرى": "?", "لا اعرف": "?", "مش شايف": "?"
     };
-    if (currentTrial.type === 'letter') {
-      ALL_LETTERS.forEach(l => {
-        map[l.toLowerCase()] = l;
-        map[`letter ${l.toLowerCase()}`] = l;
-      });
-    } else {
-      map['up'] = 'up'; map['فوق'] = 'up';
-      map['down'] = 'down'; map['تحت'] = 'down';
-      map['left'] = 'left'; map['يسار'] = 'left'; map['شمال'] = 'left';
-      map['right'] = 'right'; map['يمين'] = 'right';
-    }
+    ALL_LETTERS.forEach(l => {
+      map[l.toLowerCase()] = l;
+      map[`letter ${l.toLowerCase()}`] = l;
+    });
     return map;
-  }, [currentTrial.type]);
+  }, []);
 
   const { isListening, transcript } = useVoiceCommand({
     commands: voiceCommands,
@@ -187,9 +127,7 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
     setTimeout(() => setActiveButton(null), 250);
 
     const timeMs = Date.now() - lastTime.current;
-    const isCorrect = currentTrial.type === 'letter'
-      ? answer === currentTrial.letter
-      : answer === currentTrial.direction;
+    const isCorrect = answer === currentTrial.letter;
 
     setFeedback(isCorrect ? 'correct' : 'incorrect');
 
@@ -265,10 +203,6 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
   const progressPct = ((currentIndex + 1) / totalTrials) * 100;
   const difficultyLabel = currentTrial.rowIndex < 4 ? 'EASY' : currentTrial.rowIndex < 8 ? 'MEDIUM' : 'HARD';
   const difficultyColor = currentTrial.rowIndex < 4 ? '#10b981' : currentTrial.rowIndex < 8 ? '#f59e0b' : '#ef4444';
-  const typeLabel = currentTrial.type === 'letter' ? 'Letter' : currentTrial.type === 'tumbling-e' ? 'Tumbling E' : 'Landolt C';
-
-  // Rotation for E/C shapes: direction = where the prongs/gap point
-  const rotation = currentTrial.direction === 'right' ? 0 : currentTrial.direction === 'down' ? 90 : currentTrial.direction === 'left' ? 180 : 270;
 
   if (phase === 'done') return null;
 
@@ -281,11 +215,9 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
         {/* Test Info Panel */}
         <div className="w-full glass rounded-2xl border border-white/5 p-3 space-y-2">
           <div className="text-center">
-            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{typeLabel}</div>
+            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Letter</div>
             <div className="text-lg font-black text-white">
-              {currentTrial.type === 'letter'
-                ? `${currentTrial.label} · ${Math.round((currentTrial.opacity ?? 1) * 100)}%`
-                : `${currentTrial.sizePx}px`}
+              {currentTrial.label} · {currentTrial.sizePx}px
             </div>
           </div>
           <div className="h-px bg-white/5"></div>
@@ -294,8 +226,8 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
             <span className="text-sm font-black text-white">{currentIndex + 1}/{totalTrials}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-500 uppercase font-bold">Type</span>
-            <span className="text-sm font-black text-white">{typeLabel}</span>
+            <span className="text-[10px] text-slate-500 uppercase font-bold">Size</span>
+            <span className="text-sm font-black text-white">Letter</span>
           </div>
           <div className="flex items-center justify-center pt-1 gap-2">
             <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
@@ -310,7 +242,7 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
 
         <div className="text-center px-2">
           <div className="text-[10px] font-bold text-cyan-400/80 flex items-center gap-1 justify-center">
-            <span>{currentTrial.type === 'letter' ? 'Select the letter' : 'Select the direction'}</span>
+            <span>Select the letter</span>
           </div>
         </div>
         <AIBotBubble botState={botState} isEyeUncovered={false} coverEye={undefined} isListening={isListening} transcript={transcript} />
@@ -332,7 +264,7 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
         <div className="shrink-0 px-3 md:px-6 py-2 md:py-3">
           <h3 className="text-base md:text-2xl font-black text-white uppercase tracking-tight leading-none">{t.visual_acuity}</h3>
           <p className="text-[10px] md:text-xs text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
-            Trial {currentIndex + 1}/{totalTrials} · {typeLabel}
+            Trial {currentIndex + 1}/{totalTrials} · {currentTrial.label}
           </p>
         </div>
 
@@ -351,98 +283,42 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
           <div className="flex items-center justify-center transition-all duration-300"
             style={{ width: `${currentTrial.sizePx}px`, height: `${currentTrial.sizePx}px` }}
           >
-            {/* Snellen Letter */}
-            {currentTrial.type === 'letter' && (
-              <span
-                className="font-black text-white select-none leading-none"
-                style={{
-                  fontSize: `${currentTrial.sizePx}px`,
-                  fontFamily: "'Courier New', 'Courier', monospace",
-                  opacity: currentTrial.opacity ?? 1,
-                  filter: `drop-shadow(0 0 ${Math.round((currentTrial.opacity ?? 1) * 20)}px rgba(255,255,255,${(currentTrial.opacity ?? 1) * 0.4}))`,
-                }}
-              >
-                {currentTrial.letter}
-              </span>
-            )}
-
-            {/* Tumbling E — SVG */}
-            {currentTrial.type === 'tumbling-e' && (
-              <svg viewBox="0 0 100 100" className="w-full h-full text-white fill-current drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]"
-                style={{ transform: `rotate(${rotation}deg)` }}
-              >
-                <rect x="0" y="0" width="100" height="20" />
-                <rect x="0" y="40" width="100" height="20" />
-                <rect x="0" y="80" width="100" height="20" />
-                <rect x="0" y="0" width="20" height="100" />
-              </svg>
-            )}
-
-            {/* Landolt C — SVG */}
-            {currentTrial.type === 'landolt-c' && (
-              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]"
-                style={{ transform: `rotate(${rotation}deg)` }}
-              >
-                <path
-                  d="M 100 40 L 100 60 L 80 60 A 30 30 0 1 1 80 40 Z"
-                  fill="white"
-                  transform="rotate(0 50 50)"
-                />
-                <circle cx="50" cy="50" r="50" fill="white" />
-                <circle cx="50" cy="50" r="30" fill="black" />
-                <rect x="50" y="40" width="55" height="20" fill="black" />
-              </svg>
-            )}
+            {/* Letter Display */}
+            <span
+              className="font-black text-white select-none leading-none"
+              style={{
+                fontSize: `${currentTrial.sizePx}px`,
+                fontFamily: "'Courier New', 'Courier', monospace",
+                opacity: currentTrial.opacity ?? 1,
+                filter: `drop-shadow(0 0 ${Math.round((currentTrial.opacity ?? 1) * 20)}px rgba(255,255,255,${(currentTrial.opacity ?? 1) * 0.4}))`,
+              }}
+            >
+              {currentTrial.letter}
+            </span>
           </div>
         </div>
 
         {/* Answer Buttons */}
         <div className="shrink-0 p-2 md:p-4 pt-0">
-          {currentTrial.type === 'letter' ? (
-            /* Letter choice grid — 3 columns × 2 rows */
-            <div className="grid grid-cols-3 gap-2 md:gap-3 max-w-2xl mx-auto">
-              {letterChoices.map((letter, idx) => (
-                <button
-                  key={`${letter}-${idx}`}
-                  onClick={() => handleSelect(letter)}
-                  className={`
-                    py-2 md:py-5 glass border-2 rounded-xl md:rounded-3xl
-                    text-xl md:text-4xl lg:text-5xl font-black transition-all active:scale-95
-                    ${activeButton === letter
-                      ? 'border-cyan-400 bg-cyan-500/40 shadow-[0_0_50px_rgba(0,243,255,0.6)] scale-105'
-                      : 'border-white/10 hover:border-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_40px_rgba(0,243,255,0.4)]'}
-                  `}
-                  style={{ fontFamily: "'Courier New', 'Courier', monospace" }}
-                >
-                  <span className="text-white drop-shadow-lg">{letter}</span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            /* Direction choice grid — 2×2 for Tumbling E / Landolt C */
-            <div className="grid grid-cols-2 gap-2 md:gap-3 max-w-md mx-auto">
-              {DIRECTIONS.map(dir => (
-                <button
-                  key={dir}
-                  onClick={() => handleSelect(dir)}
-                  className={`
-                    py-3 md:py-7 glass border-2 rounded-xl md:rounded-3xl
-                    text-2xl md:text-5xl lg:text-6xl transition-all active:scale-95
-                    ${activeButton === dir
-                      ? 'border-cyan-400 bg-cyan-500/40 shadow-[0_0_50px_rgba(0,243,255,0.6)] scale-105'
-                      : 'border-white/10 hover:border-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_40px_rgba(0,243,255,0.4)]'}
-                  `}
-                >
-                  <span className="inline-block drop-shadow-lg">
-                    {dir === 'up' && '⬆️'}
-                    {dir === 'down' && '⬇️'}
-                    {dir === 'left' && '⬅️'}
-                    {dir === 'right' && '➡️'}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
+          {/* Letter choice grid */}
+          <div className="grid grid-cols-3 gap-2 md:gap-3 max-w-2xl mx-auto">
+            {letterChoices.map((letter, idx) => (
+              <button
+                key={`${letter}-${idx}`}
+                onClick={() => handleSelect(letter)}
+                className={`
+                  py-2 md:py-5 glass border-2 rounded-xl md:rounded-3xl
+                  text-xl md:text-4xl lg:text-5xl font-black transition-all active:scale-95
+                  ${activeButton === letter
+                    ? 'border-cyan-400 bg-cyan-500/40 shadow-[0_0_50px_rgba(0,243,255,0.6)] scale-105'
+                    : 'border-white/10 hover:border-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_40px_rgba(0,243,255,0.4)]'}
+                `}
+                style={{ fontFamily: "'Courier New', 'Courier', monospace" }}
+              >
+                <span className="text-white drop-shadow-lg">{letter}</span>
+              </button>
+            ))}
+          </div>
 
           <div className="text-center mt-3">
             <button
@@ -453,7 +329,7 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
             </button>
           </div>
           <div className="text-center mt-2 text-xs text-slate-500 uppercase tracking-widest opacity-60 flex items-center justify-center gap-2">
-            <span>Voice: {currentTrial.type === 'letter' ? 'Say the letter' : 'Say "Up", "Down", "Left", "Right"'}</span>
+            <span>Voice: Say the letter or "can't see"</span>
             {isListening && <span className="text-emerald-400 font-bold animate-pulse">🎤 Listening</span>}
           </div>
         </div>
