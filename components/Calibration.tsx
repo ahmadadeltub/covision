@@ -22,7 +22,7 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const IS_DEV = new URLSearchParams(window.location.search).get('dev') === 'true';
-  const TARGET_M = IS_DEV ? 0.5 : 2.0;
+  const TARGET_M = IS_DEV ? 0.5 : 1.0;
   const TOLERANCE_M = IS_DEV ? 0.3 : 0.15;
 
   useEffect(() => {
@@ -379,7 +379,7 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
 
   const handleFinish = () => {
     const pxPerMm = 4.0;
-    const viewingDistanceCm = 200;
+    const viewingDistanceCm = 100;
     onComplete({ pxPerMm, viewingDistanceCm });
   };
 
@@ -440,38 +440,38 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
               </span>
               <span className="text-xl text-slate-400 font-bold ml-1">m</span>
               <span className="block text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">
-                Target: 2.00 m
+                Target: 1.00 m
               </span>
             </div>
 
             {/* Distance Bar */}
             <div className="relative w-full h-8 md:h-10 rounded-full bg-slate-800/80 border border-slate-700/50 overflow-hidden">
-              {/* Green target zone (1.85m - 2.15m on a 0-3m scale) */}
+              {/* Green target zone (0.85m - 1.15m on a 0-2m scale) */}
               <div
                 className="absolute top-0 h-full bg-emerald-500/20 border-x-2 border-emerald-400/50"
-                style={{ left: `${(1.85 / 3) * 100}%`, width: `${((2.15 - 1.85) / 3) * 100}%` }}
+                style={{ left: `${(0.85 / 2) * 100}%`, width: `${((1.15 - 0.85) / 2) * 100}%` }}
               />
 
               {/* Filled bar up to current distance */}
               <div
                 className="absolute top-0 left-0 h-full rounded-full transition-all duration-500 ease-out"
                 style={{
-                  width: `${Math.min((effectiveDistanceM / 3) * 100, 100)}%`,
+                  width: `${Math.min((effectiveDistanceM / 2) * 100, 100)}%`,
                   background: `linear-gradient(90deg, ${getDistanceColor()}88, ${getDistanceColor()})`,
                   boxShadow: `0 0 20px ${getDistanceColor()}66`
                 }}
               />
 
-              {/* Target line at 2.0m */}
+              {/* Target line at 1.0m */}
               <div
                 className="absolute top-0 h-full w-0.5 bg-white/80"
-                style={{ left: `${(2.0 / 3) * 100}%` }}
+                style={{ left: `${(1.0 / 2) * 100}%` }}
               />
               <div
                 className="absolute -top-6 text-xs font-bold text-white/70"
-                style={{ left: `${(2.0 / 3) * 100}%`, transform: 'translateX(-50%)' }}
+                style={{ left: `${(1.0 / 2) * 100}%`, transform: 'translateX(-50%)' }}
               >
-                2.0m
+                1.0m
               </div>
 
               {/* Current position marker */}
@@ -479,7 +479,7 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
                 <div
                   className="absolute top-1/2 -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 rounded-full border-3 border-white shadow-lg transition-all duration-500 ease-out"
                   style={{
-                    left: `${Math.min((effectiveDistanceM / 3) * 100, 100)}%`,
+                    left: `${Math.min((effectiveDistanceM / 2) * 100, 100)}%`,
                     transform: 'translate(-50%, -50%)',
                     background: getDistanceColor(),
                     boxShadow: `0 0 15px ${getDistanceColor()}`
@@ -489,8 +489,8 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
 
               {/* Scale labels */}
               <div className="absolute -bottom-5 left-0 text-[10px] text-slate-500 font-bold">0m</div>
-              <div className="absolute -bottom-5 left-1/3 -translate-x-1/2 text-[10px] text-slate-500 font-bold">1m</div>
-              <div className="absolute -bottom-5 right-0 text-[10px] text-slate-500 font-bold">3m</div>
+              <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-slate-500 font-bold">1m</div>
+              <div className="absolute -bottom-5 right-0 text-[10px] text-slate-500 font-bold">2m</div>
             </div>
           </div>
         </div>
@@ -504,7 +504,7 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
               onClick={handleFinish}
               className="w-full py-3 rounded-2xl font-bold text-sm uppercase tracking-widest transition-all bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white border border-slate-700 shadow-sm"
             >
-              Skip 2m (Testing)
+              Skip 1m (Testing)
             </button>
 
             <button

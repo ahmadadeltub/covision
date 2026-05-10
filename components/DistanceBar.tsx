@@ -6,7 +6,7 @@ interface Props {
     distanceM?: number;
     /** Status — from useFaceDistance hook */
     status?: 'ok' | 'too_close' | 'too_far' | 'no_face';
-    /** Target distance in meters (default 2.0) */
+    /** Target distance in meters (default 1.0) */
     targetM?: number;
     /** Tolerance in meters (default 0.15) */
     toleranceM?: number;
@@ -24,7 +24,7 @@ interface Props {
 const DistanceBar: React.FC<Props> = ({
     distanceM = 0,
     status = 'no_face',
-    targetM = 2.0,
+    targetM = 1.0,
     toleranceM = 0.15,
     onStatusChange,
     showPauseOverlay = true,

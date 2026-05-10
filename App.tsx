@@ -36,13 +36,13 @@ import { onMessageListener } from './firebase';
  * 4. Profile — sync profile data (original)
  * 6. ColorIntro — lighting guidance (new)
  * 7. ColorTest — Ishihara plates (new)
- * 8. Calibration — 2m distance calibration (original, moved before acuity)
+ * 8. Calibration — 1m distance calibration (original, moved before acuity)
  * 9. Testing — Visual Acuity + other tests (original)
  * 10. Results — AI insights dashboard (original)
  * 12. Report — medical PDF report (new)
  */
 
-// Dev mode: add ?dev=true to URL to bypass 2m distance requirement
+// Dev mode: add ?dev=true to URL to bypass 1m distance requirement
 const IS_DEV = new URLSearchParams(window.location.search).get('dev') === 'true';
 const DEV_DISTANCE = 0.5;
 
@@ -86,14 +86,14 @@ const App: React.FC = () => {
     debugMode
   } = useFaceDistance({
     stream: stream,
-    targetDistanceM: step === AppStep.BiometricScan ? 0.55 : (IS_DEV ? DEV_DISTANCE : 2.0),
+    targetDistanceM: step === AppStep.BiometricScan ? 0.55 : (IS_DEV ? DEV_DISTANCE : 1.0),
     toleranceM: step === AppStep.BiometricScan ? 0.35 : (IS_DEV ? 0.3 : 0.15),
   });
 
   const t = translations[lang];
 
   // ─── Global AI Bot (with distance awareness) ───
-  const targetDistM = step === AppStep.BiometricScan ? 0.55 : (IS_DEV ? DEV_DISTANCE : 2.0);
+  const targetDistM = step === AppStep.BiometricScan ? 0.55 : (IS_DEV ? DEV_DISTANCE : 1.0);
   const tolerM = step === AppStep.BiometricScan ? 0.35 : (IS_DEV ? 0.3 : 0.15);
   const { globalBotState } = useGlobalBot(step, {
     distanceM,
@@ -472,7 +472,7 @@ const App: React.FC = () => {
           />
         )}
 
-        {/* Step 10: Distance Calibration — 2m (moved before Visual Acuity) */}
+        {/* Step 10: Distance Calibration — 1m (moved before Visual Acuity) */}
         {step === AppStep.Calibration && (
           <Calibration
             lang={lang}

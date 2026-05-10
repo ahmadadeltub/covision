@@ -53,7 +53,7 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
     const {
         pxPerMm = 4.0,
         ipdMm = 63,
-        targetDistanceM = 2.0,
+        targetDistanceM = 1.0,
         toleranceM = 0.15,
         stream: externalStream
     } = options || {};

@@ -24,8 +24,8 @@ export const translations: Record<string, Record<string, string>> = {
     enter_age: "Enter age",
 
     // Distance Enforcement
-    distance_req: "Maintain 2 meters distance from the screen",
-    distance_warning: "Please do not move closer. Keep 2 meters distance.",
+    distance_req: "Maintain 1 meter distance from the screen",
+    distance_warning: "Please do not move closer. Keep 1 meter distance.",
     anti_cheat: "You must maintain the required distance for valid results",
     start_test: "Start Test",
     camera_loading: "Loading camera...",
@@ -177,8 +177,8 @@ export const translations: Record<string, Record<string, string>> = {
     enter_age: "Enter age",
 
     // Distance Enforcement
-    distance_req: "Maintain 2 meters distance from the screen",
-    distance_warning: "Please do not move closer. Keep 2 meters distance.",
+    distance_req: "Maintain 1 meter distance from the screen",
+    distance_warning: "Please do not move closer. Keep 1 meter distance.",
     anti_cheat: "You must maintain the required distance for valid results",
     start_test: "Start Test",
     camera_loading: "Loading camera...",

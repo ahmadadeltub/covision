@@ -98,7 +98,7 @@ const PAGE_MESSAGES: Record<AppStep, { intro: GlobalBotMessage; tips: Omit<Globa
   [AppStep.Calibration]: {
     intro: { text: "Position yourself at the correct distance from the screen. I'll help you stay in range!", emoji: '📐', color: '#06b6d4', id: 0 },
     tips: [
-      { text: "Stand about 2 meters (6 feet) away from your screen.", emoji: '📏', color: '#f59e0b' },
+      { text: "Stand about 1 meter (3 feet) away from your screen.", emoji: '📏', color: '#f59e0b' },
       { text: "Keep your head level with the center of the screen.", emoji: '🎯', color: '#10b981' },
       { text: "I'll show a green indicator when you're at the perfect distance.", emoji: '✅', color: '#06b6d4' },
     ],

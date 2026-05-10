@@ -61,7 +61,7 @@ const TestingEngine: React.FC<Props> = ({ lang, t, tests, calibration, stream, d
           <DistanceBar
             distanceM={propDistanceM}
             status={propDistanceStatus}
-            targetM={new URLSearchParams(window.location.search).get('dev') === 'true' ? 0.5 : 2.0}
+            targetM={new URLSearchParams(window.location.search).get('dev') === 'true' ? 0.5 : 1.0}
             toleranceM={new URLSearchParams(window.location.search).get('dev') === 'true' ? 0.3 : 0.15}
             onStatusChange={handleDistanceStatus}
             showPauseOverlay={true}
