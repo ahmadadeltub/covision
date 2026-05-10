@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Language } from '../types';
 import { translations } from '../translations';
 
@@ -10,6 +10,16 @@ interface Props {
 
 const ColorVisionIntro: React.FC<Props> = ({ lang, onStart }) => {
     const t = translations[lang];
+    const [countdown, setCountdown] = useState(5);
+
+    useEffect(() => {
+        if (countdown <= 0) {
+            onStart();
+            return;
+        }
+        const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+        return () => clearTimeout(timer);
+    }, [countdown, onStart]);
 
     const guidelines = [
         { icon: '☀️', text: t.lighting_1 },
@@ -59,13 +69,25 @@ const ColorVisionIntro: React.FC<Props> = ({ lang, onStart }) => {
                     ))}
                 </div>
 
-                <button
-                    onClick={onStart}
-                    className="btn btn-primary btn-xl"
-                    style={{ width: '100%', fontSize: 20 }}
-                >
-                    {t.start_color_test}
-                </button>
+                {/* Countdown instead of button */}
+                <div style={{ 
+                    width: '100%', 
+                    padding: '24px', 
+                    textAlign: 'center',
+                    background: 'var(--accent-bg)',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '2px solid var(--accent-color)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 8
+                }}>
+                    <p style={{ fontSize: 14, fontWeight: 900, color: 'var(--accent-color)', textTransform: 'uppercase', letterSpacing: 2 }}>
+                        Starting In
+                    </p>
+                    <p style={{ fontSize: 48, fontWeight: 900, color: 'white', lineHeight: 1 }}>
+                        {countdown}
+                    </p>
+                </div>
             </div>
         </div>
     );
