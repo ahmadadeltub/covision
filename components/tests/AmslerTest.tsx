@@ -22,14 +22,14 @@ const GRID_VARIANTS: { key: GridVariant; label: string; bg: string; lineColor: s
   { key: 'fine', label: 'Fine Mesh', bg: '#ffffff', lineColor: 'rgba(0,0,0,0.15)', dotColor: '#000', cellCount: 625 },
 ];
 
-const TOTAL_TRIALS = 5;
+const TOTAL_TRIALS = 3;
 
 type Phase = 'intro' | 'testing' | 'done';
 
 const AmslerTest: React.FC<Props> = ({ t, stream, onFinish }) => {
   const [phase, setPhase] = useState<Phase>('intro');
   const [trialIdx, setTrialIdx] = useState(0);
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(3);
   const [results, setResults] = useState<{ variant: GridVariant; hasIssues: boolean; quadrants: Quadrant[] }[]>([]);
   const [selectedQuadrants, setSelectedQuadrants] = useState<Quadrant[]>([]);
   const [showQuadrant, setShowQuadrant] = useState(false);
@@ -42,7 +42,7 @@ const AmslerTest: React.FC<Props> = ({ t, stream, onFinish }) => {
   // Countdown
   useEffect(() => {
     if (phase !== 'intro') return;
-    setCountdown(5);
+    setCountdown(3);
     const interval = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
@@ -64,14 +64,10 @@ const AmslerTest: React.FC<Props> = ({ t, stream, onFinish }) => {
 
   const voiceCommands = React.useMemo(() => {
     return {
-      'clear': 'clear',
-      'sharp': 'clear',
-      'normal': 'clear',
-      'واضح': 'clear',
-      'blur': 'blur',
-      'distorted': 'blur',
-      'wavy': 'blur',
-      'مشوش': 'blur'
+      'clear': 'clear', 'sharp': 'clear', 'normal': 'clear', 'good': 'clear', 'straight': 'clear',
+      'واضح': 'clear', 'سليم': 'clear', 'ممتاز': 'clear', 'تمام': 'clear', 'مستقيم': 'clear',
+      'blur': 'blur', 'distorted': 'blur', 'wavy': 'blur', 'bad': 'blur', 'broken': 'blur', 'missing': 'blur',
+      'مشوش': 'blur', 'متعرج': 'blur', 'مشوه': 'blur', 'غير واضح': 'blur', 'موجي': 'blur', 'ناقص': 'blur'
     };
   }, []);
 
@@ -112,9 +108,9 @@ const AmslerTest: React.FC<Props> = ({ t, stream, onFinish }) => {
     const affectedQuadrants = [...new Set(allResults.flatMap(r => r.quadrants))];
 
     let findings: string;
-    if (totalIssues >= 4) {
+    if (totalIssues >= 2) {
       findings = `Significant central vision distortion — ${totalIssues}/${TOTAL_TRIALS} grids showed issues. Affected: ${affectedQuadrants.join(', ') || 'N/A'}. Macular evaluation strongly recommended.`;
-    } else if (totalIssues >= 2) {
+    } else if (totalIssues >= 1) {
       findings = `Mild central vision concerns — ${totalIssues}/${TOTAL_TRIALS} grids showed issues. Monitoring recommended.`;
     } else {
       findings = `No central vision distortions detected — ${totalIssues}/${TOTAL_TRIALS} grids showed issues. Vision appears normal.`;
@@ -128,7 +124,7 @@ const AmslerTest: React.FC<Props> = ({ t, stream, onFinish }) => {
       total,
       confidence: 1.0,
       findings,
-      difficulty: totalIssues >= 8 ? 'hard' : 'easy',
+      difficulty: totalIssues >= 2 ? 'hard' : 'easy',
       perSampleScores: allResults.map((r, i) => ({ sample: i + 1, correct: !r.hasIssues, timeMs: 0 })),
       rawResponseTimes: [],
     });

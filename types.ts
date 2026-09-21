@@ -28,6 +28,7 @@ export enum TestType {
 
 // ─────────── User Profile ───────────
 export interface UserProfile {
+  name?: string;
   age: number;
   gender: 'male' | 'female' | 'other';
   deviceType?: 'mobile' | 'desktop';

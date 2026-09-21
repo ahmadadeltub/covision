@@ -15,20 +15,20 @@ interface Props {
 
 const LETTERS = "CDHKNORSVZ";
 
-// 5 Contrast Levels
+// 3 Contrast Levels (High, Medium, Low)
 const CONTRAST_LEVELS = [
-  1.0, 0.8, 0.6, 0.4, 0.2
+  1.0, 0.6, 0.2
 ];
 
-const SAMPLES_PER_EYE = 5;
+const SAMPLES_PER_EYE = 3;
 
 type Phase = 'intro' | 'testing' | 'done';
 
 const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
-  const [phase, setPhase] = useState<Phase>('intro');
+  const [phase, setPhase] = useState<Phase>('testing');
   const [level, setLevel] = useState(0);
   const [currentLetter, setCurrentLetter] = useState('');
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(3);
 
   const [results, setResults] = useState<{ correct: boolean; timeMs: number; level: number }[]>([]);
   const [activeButton, setActiveButton] = useState<string | null>(null);
@@ -66,12 +66,18 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
   // Voice commands mapping
   const voiceCommands = React.useMemo(() => {
     const map: Record<string, string> = {
-      "can't see": "__CANT_SEE__", "cant see": "__CANT_SEE__", "i don't know": "__CANT_SEE__", "لا أرى": "__CANT_SEE__", "لا اعرف": "__CANT_SEE__", "مش شايف": "__CANT_SEE__"
+      "can't see": "__CANT_SEE__", "cant see": "__CANT_SEE__", "i don't know": "__CANT_SEE__", "nothing": "__CANT_SEE__", "faded": "__CANT_SEE__",
+      "لا أرى": "__CANT_SEE__", "لا اعرف": "__CANT_SEE__", "مش شايف": "__CANT_SEE__", "لا شيء": "__CANT_SEE__", "اختفى": "__CANT_SEE__"
+    };
+    const arabicLetters: Record<string, string> = {
+        'سي': 'C', 'دي': 'D', 'اتش': 'H', 'كي': 'K', 'ان': 'N', 'او': 'O', 'ار': 'R', 'اس': 'S', 'في': 'V', 'زد': 'Z'
     };
     LETTERS.split('').forEach(l => {
       map[l.toLowerCase()] = l;
       map[`letter ${l.toLowerCase()}`] = l;
+      // Add Arabic phonetic versions if possible
     });
+    Object.assign(map, arabicLetters);
     return map;
   }, []);
 
@@ -106,7 +112,7 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
             return;
         }
         setLevel(l => l + 1);
-    }, 1000);
+    }, 500);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, currentLetter, level, results, isTesting, feedback]);
 
@@ -123,7 +129,7 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
         const updated = [...results, entry];
         setResults(updated);
         finishTest(updated);
-    }, 1000);
+    }, 500);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, level, results, isTesting, feedback]);
 
@@ -164,30 +170,11 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
 
 
 
-  const currentEyeLabel = phase === 'testing-right' || phase === 'cover-right' ? 'RIGHT EYE' : 'LEFT EYE';
+  const currentEyeLabel = 'BOTH EYES';
   const progressPct = isTesting ? ((level + 1) / SAMPLES_PER_EYE) * 100 : 0;
   const difficultyLabel = level < 1 ? 'EASY' : level < 2 ? 'MEDIUM' : 'HARD';
   const difficultyColor = level < 1 ? '#10b981' : level < 2 ? '#f59e0b' : '#ef4444';
 
-  // ─── Cover Eye Screen ───
-  if (phase === 'intro') {
-    return (
-      <div className="w-full h-full flex items-center justify-center animate-in fade-in duration-700">
-        <div className="flex flex-col items-center gap-6 text-center p-8 max-w-lg">
-          <div className="text-6xl animate-pulse">👁️</div>
-          <h2 className="text-2xl md:text-3xl font-black text-white">Contrast Sensitivity Test</h2>
-          <div className="max-w-md w-full p-4 glass border-2 border-cyan-500/40 rounded-2xl space-y-3">
-            <p className="text-slate-300 text-sm">Testing both eyes together. Letters will fade progressively.</p>
-          </div>
-          <button
-              onClick={() => { setPhase('testing'); start.current = Date.now(); }}
-              className="w-full max-w-md py-4 bg-white text-slate-950 rounded-2xl font-black text-xl hover:bg-cyan-400 transition-colors uppercase tracking-widest mt-4">
-              Start Test
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   if (phase === 'done') return null;
 

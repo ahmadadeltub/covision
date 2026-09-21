@@ -49,7 +49,7 @@ const DEV_DISTANCE = 0.5;
 const App: React.FC = () => {
   // ─── Global State ───
   const [lang] = useState<Language>('en');
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [step, setStep] = useState<AppStep>(AppStep.Welcome);
 
   // ─── Camera ───
@@ -157,7 +157,15 @@ const App: React.FC = () => {
   const initCamera = useCallback(async () => {
     if (streamRef.current) return;
     try {
-      const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+      // Explicit 640×480 @ 30fps — ideal for MediaPipe (faster to acquire than 1080p default)
+      const s = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'user',
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          frameRate: { ideal: 30 },
+        }
+      });
       streamRef.current = s;
       setStream(s);
     } catch (err) {
@@ -166,11 +174,18 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (step === AppStep.BiometricScan || step === AppStep.Calibration || step === AppStep.Testing || step === AppStep.ColorIntro || step === AppStep.ColorTest) {
+    // Pre-warm camera and start face distance pipeline from Welcome & TestSelection onward
+    // This ensures FaceLandmarker and camera are fully active BEFORE the user arrives at BiometricScan
+    if (
+      step === AppStep.Welcome ||
+      step === AppStep.TestSelection ||
+      step === AppStep.BiometricScan ||
+      step === AppStep.Calibration ||
+      step === AppStep.Testing ||
+      step === AppStep.ColorIntro ||
+      step === AppStep.ColorTest
+    ) {
       initCamera();
-    }
-    // Also start face distance camera for BiometricScan / Calibration / Testing / ColorTest
-    if (step === AppStep.BiometricScan || step === AppStep.Calibration || step === AppStep.Testing || step === AppStep.ColorIntro || step === AppStep.ColorTest) {
       startCamera();
     }
   }, [step, initCamera, startCamera]);
@@ -407,7 +422,7 @@ const App: React.FC = () => {
           />
         )}
 
-        {/* Step 4: Profile Sync (ORIGINAL) */}
+        {/* Step 4: Profile Sync */}
         {step === AppStep.Profile && (
           <ProfileForm
             lang={lang}
@@ -415,13 +430,15 @@ const App: React.FC = () => {
             initialData={pendingBiometrics || undefined}
             onComplete={(d) => {
               setProfile(d);
-              // Auto-fill patient info from profile
               setPatient({
-                fullName: '',
+                fullName: d.name || 'Patient',
                 age: d.age,
                 gender: d.gender === 'other' ? 'male' : d.gender,
-                dateTime: new Date().toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US'),
-                deviceInfo: navigator.userAgent,
+                dateTime: new Date().toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US', {
+                  year: 'numeric', month: 'long', day: 'numeric',
+                  hour: '2-digit', minute: '2-digit',
+                }),
+                deviceInfo: `${navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'} — ${window.innerWidth}×${window.innerHeight}`,
               });
               setStep(AppStep.Calibration);
             }}
@@ -450,13 +467,6 @@ const App: React.FC = () => {
           />
         )}
 
-        {/* Step 8: Color Vision Intro — lighting guidance (NEW) */}
-        {step === AppStep.ColorIntro && (
-          <ColorVisionIntro
-            lang={lang}
-            onStart={() => setStep(AppStep.ColorTest)}
-          />
-        )}
 
         {/* Step 9: Color Vision Test — Ishihara plates (NEW) */}
         {step === AppStep.ColorTest && (
@@ -489,7 +499,7 @@ const App: React.FC = () => {
             isStable={isStable}
             onComplete={(data) => {
               setCalibration(data);
-              setStep(AppStep.ColorIntro);
+              setStep(AppStep.ColorTest);
             }}
           />
         )}
@@ -551,6 +561,7 @@ const App: React.FC = () => {
               averageDistanceM: complianceLog.reduce((s, r) => s + r.distanceM, 0) / complianceLog.length,
               violations: complianceLog.filter(r => !r.inRange).length,
               readings: complianceLog,
+              drift: 0,
             } : undefined}
             onReset={handleReset}
           />

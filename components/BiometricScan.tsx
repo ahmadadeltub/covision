@@ -54,13 +54,13 @@ const BiometricScan: React.FC<Props> = ({
   const [showManualOption, setShowManualOption] = useState(false);
   const detectionTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // ─── Fallback: force cameraReady after 3s no matter what ───
+  // ─── Fallback: force cameraReady after 1.2s no matter what ───
   useEffect(() => {
     if (cameraReady) return;
     const fallback = setTimeout(() => {
       console.log('BiometricScan: cameraReady fallback triggered');
       setCameraReady(true);
-    }, 3000);
+    }, 1200);
     return () => clearTimeout(fallback);
   }, [cameraReady]);
 
@@ -115,8 +115,8 @@ const BiometricScan: React.FC<Props> = ({
         return;
       }
 
-      // Keep checking every 200ms
-      checkTimer = setTimeout(checkVideoReady, 200);
+      // Keep checking every 50ms for faster camera-ready detection
+      checkTimer = setTimeout(checkVideoReady, 50);
     };
 
     checkVideoReady();
@@ -130,6 +130,11 @@ const BiometricScan: React.FC<Props> = ({
   // ─── Face Mesh Overlay (using landmarks from useFaceDistance, no separate Holistic) ───
   const drawLoopActiveRef = useRef(false);
   const landmarkDrawCountRef = useRef(0);
+  const distanceMRef = useRef(distanceM);
+
+  useEffect(() => {
+    distanceMRef.current = distanceM;
+  }, [distanceM]);
 
   useEffect(() => {
     let cancelled = false;
@@ -159,15 +164,8 @@ const BiometricScan: React.FC<Props> = ({
               canvas.height = h;
             }
             ctx.clearRect(0, 0, w, h);
-            drawFaceMask(ctx, landmarks, w, h, distanceM);
-
-            // Draw Hand Mesh
-            const handsLm = handLandmarksRef?.current;
-            if (handsLm && handsLm.length > 0) {
-              handsLm.forEach((hand) => {
-                drawHandMesh(ctx, hand, w, h, distanceM);
-              });
-            }
+            const liveDist = (window as any).__covisionCurrentDistance || distanceMRef.current || distanceM;
+            drawFaceMask(ctx, landmarks, w, h, liveDist);
 
             landmarkDrawCountRef.current++;
             if (landmarkDrawCountRef.current === 1) {
@@ -192,274 +190,557 @@ const BiometricScan: React.FC<Props> = ({
       drawLoopActiveRef.current = false;
       if (animId) cancelAnimationFrame(animId);
     };
-  }, [faceLandmarksRef, handLandmarksRef]); // Stable ref, runs once
+  }, [faceLandmarksRef]); // Stable ref, runs once
 
-  const drawHandMesh = (ctx: CanvasRenderingContext2D, landmarks: any[], w: number, h: number, distM: number) => {
+  const lastAnglesRef = useRef({ yaw: 0, pitch: 0, roll: 0, dist: 0.6 });
+
+  // ─── Year 2526 Quantum AI Neural Biometric Face Mesh (500 Years in Future) ───
+  const drawFaceMask = (ctx: CanvasRenderingContext2D, landmarks: any[], w: number, h: number, distM: number) => {
+    const time = Date.now() / 1000;
+    const pulse = Math.sin(time * 3.2) * 0.15 + 0.85;
+    const pulseFast = Math.sin(time * 8.0) * 0.25 + 0.75;
+    const distScale = Math.max(0.4, Math.min(1.25, 1.5 - (distM * 0.45)));
+
+    // 3-Axis Head Pose Attitude (Yaw, Pitch, Roll)
+    let yawDeg = 0;
+    let pitchDeg = 0;
+    let rollDeg = 0;
+    if (landmarks[33] && landmarks[263] && landmarks[1]) {
+      const dEyeX = (landmarks[263].x - landmarks[33].x) * w;
+      const dEyeY = (landmarks[263].y - landmarks[33].y) * h;
+      rollDeg = Math.round((Math.atan2(dEyeY, dEyeX) * 180) / Math.PI);
+
+      const eyeMidX = (landmarks[33].x + landmarks[263].x) / 2;
+      const eyeSpan = Math.abs(landmarks[263].x - landmarks[33].x);
+      if (eyeSpan > 0.01) {
+        yawDeg = Math.round(((landmarks[1].x - eyeMidX) / eyeSpan) * 90);
+      }
+    }
+    if (landmarks[10] && landmarks[152] && landmarks[1]) {
+      const faceHeight = Math.abs(landmarks[152].y - landmarks[10].y);
+      const noseRelY = (landmarks[1].y - landmarks[10].y) / (faceHeight || 1);
+      pitchDeg = Math.round((noseRelY - 0.6) * 100);
+    }
+    // Dynamic real-time optical distance and IPD computation from MediaPipe iris landmarks (468, 473)
+    let dynamicDistM = distM > 0 ? distM : ((window as any).__covisionCurrentDistance || 0);
+    let liveIpdMm = 63.0;
+    if (landmarks[468] && landmarks[473]) {
+      const dx = (landmarks[473].x - landmarks[468].x) * w;
+      const dy = (landmarks[473].y - landmarks[468].y) * h;
+      const eyeDistPx = Math.hypot(dx, dy);
+      const fl = w * 0.7413;
+      if (eyeDistPx > 5 && fl > 0) {
+        const estFromGeometry = (fl * 0.063) / eyeDistPx;
+        if (dynamicDistM <= 0.05 || !isFinite(dynamicDistM)) {
+          dynamicDistM = estFromGeometry;
+        }
+        if (dynamicDistM > 0.25) {
+          const estMm = (eyeDistPx * dynamicDistM / fl) * 1000;
+          liveIpdMm = Math.round(Math.max(56, Math.min(72, estMm)) * 10) / 10;
+        }
+      }
+    }
+    if (dynamicDistM <= 0 || !isFinite(dynamicDistM)) dynamicDistM = 0.60;
+
+    // Smooth head pose attitude & distance to eliminate jitter
+    const smoothYaw = Math.round(lastAnglesRef.current.yaw * 0.75 + yawDeg * 0.25);
+    const smoothPitch = Math.round(lastAnglesRef.current.pitch * 0.75 + pitchDeg * 0.25);
+    const smoothRoll = Math.round(lastAnglesRef.current.roll * 0.75 + rollDeg * 0.25);
+    const smoothedDist = lastAnglesRef.current.dist * 0.7 + dynamicDistM * 0.3;
+    lastAnglesRef.current = { yaw: smoothYaw, pitch: smoothPitch, roll: smoothRoll, dist: smoothedDist };
+
+    const yawStr = (smoothYaw > 0 ? '+' : '') + smoothYaw;
+    const pitchStr = (smoothPitch > 0 ? '+' : '') + smoothPitch;
+    const rollStr = (smoothRoll > 0 ? '+' : '') + smoothRoll;
+    dynamicDistM = Math.round(smoothedDist * 100) / 100;
+
+    // ─────────────────────────────────────────────────────────────
+    // PART A: REFERENCE-MATCHED STREAMLINE & DOTTED NODE MATRIX (Mirrored Space)
+    // ─────────────────────────────────────────────────────────────
     ctx.save();
     ctx.scale(-1, 1);
     ctx.translate(-w, 0);
+
+    ctx.globalCompositeOperation = 'lighter';
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    const time = Date.now() / 1000;
-    const pulse = Math.sin(time * 4) * 0.2 + 0.8;
-    const distScale = Math.max(0.4, Math.min(1.2, 1.5 - (distM * 0.45)));
+    // Helper: Draw smooth curved spline with delicate micro-node dots (Clean, non-bold, modern)
+    const drawStreamlineWithDots = (
+      pts: Array<{ x: number; y: number } | null | undefined>,
+      lineColor: string,
+      lineWidth: number,
+      dotColor: string,
+      dotRadius: number,
+      dotSpacing: number,
+      showLine = true
+    ) => {
+      const validPts = pts.filter((p): p is { x: number; y: number } => !!p && isFinite(p.x) && isFinite(p.y));
+      if (validPts.length < 2) return;
 
-    ctx.globalCompositeOperation = 'lighter';
-
-    const drawLine = (i1: number, i2: number, color: string, lw: number) => {
-      const p1 = landmarks[i1], p2 = landmarks[i2];
-      if (!p1 || !p2) return;
-      ctx.beginPath();
-      ctx.lineWidth = lw * distScale;
-      ctx.strokeStyle = color;
-      ctx.shadowBlur = (lw * distScale) * 2;
-      ctx.shadowColor = color;
-      ctx.moveTo(p1.x * w, p1.y * h);
-      ctx.lineTo(p2.x * w, p2.y * h);
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-    };
-
-    const drawJoint = (idx: number, r: number, color: string) => {
-      const p = landmarks[idx];
-      if (!p) return;
-      ctx.beginPath();
-      ctx.fillStyle = color;
-      ctx.shadowBlur = (r * distScale) * 3;
-      ctx.shadowColor = color;
-      ctx.arc(p.x * w, p.y * h, r * distScale, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
-    };
-
-    const cLine = `rgba(0, 200, 255, ${0.8 * pulse})`;
-    const cJoint = `rgba(100, 255, 255, ${0.9 * pulse})`;
-    const lw = 4;
-
-    // --- Fill the palm to make it a continuous glowing MESH surface ---
-    const palmIndices = [0, 1, 5, 9, 13, 17];
-    ctx.beginPath();
-    let started = false;
-    palmIndices.forEach((idx) => {
-      const p = landmarks[idx];
-      if (!p) return;
-      if (!started) {
-        ctx.moveTo(p.x * w, p.y * h);
-        started = true;
-      } else {
-        ctx.lineTo(p.x * w, p.y * h);
+      // 1. Smooth fine spline curve (sleek, non-bold line)
+      if (showLine) {
+        ctx.beginPath();
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = lineWidth * distScale;
+        ctx.shadowBlur = 3 * distScale;
+        ctx.shadowColor = '#0000FF';
+        ctx.moveTo(validPts[0].x * w, validPts[0].y * h);
+        for (let i = 1; i < validPts.length - 1; i++) {
+          const xc = ((validPts[i].x + validPts[i + 1].x) / 2) * w;
+          const yc = ((validPts[i].y + validPts[i + 1].y) / 2) * h;
+          ctx.quadraticCurveTo(validPts[i].x * w, validPts[i].y * h, xc, yc);
+        }
+        ctx.lineTo(validPts[validPts.length - 1].x * w, validPts[validPts.length - 1].y * h);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
       }
-    });
-    ctx.closePath();
-    ctx.fillStyle = `rgba(0, 150, 255, ${0.15 * pulse})`;
-    ctx.fill();
 
-    // Thumb
-    drawLine(0, 1, cLine, lw); drawLine(1, 2, cLine, lw); drawLine(2, 3, cLine, lw); drawLine(3, 4, cLine, lw);
-    // Index
-    drawLine(0, 5, cLine, lw); drawLine(5, 6, cLine, lw); drawLine(6, 7, cLine, lw); drawLine(7, 8, cLine, lw);
-    // Middle
-    drawLine(9, 10, cLine, lw); drawLine(10, 11, cLine, lw); drawLine(11, 12, cLine, lw);
-    // Ring
-    drawLine(13, 14, cLine, lw); drawLine(14, 15, cLine, lw); drawLine(15, 16, cLine, lw);
-    // Pinky
-    drawLine(17, 18, cLine, lw); drawLine(18, 19, cLine, lw); drawLine(19, 20, cLine, lw);
-    // Palm Base Matrix
-    drawLine(5, 9, cLine, lw); drawLine(9, 13, cLine, lw); drawLine(13, 17, cLine, lw); drawLine(0, 17, cLine, lw);
+      // 2. Delicate glowing micro-nodes spaced along the path (BATCHED GPU DRAW CALL)
+      const r = dotRadius * distScale;
+      ctx.save();
+      ctx.fillStyle = dotColor;
+      ctx.shadowBlur = 4 * distScale;
+      ctx.shadowColor = '#0000FF';
+      ctx.beginPath();
+      for (let i = 0; i < validPts.length - 1; i++) {
+        const p1x = validPts[i].x * w, p1y = validPts[i].y * h;
+        const p2x = validPts[i + 1].x * w, p2y = validPts[i + 1].y * h;
+        const segLen = Math.hypot(p2x - p1x, p2y - p1y);
+        const numDots = Math.max(1, Math.floor(segLen / (dotSpacing * distScale)));
 
-    // Draw joints
-    for (let i = 0; i < 21; i++) {
-      drawJoint(i, i === 0 ? 6 : 4, cJoint);
+        for (let s = 0; s < numDots; s++) {
+          const t = s / numDots;
+          const nx = p1x + (p2x - p1x) * t;
+          const ny = p1y + (p2y - p1y) * t;
+          ctx.moveTo(nx + r, ny);
+          ctx.arc(nx, ny, r, 0, Math.PI * 2);
+        }
+      }
+      const last = validPts[validPts.length - 1];
+      ctx.moveTo(last.x * w + r, last.y * h);
+      ctx.arc(last.x * w, last.y * h, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    };
+
+    // Modern Refined Palette: Pure Cyber Blue filaments with glowing Cyan/White micro-nodes
+    const cLineBlue = `rgba(0, 70, 255, ${0.70 * pulse})`;
+    const cLineBrightBlue = `rgba(0, 130, 255, ${0.85 * pulse})`;
+    const cDotCyan = `rgba(0, 240, 255, ${0.90 * pulse})`;
+    const cDotWhite = '#ffffff';
+
+    // ── 1. Forehead / Brow Contours (Simple & Architectural) ──
+    const foreheadRib1 = [54, 103, 67, 109, 10, 338, 297, 332, 284].map(i => landmarks[i]);
+    const foreheadRib2 = [70, 63, 105, 66, 8, 296, 334, 293, 300].map(i => landmarks[i]);
+    drawStreamlineWithDots(foreheadRib1, cLineBrightBlue, 0.85, cDotWhite, 1.0, 20);
+    drawStreamlineWithDots(foreheadRib2, cLineBlue, 0.75, cDotCyan, 0.9, 22);
+
+    // ── 2. Nasal Centerline & Tip Loop ──
+    const nasalMidline = [168, 6, 197, 195, 5, 4, 1, 19, 94, 2].map(i => landmarks[i]);
+    const nasalTipLoop = [98, 97, 2, 326, 327].map(i => landmarks[i]);
+    drawStreamlineWithDots(nasalMidline, cLineBrightBlue, 0.9, cDotWhite, 1.0, 16);
+    drawStreamlineWithDots(nasalTipLoop, cLineBlue, 0.8, cDotCyan, 0.9, 14);
+
+    // ── 3. Cheeks & Mid-Face Contours (Clean 3D Facial Structure) ──
+    const cheekVertR1 = [143, 111, 117, 118, 100, 47, 50, 205, 187, 147, 150].map(i => landmarks[i]);
+    const cheekVertR2 = [127, 234, 93, 132, 58, 172, 136, 150, 149, 176].map(i => landmarks[i]);
+    const cheekVertL1 = [372, 340, 346, 347, 329, 277, 280, 425, 411, 376, 379].map(i => landmarks[i]);
+    const cheekVertL2 = [356, 454, 323, 361, 288, 397, 365, 379, 378, 400].map(i => landmarks[i]);
+    drawStreamlineWithDots(cheekVertR1, cLineBlue, 0.75, cDotCyan, 0.9, 18);
+    drawStreamlineWithDots(cheekVertR2, cLineBlue, 0.75, cDotCyan, 0.9, 18);
+    drawStreamlineWithDots(cheekVertL1, cLineBlue, 0.75, cDotCyan, 0.9, 18);
+    drawStreamlineWithDots(cheekVertL2, cLineBlue, 0.75, cDotCyan, 0.9, 18);
+
+    // Infraorbital Zygomatic Curve
+    const infraOrbital = [116, 123, 147, 213, 192, 4, 416, 433, 376, 352, 345].map(i => landmarks[i]);
+    drawStreamlineWithDots(infraOrbital, cLineBrightBlue, 0.85, cDotWhite, 1.0, 18);
+
+    // ── 4. Outer Mandibular Jaw Silhouette & Chin ──
+    const jawContour = [234, 127, 162, 21, 54, 103, 67, 109, 10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234].map(i => landmarks[i]);
+    drawStreamlineWithDots(jawContour, '#0000FF', 1.0, cDotWhite, 1.1, 20);
+
+    const chinArcs = [172, 136, 150, 149, 176, 148, 152, 377, 400, 378, 379, 365, 397].map(i => landmarks[i]);
+    drawStreamlineWithDots(chinArcs, cLineBrightBlue, 0.85, cDotCyan, 0.95, 16);
+
+    // ── 5. Perioral Lips Contour ──
+    const outerLips = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146, 61].map(i => landmarks[i]);
+    drawStreamlineWithDots(outerLips, cLineBrightBlue, 0.85, cDotWhite, 1.0, 16);
+
+    // ── 6. Minimalist Collar Arcs (3 subtle rings) ──
+    const pForehead = landmarks[10];
+    const pChin = landmarks[152];
+    const pLeftEar = landmarks[234];
+    const pRightEar = landmarks[454];
+
+    if (pChin && pLeftEar && pRightEar) {
+      const jawWidth = Math.abs(pRightEar.x - pLeftEar.x);
+      const neckCenterX = (pLeftEar.x + pRightEar.x) / 2;
+      const neckBaseY = pChin.y;
+
+      for (let r = 1; r <= 3; r++) {
+        const ringY = neckBaseY + r * 0.030;
+        if (ringY > 1.02) break;
+        const halfSpan = (jawWidth * 0.38) * (1.0 + r * 0.08);
+        const dip = (9 + r * 2.5) * distScale;
+
+        const ringPts = [];
+        for (let s = 0; s <= 8; s++) {
+          const t = s / 8;
+          const px = (neckCenterX - halfSpan) + 2 * halfSpan * t;
+          const py = ringY + (Math.sin(t * Math.PI) * dip / h);
+          ringPts.push({ x: px, y: py });
+        }
+        drawStreamlineWithDots(ringPts, cLineBlue, 0.75, cDotCyan, 0.9, 20);
+      }
     }
 
-    ctx.restore();
-  };
+    // ── 7. Luminous Modern AI Eyes (Refined, Non-Bold) ──
+    const drawRadiantEye = (centerIdx: number, palpebralIndices: number[]) => {
+      const pCenter = landmarks[centerIdx];
+      if (!pCenter) return;
+      const cx = pCenter.x * w;
+      const cy = pCenter.y * h;
 
-  const drawFaceMask = (ctx: CanvasRenderingContext2D, landmarks: any[], w: number, h: number, distM: number) => {
-    ctx.save();
-    ctx.scale(-1, 1);
-    ctx.translate(-w, 0);
+      // Palpebral Almond Eyelid Outline (sleek, non-bold)
+      const eyePts = palpebralIndices.map(i => landmarks[i]).filter(Boolean);
+      if (eyePts.length > 2) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(eyePts[0].x * w, eyePts[0].y * h);
+        for (let i = 1; i < eyePts.length; i++) {
+          ctx.lineTo(eyePts[i].x * w, eyePts[i].y * h);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.lineWidth = 1.1 * distScale;
+        ctx.shadowBlur = 8 * distScale;
+        ctx.shadowColor = '#00f0ff';
+        ctx.stroke();
 
-    const time = Date.now() / 1000;
-    const pulse = Math.sin(time * 3) * 0.2 + 0.8;
-    const pulseFast = Math.sin(time * 8) * 0.3 + 0.7;
+        ctx.fillStyle = `rgba(0, 180, 255, ${0.10 * pulse})`;
+        ctx.fill();
+        ctx.restore();
+      }
 
-    // Advanced Distance Scaling (At 0.5m = ~1.0, At 2.0m = ~0.4)
-    const distScale = Math.max(0.3, Math.min(1.2, 1.5 - (distM * 0.45)));
+      // Modern iris aperture rings
+      const rOuter = 13 * distScale;
+      const rInner = 3.5 * distScale;
 
-    // Use additive blending for a glowing holographic look
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
-    // Helper to draw a path
-    const drawPath = (indices: number[], color: string, width: number, closed = false) => {
+      ctx.save();
+      // Outer limbal ring
       ctx.beginPath();
-      ctx.lineWidth = width * distScale;
-      ctx.strokeStyle = color;
-      let started = false;
-      indices.forEach(idx => {
-        const p = landmarks[idx];
-        if (!p) return;
-        if (!started) { ctx.moveTo(p.x * w, p.y * h); started = true; }
-        else ctx.lineTo(p.x * w, p.y * h);
-      });
-      if (closed && started) ctx.closePath();
+      ctx.arc(cx, cy, rOuter, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(0, 220, 255, ${0.85 * pulse})`;
+      ctx.lineWidth = 0.9 * distScale;
+      ctx.shadowBlur = 8 * distScale;
+      ctx.shadowColor = '#00f0ff';
       ctx.stroke();
-    };
 
-    // ═══════════════════════════════════════════
-    // 1. DENSE POINT CLOUD (Base layer)
-    // ═══════════════════════════════════════════
-    ctx.beginPath();
-    landmarks.forEach(p => {
-      ctx.moveTo(p.x * w, p.y * h);
-      ctx.arc(p.x * w, p.y * h, 0.8 * distScale, 0, Math.PI * 2);
-    });
-    ctx.fillStyle = `rgba(16, 185, 129, ${0.4 * pulse})`; // Emerald green
-    ctx.fill();
-
-    // ═══════════════════════════════════════════
-    // 2. FACE OVAL (Outer contour framework)
-    // ═══════════════════════════════════════════
-    const ovalIdx = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109, 10];
-    ctx.shadowBlur = (15 * distScale) * pulse;
-    ctx.shadowColor = '#10b981'; // Emerald glow
-    drawPath(ovalIdx, `rgba(16, 185, 129, ${0.8 * pulse})`, 3.0, true);
-    ctx.shadowBlur = 0;
-
-    // ═══════════════════════════════════════════
-    // 3. EYES (High definition contour)
-    // ═══════════════════════════════════════════
-    const rightEye = [33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161, 246, 33];
-    const leftEye = [263, 249, 390, 373, 374, 380, 381, 382, 362, 398, 384, 385, 386, 387, 388, 466, 263];
-
-    // Eye inner fill (slight glow)
-    ctx.beginPath();
-    [rightEye, leftEye].forEach(eye => {
-      let started = false;
-      eye.forEach(idx => {
-        const p = landmarks[idx];
-        if (!p) return;
-        if (!started) { ctx.moveTo(p.x * w, p.y * h); started = true; }
-        else ctx.lineTo(p.x * w, p.y * h);
-      });
-      ctx.closePath();
-    });
-    ctx.fillStyle = `rgba(52, 211, 153, ${0.1 * pulse})`; // Light emerald
-    ctx.fill();
-
-    // Eye outlines
-    ctx.shadowBlur = 15 * distScale;
-    ctx.shadowColor = '#fff';
-    drawPath(rightEye, `rgba(255, 255, 255, ${0.9 * pulse})`, 2.5, true);
-    drawPath(leftEye, `rgba(255, 255, 255, ${0.9 * pulse})`, 2.5, true);
-    ctx.shadowBlur = 10 * distScale;
-    ctx.shadowColor = '#34d399'; // Emerald bright glow
-    drawPath([133, 155, 154, 153, 145, 144, 163, 7, 33], `rgba(16, 185, 129, 0.9)`, 2.0);
-    drawPath([362, 382, 381, 380, 374, 373, 390, 249, 263], `rgba(16, 185, 129, 0.9)`, 2.0);
-
-    // ═══════════════════════════════════════════
-    // 4. EYEBROWS & FOREHEAD
-    // ═══════════════════════════════════════════
-    const rightBrow = [70, 63, 105, 66, 107, 55, 65, 52, 53, 46];
-    const leftBrow = [300, 293, 334, 296, 336, 285, 295, 282, 283, 276];
-    ctx.shadowBlur = (10 * distScale) * pulse;
-    ctx.shadowColor = '#10b981';
-    drawPath(rightBrow, `rgba(16, 185, 129, ${0.9 * pulse})`, 3.0);
-    drawPath(leftBrow, `rgba(16, 185, 129, ${0.9 * pulse})`, 3.0);
-
-    // Forehead cyber-grid
-    drawPath([10, 67, 109, 10], `rgba(52, 211, 153, ${0.6 * pulse})`, 1.5);
-    drawPath([10, 103, 54, 21], `rgba(52, 211, 153, ${0.6 * pulse})`, 1.5);
-    drawPath([10, 338, 297, 332], `rgba(52, 211, 153, ${0.6 * pulse})`, 1.5);
-    drawPath([10, 151, 9, 8, 168], `rgba(16, 185, 129, ${0.7 * pulse})`, 2.0); // Center line
-
-    // ═══════════════════════════════════════════
-    // 5. NOSE
-    // ═══════════════════════════════════════════
-    ctx.shadowBlur = 8 * distScale;
-    ctx.shadowColor = '#10b981';
-    drawPath([168, 6, 197, 195, 5, 4, 1, 19], `rgba(16, 185, 129, ${0.9 * pulse})`, 2.5);
-    drawPath([48, 115, 220, 45, 4, 275, 440, 344, 278], `rgba(52, 211, 153, ${0.7 * pulse})`, 2.0);
-    drawPath([94, 19, 1, 4, 5], `rgba(16, 185, 129, ${0.8 * pulse})`, 2.0);
-
-    // ═══════════════════════════════════════════
-    // 6. LIPS (Inner & Outer)
-    // ═══════════════════════════════════════════
-    const lipsOuter = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146, 61];
-    const lipsInner = [78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95, 78];
-    ctx.shadowBlur = (12 * distScale) * pulse;
-    ctx.shadowColor = '#059669'; // Deeper emerald glow for lips
-    drawPath(lipsOuter, `rgba(16, 185, 129, ${0.8 * pulse})`, 2.5, true);
-    drawPath(lipsInner, `rgba(52, 211, 153, ${0.6 * pulse})`, 1.5, true);
-
-    // ═══════════════════════════════════════════
-    // 7. CHEEKBONE & JAW TOPOLOGY
-    // ═══════════════════════════════════════════
-    ctx.shadowBlur = 0;
-    drawPath([127, 234, 93, 132, 58, 172, 136, 150, 149, 176, 148, 152], `rgba(52, 211, 153, ${0.5 * pulse})`, 1.5);
-    drawPath([356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152], `rgba(52, 211, 153, ${0.5 * pulse})`, 1.5);
-
-    // Diagonal cheek vectors
-    drawPath([234, 227, 116, 117, 118, 100, 47], `rgba(52, 211, 153, ${0.4 * pulse})`, 1.0);
-    drawPath([454, 447, 345, 346, 347, 329, 277], `rgba(52, 211, 153, ${0.4 * pulse})`, 1.0);
-
-    // ═══════════════════════════════════════════
-    // 8. CRITICAL NODES (Glowing intersection points)
-    // ═══════════════════════════════════════════
-    const drawSpark = (idx: number, size: number, color: string) => {
-      const p = landmarks[idx];
-      if (!p) return;
-      const scaledSize = size * distScale;
+      // Inner glowing core beacon
       ctx.beginPath();
-      ctx.fillStyle = color;
-      ctx.shadowBlur = scaledSize * 5;
-      ctx.shadowColor = color;
-      ctx.arc(p.x * w, p.y * h, scaledSize, 0, Math.PI * 2);
+      ctx.arc(cx, cy, rInner, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowBlur = 10 * distScale;
+      ctx.shadowColor = '#00f0ff';
       ctx.fill();
+
+      // Fine crosshair
+      ctx.beginPath();
+      ctx.moveTo(cx - 5 * distScale, cy); ctx.lineTo(cx + 5 * distScale, cy);
+      ctx.moveTo(cx, cy - 5 * distScale); ctx.lineTo(cx, cy + 5 * distScale);
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.8)';
+      ctx.lineWidth = 0.8 * distScale;
+      ctx.stroke();
+      ctx.restore();
     };
 
-    // Major anchors (Pupils, Nose tip, Chin, Sides)
-    const anchors = [468, 473, 1, 152, 234, 454];
-    anchors.forEach(idx => drawSpark(idx, 3.0, '#fff'));
+    const rightEyeIndices = [33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161, 246, 33];
+    const leftEyeIndices = [263, 249, 390, 373, 374, 380, 381, 382, 362, 398, 384, 385, 386, 387, 388, 466, 263];
+    drawRadiantEye(468, rightEyeIndices);
+    drawRadiantEye(473, leftEyeIndices);
 
-    // Secondary tracking points (Eyes, Brows, Lips)
-    const activeNodes = [33, 263, 133, 362, 10, 61, 291, 168, 0, 17, 105, 334];
-    activeNodes.forEach(idx => drawSpark(idx, 2.0, `rgba(52, 211, 153, ${0.9 * pulseFast})`));
+    // ── 8. Minimalist IPD Caliper ──
+    const pR = landmarks[468];
+    const pL = landmarks[473];
+    if (pR && pL) {
+      const rx = pR.x * w, ry = pR.y * h;
+      const lx = pL.x * w, ly = pL.y * h;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(rx, ry);
+      ctx.lineTo(lx, ly);
+      ctx.strokeStyle = '#0000FF';
+      ctx.lineWidth = 1.0 * distScale;
+      ctx.shadowBlur = 6 * distScale;
+      ctx.shadowColor = '#0000FF';
+      ctx.stroke();
+
+      const capH = 5 * distScale;
+      ctx.beginPath();
+      ctx.moveTo(rx, ry - capH); ctx.lineTo(rx, ry + capH);
+      ctx.moveTo(lx, ly - capH); ctx.lineTo(lx, ly + capH);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.0 * distScale;
+      ctx.stroke();
+      ctx.restore();
+
+      const midX = (rx + lx) / 2;
+      const midY = (ry + ly) / 2 - 13 * distScale;
+      const ipdText = `IPD ${liveIpdMm.toFixed(1)}mm`;
+
+      ctx.save();
+      ctx.font = `600 ${Math.max(10, Math.round(11 * distScale))}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`;
+      const ipdTw = ctx.measureText(ipdText).width;
+      const ipdBoxW = ipdTw + 14 * distScale;
+      const ipdBoxH = 16 * distScale;
+
+      ctx.fillStyle = 'rgba(4, 8, 28, 0.88)';
+      ctx.beginPath();
+      ctx.roundRect(midX - ipdBoxW / 2, midY - ipdBoxH / 2, ipdBoxW, ipdBoxH, 5);
+      ctx.fill();
+      ctx.strokeStyle = '#0000FF';
+      ctx.lineWidth = 1.0;
+      ctx.shadowBlur = 6 * distScale;
+      ctx.shadowColor = '#0000FF';
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(ipdText, midX, midY);
+      ctx.restore();
+    }
+
+    // ── 9. Delicate Laser Scan Tracer ──
+    const pTop = landmarks[10];
+    const pBottom = landmarks[152];
+    const pLeft = landmarks[234];
+    const pRight = landmarks[454];
+
+    if (pTop && pBottom && pLeft && pRight) {
+      const yMin = pTop.y * h;
+      const yMax = pBottom.y * h;
+      const xMin = Math.min(pLeft.x, pRight.x) * w - (16 * distScale);
+      const xMax = Math.max(pLeft.x, pRight.x) * w + (16 * distScale);
+
+      const sweepT = (Math.sin(time * 2.4) + 1) / 2;
+      const scanY = yMin + sweepT * (yMax - yMin);
+
+      const gradH = 16 * distScale;
+      const grad = ctx.createLinearGradient(0, scanY - gradH, 0, scanY + gradH);
+      grad.addColorStop(0, 'rgba(0, 0, 255, 0)');
+      grad.addColorStop(0.5, `rgba(0, 150, 255, ${0.18 * pulseFast})`);
+      grad.addColorStop(1, 'rgba(0, 0, 255, 0)');
+
+      ctx.fillStyle = grad;
+      ctx.fillRect(xMin, scanY - gradH, xMax - xMin, gradH * 2);
+
+      ctx.beginPath();
+      ctx.moveTo(xMin, scanY);
+      ctx.lineTo(xMax, scanY);
+      ctx.strokeStyle = `rgba(255, 255, 255, ${0.90 * pulseFast})`;
+      ctx.lineWidth = 0.9 * distScale;
+      ctx.shadowBlur = 8 * distScale;
+      ctx.shadowColor = '#0000FF';
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+
+    ctx.restore(); // Restore mirrored space
+
+    // ─────────────────────────────────────────────────────────────
+    // PART B: MODERN BLUE #0000FF FRAME & ATTITUDE HUD (Unmirrored Screen Space)
+    // ─────────────────────────────────────────────────────────────
+    let minX = 1, maxX = 0, minY = 1, maxY = 0;
+    for (let i = 0; i < landmarks.length; i += 4) {
+      const p = landmarks[i];
+      if (p.x < minX) minX = p.x;
+      if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y;
+      if (p.y > maxY) maxY = p.y;
+    }
+
+    const boxLeft = Math.max(12, (1 - maxX) * w - (18 * distScale));
+    const boxRight = Math.min(w - 12, (1 - minX) * w + (18 * distScale));
+    const boxTop = Math.max(12, minY * h - (22 * distScale));
+    const boxBottom = Math.min(h - 12, maxY * h + (18 * distScale));
+    const bracketLen = Math.min(24 * distScale, (boxRight - boxLeft) * 0.20);
+
+    ctx.save();
+    ctx.lineCap = 'square';
+    ctx.lineWidth = 1.2 * distScale;
+    ctx.strokeStyle = '#0000FF';
+    ctx.shadowBlur = 8 * distScale;
+    ctx.shadowColor = '#0000FF';
+
+    // Corner Frame Brackets (Thin & Crisp)
+    // Top-Left
+    ctx.beginPath();
+    ctx.moveTo(boxLeft, boxTop + bracketLen); ctx.lineTo(boxLeft, boxTop); ctx.lineTo(boxLeft + bracketLen, boxTop);
+    ctx.stroke();
+    // Top-Right
+    ctx.beginPath();
+    ctx.moveTo(boxRight - bracketLen, boxTop); ctx.lineTo(boxRight, boxTop); ctx.lineTo(boxRight, boxTop + bracketLen);
+    ctx.stroke();
+    // Bottom-Left
+    ctx.beginPath();
+    ctx.moveTo(boxLeft, boxBottom - bracketLen); ctx.lineTo(boxLeft, boxBottom); ctx.lineTo(boxLeft + bracketLen, boxBottom);
+    ctx.stroke();
+    // Bottom-Right
+    ctx.beginPath();
+    ctx.moveTo(boxRight - bracketLen, boxBottom); ctx.lineTo(boxRight, boxBottom); ctx.lineTo(boxRight, boxBottom - bracketLen);
+    ctx.stroke();
+
+    ctx.shadowBlur = 0;
+
+    // Corner Micro-Telemetry Tags
+    const microFont = `${Math.max(8, Math.round(9 * distScale))}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+    ctx.font = microFont;
+    ctx.fillStyle = '#0000FF';
+    ctx.fillText(`[NEURAL MESH]`, boxLeft, boxTop - 4);
+    ctx.fillText(`[ACTIVE]`, boxRight - ctx.measureText(`[ACTIVE]`).width, boxTop - 4);
+
+    const fontSize = Math.max(11, Math.round(12 * distScale));
+    ctx.font = `600 ${fontSize}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`;
+
+    // ── 1. 3-Axis Gyro Attitude: DIRECTLY ABOVE AND CENTER OF HEAD ──
+    const headCenterX = (boxLeft + boxRight) / 2;
+    const orientText = `PITCH ${pitchStr}°   YAW ${yawStr}°   ROLL ${rollStr}°`;
+    const orientTw = ctx.measureText(orientText).width;
+    const headPillW = orientTw + 22 * distScale;
+    const headPillH = fontSize + 10;
+    const headPillX = Math.max(8, Math.min(w - headPillW - 8, headCenterX - headPillW / 2));
+    const headPillY = Math.max(10, boxTop - headPillH - 10 * distScale);
+
+    // Laser Tracking Dotted Guide from Badge to Head Top
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(headCenterX, headPillY + headPillH);
+    ctx.lineTo(headCenterX, boxTop);
+    ctx.strokeStyle = '#0000FF';
+    ctx.lineWidth = 1.0 * distScale;
+    ctx.setLineDash([3 * distScale, 3 * distScale]);
+    ctx.shadowBlur = 4 * distScale;
+    ctx.shadowColor = '#0000FF';
+    ctx.stroke();
+    ctx.restore();
+
+    // Attitude Pod (Refined, Modern)
+    ctx.fillStyle = 'rgba(4, 8, 28, 0.90)';
+    ctx.beginPath();
+    ctx.roundRect(headPillX, headPillY, headPillW, headPillH, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#0000FF';
+    ctx.lineWidth = 1.0 * distScale;
+    ctx.shadowBlur = 6 * distScale;
+    ctx.shadowColor = '#0000FF';
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Indicator Pip
+    ctx.fillStyle = '#0000FF';
+    ctx.beginPath();
+    ctx.arc(headPillX + 10 * distScale, headPillY + headPillH / 2, 2.8 * distScale, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(orientText, headPillX + 18 * distScale, headPillY + headPillH / 2 + fontSize * 0.35);
+
+    // ── 2. Bottom-Center Badge: Dynamic AI Optical Range & IPD ──
+    const distText = `AI RANGE: ${dynamicDistM.toFixed(2)}m   ●   IPD: ${liveIpdMm.toFixed(1)}mm`;
+    const distWidth = ctx.measureText(distText).width;
+    const bottomPillW = distWidth + 24 * distScale;
+    const bottomPillH = fontSize + 12;
+    const bottomPillX = (boxLeft + boxRight) / 2 - bottomPillW / 2;
+    const bottomPillY = Math.min(h - bottomPillH - 6, boxBottom + 8);
+
+    ctx.fillStyle = 'rgba(4, 8, 28, 0.90)';
+    ctx.beginPath();
+    ctx.roundRect(bottomPillX, bottomPillY, bottomPillW, bottomPillH, 8);
+    ctx.fill();
+    ctx.strokeStyle = '#0000FF';
+    ctx.lineWidth = 1.0;
+    ctx.shadowBlur = 6 * distScale;
+    ctx.shadowColor = '#0000FF';
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(distText, bottomPillX + 12 * distScale, bottomPillY + bottomPillH / 2 + fontSize * 0.35);
 
     ctx.restore();
   };
 
   // ─── Intelligent Local Face Analysis (no AI needed) ───
   const runLocalFaceAnalysis = (): BiometricResult => {
-    const landmarks = faceLandmarksRef?.current;
+    const landmarks = faceLandmarksRef?.current || (window as any).__sharedFaceLandmarks;
+    const video = videoRef.current;
+    const vidW = video?.videoWidth || 640;
+    const vidH = video?.videoHeight || 480;
+
     let estimatedAge = 25;
     let estimatedGender: 'male' | 'female' | 'other' = 'male';
     let estimatedGlasses = false;
     let estimatedMood = 'Focused';
     let estimatedDistCm = Math.round(distanceM * 100) || 60;
 
-    if (landmarks && landmarks.length > 100) {
-      // Face proportions analysis using landmark geometry
-      // Jaw width vs face height ratio gives gender hints
+    if (landmarks && landmarks.length > 200) {
+      // 1. Gender estimation using facial morphological geometry (corrected for video aspect ratio)
       const jawLeft = landmarks[234];
       const jawRight = landmarks[454];
       const forehead = landmarks[10];
       const chin = landmarks[152];
 
       if (jawLeft && jawRight && forehead && chin) {
-        const jawWidth = Math.abs(jawRight.x - jawLeft.x);
-        const faceHeight = Math.abs(chin.y - forehead.y);
-        const ratio = jawWidth / faceHeight;
+        const dxJaw = Math.abs(jawRight.x - jawLeft.x) * vidW;
+        const dyFace = Math.abs(chin.y - forehead.y) * vidH;
+        const jawRatio = dxJaw / (dyFace || 1);
 
-        // Wider jaw relative to face height is more common in males
-        if (ratio > 0.85) estimatedGender = 'male';
-        else if (ratio < 0.75) estimatedGender = 'female';
+        // Eyebrow to eyelid height (males have flatter, lower brows; females have higher arches)
+        const rightBrowDist = Math.abs(landmarks[70].y - landmarks[159].y) * vidH;
+        const leftBrowDist = Math.abs(landmarks[300].y - landmarks[386].y) * vidH;
+        const avgBrowDist = (rightBrowDist + leftBrowDist) / 2;
+
+        // Chin width: landmarks 149 and 378
+        const dxChin = Math.abs(landmarks[378].x - landmarks[149].x) * vidW;
+        const chinToJawRatio = dxChin / (dxJaw || 1);
+
+        let maleScore = 0;
+        if (jawRatio > 0.68) maleScore += 1;
+        if (chinToJawRatio > 0.36) maleScore += 1;
+        if (avgBrowDist < 16) maleScore += 1;
+        else if (avgBrowDist > 21) maleScore -= 1;
+
+        estimatedGender = maleScore >= 1 ? 'male' : 'female';
       }
 
-      // Eye openness analysis for mood
+      // 2. Age estimation from craniofacial proportions
+      // Midface proportion: distance from eye bridge (168) to nose tip (1) vs nose tip (1) to chin (152)
+      if (landmarks[168] && landmarks[1] && landmarks[152]) {
+        const upperMidface = Math.abs(landmarks[1].y - landmarks[168].y) * vidH;
+        const lowerMidface = Math.abs(landmarks[152].y - landmarks[1].y) * vidH;
+        const faceProportion = lowerMidface / (upperMidface || 1);
+
+        // Eye aperture: palpebral fissure height vs width
+        const eyeHeight = (Math.abs(landmarks[159].y - landmarks[145].y) + Math.abs(landmarks[386].y - landmarks[374].y)) * vidH / 2;
+        const eyeWidth = (Math.abs(landmarks[133].x - landmarks[33].x) + Math.abs(landmarks[263].x - landmarks[362].x)) * vidW / 2;
+        const eyeAspect = eyeHeight / (eyeWidth || 1);
+
+        // Baseline young adult ~25-28
+        let calculatedAge = 26;
+        if (faceProportion > 1.25) calculatedAge += 9;
+        else if (faceProportion < 0.95) calculatedAge -= 5;
+
+        if (eyeAspect < 0.28) calculatedAge += 5;
+        else if (eyeAspect > 0.38) calculatedAge -= 4;
+
+        estimatedAge = Math.min(65, Math.max(16, Math.round(calculatedAge)));
+      }
+
+      // 3. Eye openness analysis for mood
       const rightEyeTop = landmarks[159];
       const rightEyeBottom = landmarks[145];
       const leftEyeTop = landmarks[386];
@@ -475,7 +756,7 @@ const BiometricScan: React.FC<Props> = ({
         else estimatedMood = 'Relaxed';
       }
 
-      // Lip analysis for mood (smile detection)
+      // 4. Lip analysis for mood (smile detection)
       const lipTop = landmarks[13];
       const lipBottom = landmarks[14];
       const lipLeft = landmarks[61];
@@ -489,14 +770,12 @@ const BiometricScan: React.FC<Props> = ({
         }
       }
 
-      // Glasses detection: look for bridge-area reflections/landmarks
-      // Check if nose bridge landmarks deviate from expected pattern
+      // 5. Glasses detection
       const noseBridge1 = landmarks[6];
       const noseBridge2 = landmarks[168];
       if (noseBridge1 && noseBridge2) {
-        // This is a basic heuristic; real glasses detection requires the image
         const bridgeDist = Math.abs(noseBridge1.y - noseBridge2.y);
-        if (bridgeDist > 0.06) estimatedGlasses = true;
+        if (bridgeDist > 0.045) estimatedGlasses = true;
       }
     }
 
@@ -579,35 +858,46 @@ const BiometricScan: React.FC<Props> = ({
       }
 
       const client = new GoogleGenAI({ apiKey });
-      const modelId = 'gemini-2.0-flash';
+      const modelCandidates = ['gemini-3.6-flash'];
       setAiError(null);
 
-      // Retry logic with smart backoff for 429 rate limit errors
+      // Fast retry logic with ample timeout for Gemini 3.6 Flash thinking
       const MAX_RETRIES = 2;
       let lastError: any = null;
 
       for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
         try {
           if (attempt > 0) {
-            const waitSec = 10 * attempt; // 10s, 20s — realistic for quota limits
-            setStatus(`RATE_LIMITED — Retrying in ${waitSec}s...`);
-            await new Promise(r => setTimeout(r, waitSec * 1000));
+            setStatus(`RETRYING_AI (${attempt + 1}/${MAX_RETRIES})...`);
+            await new Promise(r => setTimeout(r, 1000));
           }
 
           setStatus('AI_DEEP_ANALYSIS');
 
-          const response = await client.models.generateContent({
-            model: modelId,
-            contents: [{
-              parts: [
-                { inlineData: { mimeType: 'image/jpeg', data: base64Data } },
-                {
-                  text: `Analyze this facial scan. Return ONLY JSON:
-{"age":{"value":number},"gender":{"value":"male"|"female"},"glasses":{"value":boolean},"mood":{"value":"string"},"distanceCm":{"value":number}}` }
-              ]
-            }],
+          const promptText = `You are an expert clinical optometrist and biometric facial analysis AI.
+Analyze the person's face in this camera capture to accurately determine their biometric attributes.
+
+Requirements:
+1. "age": Estimate their true biological age in years as an integer (e.g. 18, 22, 29, 36, 45, 54). Examine facial structure, skin texture, fine lines, under-eye contours, and hairline. Do NOT return a generic number.
+2. "gender": Identify their gender as "male" or "female" based on facial morphology, jawline angularity, brow ridge, facial hair/stubble, and facial proportions.
+3. "glasses": true if the person is wearing eyeglasses or spectacles (frames around eyes or bridge on nose), false otherwise.
+4. "mood": An accurate single-word description of their facial expression (e.g. "Focused", "Attentive", "Calm", "Alert", "Neutral", "Smiling").
+5. "distanceCm": Estimate camera viewing distance in centimeters based on face scale in the image (typically between 40 and 80 cm).
+
+Return strictly JSON matching this structure:
+{"age":{"value":number},"gender":{"value":"male"|"female"},"glasses":{"value":boolean},"mood":{"value":"string"},"distanceCm":{"value":number}}`;
+
+          const modelToUse = modelCandidates[attempt % modelCandidates.length];
+          const responsePromise = client.models.generateContent({
+            model: modelToUse,
+            contents: [
+              { inlineData: { mimeType: 'image/jpeg', data: base64Data } },
+              { text: promptText }
+            ],
             config: { responseMimeType: "application/json" }
           });
+          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('AI timeout')), 15000));
+          const response = await Promise.race([responsePromise, timeoutPromise]);
 
           let textContent = '';
           const rawResponse = response as any;
@@ -617,11 +907,24 @@ const BiometricScan: React.FC<Props> = ({
 
           const cleanJson = textContent.match(/\{[\s\S]*\}/)?.[0] || '{}';
           const parsed = JSON.parse(cleanJson);
-          if (!parsed.age) throw new Error('Invalid AI response');
+          
+          const rawAge = typeof parsed.age === 'number' ? parsed.age : parsed.age?.value;
+          const rawGender = typeof parsed.gender === 'string' ? parsed.gender : parsed.gender?.value;
+          const rawGlasses = typeof parsed.glasses === 'boolean' ? parsed.glasses : parsed.glasses?.value;
+          const rawMood = typeof parsed.mood === 'string' ? parsed.mood : parsed.mood?.value;
+          const rawDist = typeof parsed.distanceCm === 'number' ? parsed.distanceCm : parsed.distanceCm?.value;
+
+          const normalized: BiometricResult = {
+            age: { value: typeof rawAge === 'number' && !isNaN(rawAge) ? rawAge : 28 },
+            gender: { value: (rawGender === 'female' ? 'female' : 'male') },
+            glasses: { value: !!rawGlasses },
+            mood: { value: typeof rawMood === 'string' && rawMood ? rawMood : 'Focused' },
+            distanceCm: { value: typeof rawDist === 'number' && !isNaN(rawDist) ? rawDist : 60 }
+          };
 
           clearInterval(interval);
           setProgress(99);
-          setBiometricData(parsed);
+          setBiometricData(normalized);
           setComplete(true);
           setStatus('IDENTITY_CONFIRMED');
           return; // Success
@@ -693,9 +996,10 @@ const BiometricScan: React.FC<Props> = ({
     setManualOverride(false);
   };
 
-  // Allow scan when: distance ok, face detected at any distance, manual override, or after camera is ready
-  // BiometricScan just needs a clear face frame — precise distance doesn't matter
-  const inRange = distanceStatus === 'ok' || manualOverride || distanceM > 0 || cameraReady;
+  // Immediate authorization: enable scan when face is detected, distance is ok, distance is non-zero, manual override, or camera is ready
+  const isFaceDetected = !!(faceLandmarksRef?.current && faceLandmarksRef.current.length > 0);
+  const canAuthorize = cameraReady && (isFaceDetected || distanceStatus === 'ok' || distanceM > 0 || manualOverride);
+  const inRange = canAuthorize;
 
   return (
     <div className="w-full h-full flex flex-col justify-center items-center space-y-3 overflow-hidden px-4 max-h-full relative">
@@ -731,22 +1035,57 @@ const BiometricScan: React.FC<Props> = ({
           </div>
         )}
 
-        <div className="w-full flex justify-center py-4 relative z-50">
-          <div className={`px-8 py-3 rounded-full backdrop-blur-xl border flex items-center gap-4 transition-all duration-300 shadow-2xl ${distanceStatus === 'ok' || manualOverride
-            ? 'bg-emerald-500/30 border-emerald-500/60 text-emerald-300'
+        {/* Modern Instrument-Grade Live Distance Telemetry Pod */}
+        <div className="w-full flex justify-center py-3 relative z-50">
+          <div className={`px-6 py-2.5 md:px-8 md:py-3 rounded-2xl md:rounded-full backdrop-blur-2xl border flex items-center gap-4 transition-all duration-300 shadow-2xl ${distanceStatus === 'ok' || manualOverride
+            ? 'bg-slate-900/80 border-emerald-500/60 shadow-[0_0_30px_rgba(16,185,129,0.25)] text-emerald-300'
             : distanceStatus === 'too_close'
-              ? 'bg-rose-500/30 border-rose-500/60 text-rose-300'
-              : 'bg-amber-500/30 border-amber-500/60 text-amber-300'
+              ? 'bg-slate-900/80 border-rose-500/60 shadow-[0_0_30px_rgba(244,63,94,0.25)] text-rose-300'
+              : 'bg-slate-900/80 border-amber-500/60 shadow-[0_0_30px_rgba(245,158,11,0.25)] text-amber-300'
             }`}>
-            <span className="text-5xl animate-pulse">
-              {distanceStatus === 'ok' || manualOverride ? '✅' : distanceStatus === 'too_close' ? '✋' : '🔭'}
-            </span>
-            <div className="flex flex-col relative top-[1px]">
-              <div className="text-sm font-black uppercase tracking-widest opacity-90 leading-none mb-1">Live Distance</div>
-              <div className="flex items-baseline gap-3 leading-none">
-                <span className="text-5xl font-black font-mono tracking-tighter">{manualOverride ? 'N/A' : distanceM.toFixed(2) + 'm'}</span>
-                <span className="text-lg font-bold uppercase">
-                  {manualOverride ? 'BYPASSED' : distanceStatus === 'ok' ? 'Perfect' : distanceStatus === 'too_close' ? 'Move Back' : 'Move Closer'}
+            {/* Pulsing Optical Beacon */}
+            <div className="relative w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border"
+              style={{
+                backgroundColor: distanceStatus === 'ok' || manualOverride ? 'rgba(16, 185, 129, 0.15)' : distanceStatus === 'too_close' ? 'rgba(244, 63, 94, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                borderColor: distanceStatus === 'ok' || manualOverride ? 'rgba(16, 185, 129, 0.5)' : distanceStatus === 'too_close' ? 'rgba(244, 63, 94, 0.5)' : 'rgba(245, 158, 11, 0.5)'
+              }}
+            >
+              <div className={`w-3 h-3 rounded-full ${distanceStatus === 'ok' || manualOverride ? 'bg-emerald-400 shadow-[0_0_10px_#10b981]' : distanceStatus === 'too_close' ? 'bg-rose-400 shadow-[0_0_10px_#f43f5e]' : 'bg-amber-400 shadow-[0_0_10px_#f59e0b]'}`} />
+              <div className="absolute inset-0 rounded-xl border animate-ping pointer-events-none opacity-40"
+                style={{ borderColor: distanceStatus === 'ok' || manualOverride ? '#10b981' : distanceStatus === 'too_close' ? '#f43f5e' : '#f59e0b' }}
+              />
+            </div>
+
+            {/* Numbers & Subtitle */}
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-[9px] md:text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
+                  AI Optical Range
+                </span>
+                {distanceM > 0 && !manualOverride && (
+                  <span className="text-[9px] font-mono font-bold text-slate-500">
+                    (Target: 1.00m)
+                  </span>
+                )}
+              </div>
+              <div className="flex items-baseline gap-2.5 leading-none">
+                <span className="text-3xl md:text-4xl font-black font-mono tracking-tight tabular-nums text-white drop-shadow">
+                  {manualOverride ? 'N/A' : distanceM > 0 ? distanceM.toFixed(2) : '—.—'}
+                  {!manualOverride && <span className="text-sm font-sans font-bold text-slate-400 ml-1">m</span>}
+                </span>
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] md:text-xs font-mono font-bold uppercase tracking-wider border ${distanceStatus === 'ok' || manualOverride
+                  ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300'
+                  : distanceStatus === 'too_close'
+                    ? 'bg-rose-500/20 border-rose-400/40 text-rose-300'
+                    : 'bg-amber-500/20 border-amber-400/40 text-amber-300'
+                  }`}>
+                  {manualOverride
+                    ? 'BYPASSED'
+                    : distanceStatus === 'ok'
+                      ? 'IN TARGET ZONE'
+                      : distanceStatus === 'too_close'
+                        ? 'STEP BACK'
+                        : 'STEP CLOSER'}
                 </span>
               </div>
             </div>
@@ -775,27 +1114,27 @@ const BiometricScan: React.FC<Props> = ({
                 <div className="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
                 {debugInfo?.faceMeshStatus === 'wasm_ready' || debugInfo?.faceMeshStatus === 'ready'
                   ? 'Detecting Face...'
-                  : debugInfo?.faceMeshStatus?.includes?.('loading')
+                  : debugInfo?.faceMeshStatus?.includes?.('loading') || debugInfo?.faceMeshStatus === 'creating_landmarker'
                     ? 'Loading Face Mesh AI...'
-                    : debugInfo?.faceMeshStatus === 'error' || debugInfo?.faceMeshStatus === 'wasm_init_failed'
+                    : debugInfo?.faceMeshStatus?.startsWith?.('error') || debugInfo?.faceMeshStatus === 'wasm_init_failed'
                       ? 'Face Mesh Error — Using Fallback'
-                      : 'Initializing Face Detection...'}
+                      : 'Detecting Face...'}
               </div>
             </div>
           )}
 
-          {!scanning && !complete && inRange && (
+          {!scanning && !complete && canAuthorize && (
             <div className="absolute inset-x-0 bottom-8 flex justify-center pointer-events-none z-30 animate-pulse">
               <div className="px-8 py-4 bg-emerald-500/80 backdrop-blur-md rounded-full border border-emerald-400 text-white font-black uppercase tracking-widest text-lg md:text-xl shadow-[0_0_40px_rgba(16,185,129,0.5)]">
-                {manualOverride ? 'Manual Override Active. Click Start.' : 'Distance Perfect. Click Start to Scan.'}
+                {isFaceDetected ? 'Face Locked. Click Authorize Scan to Proceed.' : (manualOverride ? 'Manual Override Active. Click Start.' : 'Ready to Scan.')}
               </div>
             </div>
           )}
 
-          {!scanning && !complete && !inRange && (
+          {!scanning && !complete && !canAuthorize && (
             <div className="absolute inset-x-0 bottom-8 flex justify-center pointer-events-none z-30">
               <div className="px-6 py-3 bg-black/60 backdrop-blur-md rounded-full border border-white/10 text-cyan-300 font-bold uppercase tracking-widest text-sm animate-pulse">
-                Adjust Position Until Green
+                {cameraReady ? 'Looking for Face — Center Face in Camera' : 'Connecting Camera...'}
               </div>
             </div>
           )}
@@ -905,14 +1244,15 @@ const BiometricScan: React.FC<Props> = ({
           <div className="flex justify-center w-full">
             {!scanning ? (
               <button
-                disabled={!cameraReady || !inRange}
+                disabled={!canAuthorize}
                 onClick={runScan}
                 className={`w-full py-6 md:py-12 rounded-[2.5rem] md:rounded-[3.5rem] font-black text-xl md:text-5xl lg:text-6xl uppercase tracking-widest md:tracking-[0.4em] transition-all shadow-2xl group relative overflow-hidden
-                  ${(manualOverride || distanceStatus === 'ok') 
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-black hover:scale-[1.02] hover:shadow-[0_0_80px_rgba(16,185,129,0.6)] cursor-pointer' : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'}`}
+                  ${canAuthorize 
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-black hover:scale-[1.02] hover:shadow-[0_0_80px_rgba(16,185,129,0.6)] cursor-pointer' 
+                    : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'}`}
               >
-                <span className="relative z-10">{inRange ? 'AUTHORIZE SCAN' : 'ADJUST DISTANCE'}</span>
-                {inRange && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-300/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>}
+                <span className="relative z-10">{canAuthorize ? 'AUTHORIZE SCAN' : (cameraReady ? 'DETECTING FACE...' : 'CONNECTING CAMERA...')}</span>
+                {canAuthorize && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-300/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>}
               </button>
             ) : (
               <div className="w-full p-10 md:p-14 glass rounded-[3.5rem] text-center border-2 border-cyan-500/20 flex items-center justify-center gap-10 bg-black/40 shadow-inner">

@@ -10,7 +10,7 @@ interface Props {
 
 const ColorVisionIntro: React.FC<Props> = ({ lang, onStart }) => {
     const t = translations[lang];
-    const [countdown, setCountdown] = useState(5);
+    const [countdown, setCountdown] = useState(3);
 
     useEffect(() => {
         if (countdown <= 0) {

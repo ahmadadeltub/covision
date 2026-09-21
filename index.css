@@ -4,25 +4,26 @@
 
 /* Theme Variables */
 :root {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
+  /* ── Light Mode (default) ── */
+  --bg-primary: #f0f4f8;
+  --bg-secondary: #ffffff;
   --bg-card: #ffffff;
-  --bg-card-hover: #f1f5f9;
+  --bg-card-hover: #f8fafc;
   --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --text-secondary: #374151;
+  --text-muted: #6b7280;
   --border-color: #e2e8f0;
-  --accent: #0ea5e9;
-  --accent-light: #38bdf8;
-  --accent-bg: rgba(14, 165, 233, 0.08);
-  --success: #10b981;
+  --accent: #0284c7;
+  --accent-light: #0ea5e9;
+  --accent-bg: rgba(2, 132, 199, 0.08);
+  --success: #059669;
   --success-bg: #ecfdf5;
-  --warning: #f59e0b;
+  --warning: #d97706;
   --warning-bg: #fffbeb;
-  --danger: #ef4444;
+  --danger: #dc2626;
   --danger-bg: #fef2f2;
-  --shadow: 0 1px 4px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.05);
+  --shadow-lg: 0 4px 24px rgba(0,0,0,0.08), 0 1px 6px rgba(0,0,0,0.04);
   --radius: 16px;
   --radius-sm: 10px;
   --radius-lg: 24px;
@@ -758,7 +759,7 @@ body {
   display: none !important;
 }
 
-/* ----- KEEP DARK THEME FOR PDF ----- */
+/* ----- CLEAN WHITE THEME FOR PDF ----- */
 .exporting-pdf *,
 .exporting-pdf *::before,
 .exporting-pdf *::after {
@@ -766,43 +767,44 @@ body {
   print-color-adjust: exact !important;
 }
 
-/* Force dark background to render */
+/* Force pure white background for PDF capture */
 .exporting-pdf body {
-  background: #0c0f1a !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
 }
 
-/* Keep the glass/card backgrounds dark */
 .exporting-pdf .glass {
-  background: rgba(15, 23, 42, 0.6) !important;
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
 }
 
 .exporting-pdf [style*="var(--bg-card)"] {
-  background-color: #1e2337 !important;
+  background-color: #ffffff !important;
 }
 
 .exporting-pdf .bg-slate-800\/50 {
-  background-color: rgba(30, 41, 59, 0.5) !important;
-}
-
-.exporting-pdf .bg-cyan-600 {
-  background-color: #0891b2 !important;
+  background-color: #f8fafc !important;
 }
 
 /* Responsive */
 /* ============================================
    MOBILE APP MODE (≤768px)
    Makes the entire website feel like a native app
+   Fits any mobile screen size
    ============================================ */
 @media (max-width: 768px) {
 
-  /* ─── Layout ─── */
+  /* ─── Safe-area & Layout ─── */
   .app-wrapper {
     min-height: 100vh;
     min-height: -webkit-fill-available;
+    min-height: 100dvh;
   }
 
   .app-header {
-    padding: 8px 12px;
+    padding: 8px 14px;
+    padding-left: max(14px, env(safe-area-inset-left));
+    padding-right: max(14px, env(safe-area-inset-right));
     position: sticky;
     top: 0;
   }
@@ -816,7 +818,10 @@ body {
   }
 
   .app-main {
-    padding: 8px;
+    padding: 10px;
+    padding-left: max(10px, env(safe-area-inset-left));
+    padding-right: max(10px, env(safe-area-inset-right));
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
     align-items: flex-start;
   }
 
@@ -833,21 +838,23 @@ body {
 
   /* ─── Buttons — touch-friendly 44px minimum ─── */
   .btn {
-    padding: 10px 18px;
+    padding: 12px 20px;
     font-size: 14px;
     border-radius: 10px;
     min-height: 44px;
   }
 
   .btn-lg {
-    padding: 12px 24px;
+    padding: 14px 24px;
     font-size: 16px;
+    min-height: 48px;
   }
 
   .btn-xl {
     padding: 14px 24px;
     font-size: 16px;
     border-radius: 14px;
+    min-height: 52px;
   }
 
   /* ─── Camera Preview ─── */
@@ -956,6 +963,7 @@ body {
   .distance-indicator {
     font-size: 12px !important;
     padding: 4px 10px !important;
+    top: max(62px, calc(56px + env(safe-area-inset-top))) !important;
   }
 
   /* ─── Prevent any horizontal overflow ─── */
@@ -966,7 +974,71 @@ body {
   body {
     overflow-x: hidden;
   }
+
+  /* ─── Input font size — prevent iOS zoom on focus ─── */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
 }
+
+/* ─── Extra small phones (≤390px — iPhone SE, Galaxy A series) ─── */
+@media (max-width: 390px) {
+  .app-header {
+    padding: 6px 10px;
+  }
+
+  .app-main {
+    padding: 8px;
+  }
+
+  .card {
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .btn {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  h1 { font-size: clamp(16px, 4.5vw, 22px) !important; }
+  h2 { font-size: clamp(14px, 4vw, 18px) !important; }
+  h3 { font-size: clamp(13px, 3.5vw, 16px) !important; }
+
+  [class*="text-6xl"],
+  [class*="text-7xl"],
+  [class*="text-8xl"],
+  [class*="text-9xl"] {
+    font-size: 1.6rem !important;
+  }
+
+  [class*="text-5xl"] {
+    font-size: 1.3rem !important;
+  }
+
+  [class*="text-4xl"] {
+    font-size: 1.1rem !important;
+  }
+}
+
+/* ─── Landscape phones ─── */
+@media (max-height: 500px) and (max-width: 900px) {
+  .app-main {
+    padding: 4px 10px;
+  }
+
+  .card-lg {
+    padding: 10px 14px;
+  }
+
+  [class*="py-8"],
+  [class*="py-10"],
+  [class*="py-12"] {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+  }
+}
+
 
 /* ============================================
    LIGHT THEME OVERRIDES
@@ -975,11 +1047,11 @@ body {
 
 /* Extra CSS variables for light theme */
 :root {
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --card-dark-bg: rgba(255, 255, 255, 0.85);
-  --card-dark-border: rgba(0, 0, 0, 0.1);
-  --overlay-bg: rgba(255, 255, 255, 0.9);
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.07);
+  --card-dark-bg: rgba(255, 255, 255, 0.95);
+  --card-dark-border: rgba(0, 0, 0, 0.08);
+  --overlay-bg: rgba(255, 255, 255, 0.95);
   --progress-bg: #e2e8f0;
   --camera-bg: #1e293b;
 }
@@ -997,25 +1069,25 @@ body {
 /* ─── Light Theme: Container Backgrounds ─── */
 [data-theme="light"] .bg-slate-950\/20,
 [data-theme="light"] .bg-slate-950\/40 {
-  background-color: rgba(241, 245, 249, 0.5) !important;
+  background-color: rgba(241, 245, 249, 0.6) !important;
 }
 
 [data-theme="light"] .bg-slate-900\/60,
 [data-theme="light"] .bg-slate-900\/40,
 [data-theme="light"] .bg-slate-900\/80,
 [data-theme="light"] .bg-slate-900 {
-  background-color: rgba(248, 250, 252, 0.9) !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
 }
 
 [data-theme="light"] .bg-slate-800\/90,
 [data-theme="light"] .bg-slate-800\/80,
 [data-theme="light"] .bg-slate-800\/60,
 [data-theme="light"] .bg-slate-800 {
-  background-color: #e2e8f0 !important;
+  background-color: #f1f5f9 !important;
 }
 
 [data-theme="light"] .bg-slate-700 {
-  background-color: #cbd5e1 !important;
+  background-color: #e2e8f0 !important;
 }
 
 /* Camera/video backgrounds should stay dark */
@@ -1037,15 +1109,15 @@ body {
 }
 
 [data-theme="light"] .bg-black\/50 {
-  background-color: rgba(241, 245, 249, 0.9) !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
 }
 
 [data-theme="light"] .bg-black\/40 {
-  background-color: rgba(241, 245, 249, 0.85) !important;
+  background-color: rgba(248, 250, 252, 0.92) !important;
 }
 
 [data-theme="light"] .bg-black\/20 {
-  background-color: rgba(241, 245, 249, 0.5) !important;
+  background-color: rgba(248, 250, 252, 0.6) !important;
 }
 
 /* ─── Light Theme: Text Colors ─── */
@@ -1055,12 +1127,12 @@ body {
 
 [data-theme="light"] .text-white\/70,
 [data-theme="light"] .text-white\/80 {
-  color: rgba(15, 23, 42, 0.7) !important;
+  color: rgba(15, 23, 42, 0.65) !important;
 }
 
 [data-theme="light"] .text-white\/30,
 [data-theme="light"] .text-white\/50 {
-  color: rgba(15, 23, 42, 0.35) !important;
+  color: rgba(15, 23, 42, 0.4) !important;
 }
 
 /* Exceptions — text on colored/dark backgrounds should stay white */
@@ -1090,66 +1162,67 @@ body {
 
 /* Slate text gets darker contrast in light mode */
 [data-theme="light"] .text-slate-400 {
-  color: #475569 !important;
+  color: #4b5563 !important;
 }
 
 [data-theme="light"] .text-slate-500 {
-  color: #64748b !important;
+  color: #374151 !important;
 }
 
 [data-theme="light"] .text-slate-600 {
-  color: #475569 !important;
+  color: #374151 !important;
 }
 
 [data-theme="light"] .text-slate-700 {
-  color: #334155 !important;
+  color: #1f2937 !important;
 }
 
 [data-theme="light"] .text-slate-800 {
-  color: #1e293b !important;
+  color: #111827 !important;
 }
 
 [data-theme="light"] .text-slate-300 {
-  color: #334155 !important;
+  color: #374151 !important;
 }
 
 /* ─── Light Theme: Borders ─── */
 [data-theme="light"] .border-white\/5,
 [data-theme="light"] .border-white\/10,
 [data-theme="light"] .border-white\/20 {
-  border-color: rgba(0, 0, 0, 0.1) !important;
+  border-color: rgba(0, 0, 0, 0.09) !important;
 }
 
 [data-theme="light"] .border-white\/30 {
-  border-color: rgba(0, 0, 0, 0.15) !important;
+  border-color: rgba(0, 0, 0, 0.13) !important;
 }
 
 [data-theme="light"] .border-slate-700\/30,
 [data-theme="light"] .border-slate-700\/50 {
-  border-color: rgba(0, 0, 0, 0.12) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
 }
 
 /* ─── Light Theme: Glass Effect ─── */
 [data-theme="light"] .glass {
   background: var(--glass-bg) !important;
   border-color: var(--glass-border) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
 }
 
 /* ─── Light Theme: Shadows ─── */
-[data-theme="light"] [class*="shadow-\\[0_0_150px"] {
-  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.08) !important;
+[data-theme="light"] [class*="shadow-\[0_0_150px"] {
+  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.07) !important;
 }
 
-[data-theme="light"] [class*="shadow-\\[0_0_100px"] {
+[data-theme="light"] [class*="shadow-\[0_0_100px"] {
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.06) !important;
 }
 
 [data-theme="light"] .shadow-2xl {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.09) !important;
 }
 
 [data-theme="light"] .shadow-xl {
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07) !important;
 }
 
 /* ─── Light Theme: Progress Bars ─── */
@@ -1159,27 +1232,56 @@ body {
   background-color: #e2e8f0 !important;
 }
 
-/* ─── Light Theme: Header ─── */
+/* ─── Light Theme: Header — crisp white bar ─── */
 [data-theme="light"] .app-header {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
-  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.97) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.07) !important;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 /* ─── Light Theme: Distance Indicator ─── */
 [data-theme="light"] .distance-indicator {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border-color: rgba(0, 0, 0, 0.12) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08) !important;
 }
 
-/* ─── Light Theme: Particle Background ─── */
-[data-theme="light"] .app-wrapper>canvas:first-of-type {
-  opacity: 0.3 !important;
+/* ─── Light Theme: Particle Background — subtle ─── */
+[data-theme="light"] .app-wrapper > canvas:first-of-type {
+  opacity: 0.15 !important;
 }
 
 /* ─── Light Theme: Scrollbar ─── */
 [data-theme="light"] ::-webkit-scrollbar-thumb {
-  background: #94a3b8 !important;
+  background: #cbd5e1 !important;
+}
+
+/* ─── Light Theme: Cards & Surfaces ─── */
+[data-theme="light"] .card {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 14px rgba(0,0,0,0.05) !important;
+}
+
+[data-theme="light"] .card:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
+}
+
+/* ─── Light Theme: Input fields ─── */
+[data-theme="light"] .input-field {
+  background: #ffffff !important;
+  border-color: #d1d5db !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .input-field:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12) !important;
+}
+
+/* ─── Light Theme: App Background ─── */
+[data-theme="light"] .app-wrapper {
+  background: linear-gradient(135deg, #f0f4f8 0%, #e8f0fe 40%, #f0f4f8 100%) !important;
 }
 
 /* ─── Light Theme: Specific Components ─── */

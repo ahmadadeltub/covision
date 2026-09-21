@@ -31,12 +31,13 @@ const ResultsDashboard: React.FC<Props> = ({ lang, t, results, onReset }) => {
   const generateAiReport = async () => {
     setLoadingAi(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const apiKey = (import.meta as any).env.VITE_GEMINI_API_KEY || process.env.API_KEY || '';
+      const ai = new GoogleGenAI({ apiKey });
       const testSummary = results.map(r => `${r.testName}: ${r.score}/${r.total}`).join('\n');
       const prompt = `Act as a senior ophthalmologist. Analyze these results: ${testSummary}. Provide 3 short paragraphs: Assessment, Anomalies, Recommendation. Keep it professional and concise. End with a medical disclaimer. Use English.`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-3.6-flash',
         contents: prompt
       });
       setAiInsight(response.text || 'Diagnostic report unavailable.');

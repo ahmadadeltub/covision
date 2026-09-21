@@ -34,8 +34,8 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, distanceM: propDistanc
     const [currentPlateIndex, setCurrentPlateIndex] = useState(0);
     const [coverCountdown, setCoverCountdown] = useState<number | null>(null);
 
-    // Deck
-    const plates = useMemo(() => generateDeck(5), []);
+    // Deck (3 plates)
+    const plates = useMemo(() => generateDeck(3), []);
 
     // Answers
     const [answers, setAnswers] = useState<ColorPlateAnswer[]>([]);
@@ -110,7 +110,7 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, distanceM: propDistanc
 
     // ─── Polling loop for eye cover detection ───
     useEffect(() => {
-        const isTesting = step === 'testing_right' || step === 'testing_left';
+        const isTesting = step === 'testing';
         if (!isTesting || !stream) return;
         let stopped = false;
         const detect = () => {
@@ -154,13 +154,13 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, distanceM: propDistanc
             setFeedback(null);
             setAnswers(prev => {
                 const updated = [...prev, newAnswer];
-                if (currentPlateIndex >= 4) {
+                if (currentPlateIndex >= 2) {
                     setTimeout(() => finishTest(updated), 0);
                 }
                 return updated;
             });
 
-            if (currentPlateIndex < 4) {
+            if (currentPlateIndex < 2) {
                 setCurrentPlateIndex(prev => prev + 1);
             }
         }, 1000);
@@ -174,7 +174,7 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, distanceM: propDistanc
         let classification: ColorVisionResult['classification'];
         let classificationLabel: string;
 
-        if (correct >= 4) {
+        if (correct >= 3) {
             classification = 'normal';
             classificationLabel = t.normal_vision;
         } else if (correct >= 2) {
@@ -186,19 +186,20 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, distanceM: propDistanc
         }
 
         onComplete({
-            testName: 'Ishihara Color Vision',
+            answers: finalAnswers,
             totalPlates,
+            totalCorrect: correct,
             scoreRight: correct,
             scoreLeft: correct,
-            totalRight: 5,
-            totalLeft: 5,
+            totalRight: 3,
+            totalLeft: 3,
             classification,
             classificationLabel,
         });
     };
 
     // Calculate progress for current step
-    const progress = ((currentPlateIndex + 1) / 5) * 100;
+    const progress = ((currentPlateIndex + 1) / 3) * 100;
 
     // Voice commands mapping
     const isTesting = step === 'testing';
@@ -229,7 +230,7 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, distanceM: propDistanc
         isActive: isTesting,
     });
 
-    const [introCountdown, setIntroCountdown] = useState(5);
+    const [introCountdown, setIntroCountdown] = useState(3);
 
     useEffect(() => {
         if (step !== 'intro') return;
@@ -262,7 +263,7 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, distanceM: propDistanc
                                 : 'bg-emerald-500/80 text-white border border-emerald-400'
                         }`}>
                             {isEyeUncovered
-                                ? `⚠️ Cover your ${step === 'testing_right' ? 'LEFT' : 'RIGHT'} eye!`
+                                ? `⚠️ Please cover one eye!`
                                 : `✅ Eye covered (${coverConfidence}%)`
                             }
                         </div>
@@ -281,7 +282,7 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, distanceM: propDistanc
                             <div className="h-px bg-white/5"></div>
                             <div className="flex items-center justify-between">
                                 <span className="text-[10px] text-slate-500 uppercase font-bold">Progress</span>
-                                <span className="text-sm font-black text-white">{currentPlateIndex + 1}/5</span>
+                                <span className="text-sm font-black text-white">{currentPlateIndex + 1}/3</span>
                             </div>
                             <div className="flex items-center justify-center pt-1">
                                 <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">

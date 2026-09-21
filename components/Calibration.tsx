@@ -35,6 +35,11 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
   }, [stream, videoRef]);
 
   // ─── Draw face mesh overlay from useFaceDistance landmarks ───
+  const distanceMRef = useRef(distanceM);
+  useEffect(() => {
+    distanceMRef.current = distanceM;
+  }, [distanceM]);
+
   useEffect(() => {
     if (!faceLandmarksRef) return;
     let stopped = false;
@@ -52,18 +57,10 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
         if (ctx) {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           const lm = faceLandmarksRef.current;
-          const effectiveDistanceM = distanceM > 0 ? distanceM : TARGET_M;
+          const liveDist = (window as any).__covisionCurrentDistance || distanceMRef.current || distanceM;
 
           if (lm && lm.length > 0) {
-            drawBodyOverlay(ctx, lm, canvas.width, canvas.height, effectiveDistanceM);
-          }
-
-          // Draw Hands
-          const handsLm = handLandmarksRef?.current;
-          if (handsLm && handsLm.length > 0) {
-            handsLm.forEach((hand) => {
-              drawHandMesh(ctx, hand, canvas.width, canvas.height, effectiveDistanceM);
-            });
+            drawFaceOverlay(ctx, lm, canvas.width, canvas.height, liveDist);
           }
         }
       }
@@ -71,283 +68,486 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
     };
     loop();
     return () => { stopped = true; };
-  }, [faceLandmarksRef, handLandmarksRef, videoRef]);
+  }, [faceLandmarksRef, videoRef]);
 
-  // ─── Hand Mesh Drawing ───
-  const drawHandMesh = (ctx: CanvasRenderingContext2D, landmarks: any[], w: number, h: number, distM: number) => {
+  const lastAnglesRef = useRef({ yaw: 0, pitch: 0, roll: 0, dist: 1.0 });
+
+  // ─── Year 2526 Quantum AI Neural Biometric Face Mesh (500 Years in Future) ───
+  const drawFaceOverlay = (ctx: CanvasRenderingContext2D, landmarks: any[], w: number, h: number, distM: number) => {
+    const time = Date.now() / 1000;
+    const pulse = Math.sin(time * 3.2) * 0.15 + 0.85;
+    const pulseFast = Math.sin(time * 8.0) * 0.25 + 0.75;
+    const distScale = Math.max(0.4, Math.min(1.25, 1.5 - (distM * 0.45)));
+
+    // 3-Axis Head Pose Attitude (Yaw, Pitch, Roll)
+    let yawDeg = 0;
+    let pitchDeg = 0;
+    let rollDeg = 0;
+    if (landmarks[33] && landmarks[263] && landmarks[1]) {
+      const dEyeX = (landmarks[263].x - landmarks[33].x) * w;
+      const dEyeY = (landmarks[263].y - landmarks[33].y) * h;
+      rollDeg = Math.round((Math.atan2(dEyeY, dEyeX) * 180) / Math.PI);
+
+      const eyeMidX = (landmarks[33].x + landmarks[263].x) / 2;
+      const eyeSpan = Math.abs(landmarks[263].x - landmarks[33].x);
+      if (eyeSpan > 0.01) {
+        yawDeg = Math.round(((landmarks[1].x - eyeMidX) / eyeSpan) * 90);
+      }
+    }
+    if (landmarks[10] && landmarks[152] && landmarks[1]) {
+      const faceHeight = Math.abs(landmarks[152].y - landmarks[10].y);
+      const noseRelY = (landmarks[1].y - landmarks[10].y) / (faceHeight || 1);
+      pitchDeg = Math.round((noseRelY - 0.6) * 100);
+    }
+    // Dynamic real-time optical distance and IPD computation from MediaPipe iris landmarks (468, 473)
+    let dynamicDistM = distM > 0 ? distM : ((window as any).__covisionCurrentDistance || 0);
+    let liveIpdMm = 63.0;
+    if (landmarks[468] && landmarks[473]) {
+      const dx = (landmarks[473].x - landmarks[468].x) * w;
+      const dy = (landmarks[473].y - landmarks[468].y) * h;
+      const eyeDistPx = Math.hypot(dx, dy);
+      const fl = w * 0.7413;
+      if (eyeDistPx > 5 && fl > 0) {
+        const estFromGeometry = (fl * 0.063) / eyeDistPx;
+        if (dynamicDistM <= 0.05 || !isFinite(dynamicDistM)) {
+          dynamicDistM = estFromGeometry;
+        }
+        if (dynamicDistM > 0.25) {
+          const estMm = (eyeDistPx * dynamicDistM / fl) * 1000;
+          liveIpdMm = Math.round(Math.max(56, Math.min(72, estMm)) * 10) / 10;
+        }
+      }
+    }
+    if (dynamicDistM <= 0 || !isFinite(dynamicDistM)) dynamicDistM = 1.00;
+
+    // Smooth head pose attitude & distance to eliminate jitter
+    const smoothYaw = Math.round(lastAnglesRef.current.yaw * 0.75 + yawDeg * 0.25);
+    const smoothPitch = Math.round(lastAnglesRef.current.pitch * 0.75 + pitchDeg * 0.25);
+    const smoothRoll = Math.round(lastAnglesRef.current.roll * 0.75 + rollDeg * 0.25);
+    const smoothedDist = lastAnglesRef.current.dist * 0.7 + dynamicDistM * 0.3;
+    lastAnglesRef.current = { yaw: smoothYaw, pitch: smoothPitch, roll: smoothRoll, dist: smoothedDist };
+
+    const yawStr = (smoothYaw > 0 ? '+' : '') + smoothYaw;
+    const pitchStr = (smoothPitch > 0 ? '+' : '') + smoothPitch;
+    const rollStr = (smoothRoll > 0 ? '+' : '') + smoothRoll;
+    dynamicDistM = Math.round(smoothedDist * 100) / 100;
+
+    // ─────────────────────────────────────────────────────────────
+    // PART A: REFERENCE-MATCHED STREAMLINE & DOTTED NODE MATRIX (Mirrored Space)
+    // ─────────────────────────────────────────────────────────────
     ctx.save();
     ctx.scale(-1, 1);
     ctx.translate(-w, 0);
+
+    ctx.globalCompositeOperation = 'lighter';
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    const time = Date.now() / 1000;
-    const pulse = Math.sin(time * 5) * 0.2 + 0.8; // Faster pulse for hands
+    // Helper: Draw smooth curved spline with delicate micro-node dots (Clean, non-bold, modern)
+    const drawStreamlineWithDots = (
+      pts: Array<{ x: number; y: number } | null | undefined>,
+      lineColor: string,
+      lineWidth: number,
+      dotColor: string,
+      dotRadius: number,
+      dotSpacing: number,
+      showLine = true
+    ) => {
+      const validPts = pts.filter((p): p is { x: number; y: number } => !!p && isFinite(p.x) && isFinite(p.y));
+      if (validPts.length < 2) return;
 
-    // Scale thickness based on distance (closer = thicker, 2m away = thinner)
-    const distScale = Math.max(0.3, Math.min(1.5, 1.8 - (distM * 0.5)));
+      // 1. Smooth fine spline curve (sleek, non-bold line)
+      if (showLine) {
+        ctx.beginPath();
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = lineWidth * distScale;
+        ctx.shadowBlur = 3 * distScale;
+        ctx.shadowColor = '#0000FF';
+        ctx.moveTo(validPts[0].x * w, validPts[0].y * h);
+        for (let i = 1; i < validPts.length - 1; i++) {
+          const xc = ((validPts[i].x + validPts[i + 1].x) / 2) * w;
+          const yc = ((validPts[i].y + validPts[i + 1].y) / 2) * h;
+          ctx.quadraticCurveTo(validPts[i].x * w, validPts[i].y * h, xc, yc);
+        }
+        ctx.lineTo(validPts[validPts.length - 1].x * w, validPts[validPts.length - 1].y * h);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
 
-    const drawLine = (i1: number, i2: number, color: string, baseLw: number) => {
-      const p1 = landmarks[i1], p2 = landmarks[i2];
-      if (!p1 || !p2 || p1.visibility < 0.1 || p2.visibility < 0.1) return;
-      const lw = baseLw * distScale;
+      // 2. Delicate glowing micro-nodes spaced along the path (BATCHED GPU DRAW CALL)
+      const r = dotRadius * distScale;
+      ctx.save();
+      ctx.fillStyle = dotColor;
+      ctx.shadowBlur = 4 * distScale;
+      ctx.shadowColor = '#0000FF';
       ctx.beginPath();
-      ctx.lineWidth = lw;
-      ctx.strokeStyle = color;
-      ctx.shadowBlur = lw * 2;
-      ctx.shadowColor = color;
-      ctx.moveTo(p1.x * w, p1.y * h);
-      ctx.lineTo(p2.x * w, p2.y * h);
+      for (let i = 0; i < validPts.length - 1; i++) {
+        const p1x = validPts[i].x * w, p1y = validPts[i].y * h;
+        const p2x = validPts[i + 1].x * w, p2y = validPts[i + 1].y * h;
+        const segLen = Math.hypot(p2x - p1x, p2y - p1y);
+        const numDots = Math.max(1, Math.floor(segLen / (dotSpacing * distScale)));
+
+        for (let s = 0; s < numDots; s++) {
+          const t = s / numDots;
+          const nx = p1x + (p2x - p1x) * t;
+          const ny = p1y + (p2y - p1y) * t;
+          ctx.moveTo(nx + r, ny);
+          ctx.arc(nx, ny, r, 0, Math.PI * 2);
+        }
+      }
+      const last = validPts[validPts.length - 1];
+      ctx.moveTo(last.x * w + r, last.y * h);
+      ctx.arc(last.x * w, last.y * h, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    };
+
+    // Modern Refined Palette: Pure Cyber Blue filaments with glowing Cyan/White micro-nodes
+    const cLineBlue = `rgba(0, 70, 255, ${0.70 * pulse})`;
+    const cLineBrightBlue = `rgba(0, 130, 255, ${0.85 * pulse})`;
+    const cDotCyan = `rgba(0, 240, 255, ${0.90 * pulse})`;
+    const cDotWhite = '#ffffff';
+
+    // ── 1. Forehead / Brow Contours (Simple & Architectural) ──
+    const foreheadRib1 = [54, 103, 67, 109, 10, 338, 297, 332, 284].map(i => landmarks[i]);
+    const foreheadRib2 = [70, 63, 105, 66, 8, 296, 334, 293, 300].map(i => landmarks[i]);
+    drawStreamlineWithDots(foreheadRib1, cLineBrightBlue, 0.85, cDotWhite, 1.0, 20);
+    drawStreamlineWithDots(foreheadRib2, cLineBlue, 0.75, cDotCyan, 0.9, 22);
+
+    // ── 2. Nasal Centerline & Tip Loop ──
+    const nasalMidline = [168, 6, 197, 195, 5, 4, 1, 19, 94, 2].map(i => landmarks[i]);
+    const nasalTipLoop = [98, 97, 2, 326, 327].map(i => landmarks[i]);
+    drawStreamlineWithDots(nasalMidline, cLineBrightBlue, 0.9, cDotWhite, 1.0, 16);
+    drawStreamlineWithDots(nasalTipLoop, cLineBlue, 0.8, cDotCyan, 0.9, 14);
+
+    // ── 3. Cheeks & Mid-Face Contours (Clean 3D Facial Structure) ──
+    const cheekVertR1 = [143, 111, 117, 118, 100, 47, 50, 205, 187, 147, 150].map(i => landmarks[i]);
+    const cheekVertR2 = [127, 234, 93, 132, 58, 172, 136, 150, 149, 176].map(i => landmarks[i]);
+    const cheekVertL1 = [372, 340, 346, 347, 329, 277, 280, 425, 411, 376, 379].map(i => landmarks[i]);
+    const cheekVertL2 = [356, 454, 323, 361, 288, 397, 365, 379, 378, 400].map(i => landmarks[i]);
+    drawStreamlineWithDots(cheekVertR1, cLineBlue, 0.75, cDotCyan, 0.9, 18);
+    drawStreamlineWithDots(cheekVertR2, cLineBlue, 0.75, cDotCyan, 0.9, 18);
+    drawStreamlineWithDots(cheekVertL1, cLineBlue, 0.75, cDotCyan, 0.9, 18);
+    drawStreamlineWithDots(cheekVertL2, cLineBlue, 0.75, cDotCyan, 0.9, 18);
+
+    // Infraorbital Zygomatic Curve
+    const infraOrbital = [116, 123, 147, 213, 192, 4, 416, 433, 376, 352, 345].map(i => landmarks[i]);
+    drawStreamlineWithDots(infraOrbital, cLineBrightBlue, 0.85, cDotWhite, 1.0, 18);
+
+    // ── 4. Outer Mandibular Jaw Silhouette & Chin ──
+    const jawContour = [234, 127, 162, 21, 54, 103, 67, 109, 10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234].map(i => landmarks[i]);
+    drawStreamlineWithDots(jawContour, '#0000FF', 1.0, cDotWhite, 1.1, 20);
+
+    const chinArcs = [172, 136, 150, 149, 176, 148, 152, 377, 400, 378, 379, 365, 397].map(i => landmarks[i]);
+    drawStreamlineWithDots(chinArcs, cLineBrightBlue, 0.85, cDotCyan, 0.95, 16);
+
+    // ── 5. Perioral Lips Contour ──
+    const outerLips = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146, 61].map(i => landmarks[i]);
+    drawStreamlineWithDots(outerLips, cLineBrightBlue, 0.85, cDotWhite, 1.0, 16);
+
+    // ── 6. Minimalist Collar Arcs (3 subtle rings) ──
+    const pForehead = landmarks[10];
+    const pChin = landmarks[152];
+    const pLeftEar = landmarks[234];
+    const pRightEar = landmarks[454];
+
+    if (pChin && pLeftEar && pRightEar) {
+      const jawWidth = Math.abs(pRightEar.x - pLeftEar.x);
+      const neckCenterX = (pLeftEar.x + pRightEar.x) / 2;
+      const neckBaseY = pChin.y;
+
+      for (let r = 1; r <= 3; r++) {
+        const ringY = neckBaseY + r * 0.030;
+        if (ringY > 1.02) break;
+        const halfSpan = (jawWidth * 0.38) * (1.0 + r * 0.08);
+        const dip = (9 + r * 2.5) * distScale;
+
+        const ringPts = [];
+        for (let s = 0; s <= 8; s++) {
+          const t = s / 8;
+          const px = (neckCenterX - halfSpan) + 2 * halfSpan * t;
+          const py = ringY + (Math.sin(t * Math.PI) * dip / h);
+          ringPts.push({ x: px, y: py });
+        }
+        drawStreamlineWithDots(ringPts, cLineBlue, 0.75, cDotCyan, 0.9, 20);
+      }
+    }
+
+    // ── 7. Luminous Modern AI Eyes (Refined, Non-Bold) ──
+    const drawRadiantEye = (centerIdx: number, palpebralIndices: number[]) => {
+      const pCenter = landmarks[centerIdx];
+      if (!pCenter) return;
+      const cx = pCenter.x * w;
+      const cy = pCenter.y * h;
+
+      // Palpebral Almond Eyelid Outline (sleek, non-bold)
+      const eyePts = palpebralIndices.map(i => landmarks[i]).filter(Boolean);
+      if (eyePts.length > 2) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(eyePts[0].x * w, eyePts[0].y * h);
+        for (let i = 1; i < eyePts.length; i++) {
+          ctx.lineTo(eyePts[i].x * w, eyePts[i].y * h);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.lineWidth = 1.1 * distScale;
+        ctx.shadowBlur = 8 * distScale;
+        ctx.shadowColor = '#00f0ff';
+        ctx.stroke();
+
+        ctx.fillStyle = `rgba(0, 180, 255, ${0.10 * pulse})`;
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Modern iris aperture rings
+      const rOuter = 13 * distScale;
+      const rInner = 3.5 * distScale;
+
+      ctx.save();
+      // Outer limbal ring
+      ctx.beginPath();
+      ctx.arc(cx, cy, rOuter, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(0, 220, 255, ${0.85 * pulse})`;
+      ctx.lineWidth = 0.9 * distScale;
+      ctx.shadowBlur = 8 * distScale;
+      ctx.shadowColor = '#00f0ff';
+      ctx.stroke();
+
+      // Inner glowing core beacon
+      ctx.beginPath();
+      ctx.arc(cx, cy, rInner, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowBlur = 10 * distScale;
+      ctx.shadowColor = '#00f0ff';
+      ctx.fill();
+
+      // Fine crosshair
+      ctx.beginPath();
+      ctx.moveTo(cx - 5 * distScale, cy); ctx.lineTo(cx + 5 * distScale, cy);
+      ctx.moveTo(cx, cy - 5 * distScale); ctx.lineTo(cx, cy + 5 * distScale);
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.8)';
+      ctx.lineWidth = 0.8 * distScale;
+      ctx.stroke();
+      ctx.restore();
+    };
+
+    const rightEyeIndices = [33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161, 246, 33];
+    const leftEyeIndices = [263, 249, 390, 373, 374, 380, 381, 382, 362, 398, 384, 385, 386, 387, 388, 466, 263];
+    drawRadiantEye(468, rightEyeIndices);
+    drawRadiantEye(473, leftEyeIndices);
+
+    // ── 8. Minimalist IPD Caliper ──
+    const pR = landmarks[468];
+    const pL = landmarks[473];
+    if (pR && pL) {
+      const rx = pR.x * w, ry = pR.y * h;
+      const lx = pL.x * w, ly = pL.y * h;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(rx, ry);
+      ctx.lineTo(lx, ly);
+      ctx.strokeStyle = '#0000FF';
+      ctx.lineWidth = 1.0 * distScale;
+      ctx.shadowBlur = 6 * distScale;
+      ctx.shadowColor = '#0000FF';
+      ctx.stroke();
+
+      const capH = 5 * distScale;
+      ctx.beginPath();
+      ctx.moveTo(rx, ry - capH); ctx.lineTo(rx, ry + capH);
+      ctx.moveTo(lx, ly - capH); ctx.lineTo(lx, ly + capH);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.0 * distScale;
+      ctx.stroke();
+      ctx.restore();
+
+      const midX = (rx + lx) / 2;
+      const midY = (ry + ly) / 2 - 13 * distScale;
+      const ipdText = `IPD ${liveIpdMm.toFixed(1)}mm`;
+
+      ctx.save();
+      ctx.font = `600 ${Math.max(10, Math.round(11 * distScale))}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`;
+      const ipdTw = ctx.measureText(ipdText).width;
+      const ipdBoxW = ipdTw + 14 * distScale;
+      const ipdBoxH = 16 * distScale;
+
+      ctx.fillStyle = 'rgba(4, 8, 28, 0.88)';
+      ctx.beginPath();
+      ctx.roundRect(midX - ipdBoxW / 2, midY - ipdBoxH / 2, ipdBoxW, ipdBoxH, 5);
+      ctx.fill();
+      ctx.strokeStyle = '#0000FF';
+      ctx.lineWidth = 1.0;
+      ctx.shadowBlur = 6 * distScale;
+      ctx.shadowColor = '#0000FF';
       ctx.stroke();
       ctx.shadowBlur = 0;
-    };
 
-    const drawJoint = (i: number, baseR: number, color: string) => {
-      const p = landmarks[i];
-      if (!p || p.visibility < 0.1) return;
-      const r = baseR * distScale;
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(ipdText, midX, midY);
+      ctx.restore();
+    }
+
+    // ── 9. Delicate Laser Scan Tracer ──
+    const pTop = landmarks[10];
+    const pBottom = landmarks[152];
+    const pLeft = landmarks[234];
+    const pRight = landmarks[454];
+
+    if (pTop && pBottom && pLeft && pRight) {
+      const yMin = pTop.y * h;
+      const yMax = pBottom.y * h;
+      const xMin = Math.min(pLeft.x, pRight.x) * w - (16 * distScale);
+      const xMax = Math.max(pLeft.x, pRight.x) * w + (16 * distScale);
+
+      const sweepT = (Math.sin(time * 2.4) + 1) / 2;
+      const scanY = yMin + sweepT * (yMax - yMin);
+
+      const gradH = 16 * distScale;
+      const grad = ctx.createLinearGradient(0, scanY - gradH, 0, scanY + gradH);
+      grad.addColorStop(0, 'rgba(0, 0, 255, 0)');
+      grad.addColorStop(0.5, `rgba(0, 150, 255, ${0.18 * pulseFast})`);
+      grad.addColorStop(1, 'rgba(0, 0, 255, 0)');
+
+      ctx.fillStyle = grad;
+      ctx.fillRect(xMin, scanY - gradH, xMax - xMin, gradH * 2);
+
       ctx.beginPath();
-      ctx.fillStyle = color;
-      ctx.shadowBlur = r * 3;
-      ctx.shadowColor = color;
-      ctx.arc(p.x * w, p.y * h, r, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.moveTo(xMin, scanY);
+      ctx.lineTo(xMax, scanY);
+      ctx.strokeStyle = `rgba(255, 255, 255, ${0.90 * pulseFast})`;
+      ctx.lineWidth = 0.9 * distScale;
+      ctx.shadowBlur = 8 * distScale;
+      ctx.shadowColor = '#0000FF';
+      ctx.stroke();
       ctx.shadowBlur = 0;
-    };
-
-    const cLine = `rgba(0, 255, 200, ${0.8 * pulse})`;
-    const cJoint = `rgba(150, 255, 255, ${0.9 * pulse})`;
-    const cPalm = `rgba(0, 200, 255, ${0.15 * pulse})`;
-
-    // --- Fill the palm to make it a continuous glowing MESH surface ---
-    const palmIndices = [0, 1, 5, 9, 13, 17];
-    ctx.beginPath();
-    let started = false;
-    palmIndices.forEach((idx) => {
-      const p = landmarks[idx];
-      if (!p || p.visibility < 0.1) return;
-      if (!started) {
-        ctx.moveTo(p.x * w, p.y * h);
-        started = true;
-      } else {
-        ctx.lineTo(p.x * w, p.y * h);
-      }
-    });
-    ctx.closePath();
-    if (started) {
-      ctx.fillStyle = cPalm;
-      ctx.fill();
     }
 
-    // Thumb
-    drawLine(0, 1, cLine, 4); drawLine(1, 2, cLine, 4); drawLine(2, 3, cLine, 4); drawLine(3, 4, cLine, 4);
-    // Index
-    drawLine(0, 5, cLine, 4); drawLine(5, 6, cLine, 4); drawLine(6, 7, cLine, 4); drawLine(7, 8, cLine, 4);
-    // Middle
-    drawLine(9, 10, cLine, 4); drawLine(10, 11, cLine, 4); drawLine(11, 12, cLine, 4);
-    // Ring
-    drawLine(13, 14, cLine, 4); drawLine(14, 15, cLine, 4); drawLine(15, 16, cLine, 4);
-    // Pinky
-    drawLine(17, 18, cLine, 4); drawLine(18, 19, cLine, 4); drawLine(19, 20, cLine, 4);
-    // Palm Base
-    drawLine(5, 9, cLine, 4); drawLine(9, 13, cLine, 4); drawLine(13, 17, cLine, 4); drawLine(0, 17, cLine, 4);
+    ctx.restore(); // Restore mirrored space
 
-    // Draw joints
-    for (let i = 0; i < 21; i++) {
-      drawJoint(i, i === 0 ? 6 : 4, cJoint);
+    // ─────────────────────────────────────────────────────────────
+    // PART B: MODERN BLUE #0000FF FRAME & ATTITUDE HUD (Unmirrored Screen Space)
+    // ─────────────────────────────────────────────────────────────
+    let minX = 1, maxX = 0, minY = 1, maxY = 0;
+    for (let i = 0; i < landmarks.length; i += 4) {
+      const p = landmarks[i];
+      if (p.x < minX) minX = p.x;
+      if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y;
+      if (p.y > maxY) maxY = p.y;
     }
 
-    ctx.restore();
-  };
+    const boxLeft = Math.max(12, (1 - maxX) * w - (18 * distScale));
+    const boxRight = Math.min(w - 12, (1 - minX) * w + (18 * distScale));
+    const boxTop = Math.max(12, minY * h - (22 * distScale));
+    const boxBottom = Math.min(h - 12, maxY * h + (18 * distScale));
+    const bracketLen = Math.min(24 * distScale, (boxRight - boxLeft) * 0.20);
 
-  // ─── Body Mesh Drawing (DISTANCE ADAPTIVE) ───
-  const drawBodyOverlay = (ctx: CanvasRenderingContext2D, lm: any[], w: number, h: number, distM: number) => {
     ctx.save();
-    ctx.scale(-1, 1);
-    ctx.translate(-w, 0);
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+    ctx.lineCap = 'square';
+    ctx.lineWidth = 1.2 * distScale;
+    ctx.strokeStyle = '#0000FF';
+    ctx.shadowBlur = 8 * distScale;
+    ctx.shadowColor = '#0000FF';
 
-    const time = Date.now() / 1000;
-    const pulse = Math.sin(time * 3) * 0.15 + 0.85;
+    // Corner Frame Brackets (Thin & Crisp)
+    // Top-Left
+    ctx.beginPath();
+    ctx.moveTo(boxLeft, boxTop + bracketLen); ctx.lineTo(boxLeft, boxTop); ctx.lineTo(boxLeft + bracketLen, boxTop);
+    ctx.stroke();
+    // Top-Right
+    ctx.beginPath();
+    ctx.moveTo(boxRight - bracketLen, boxTop); ctx.lineTo(boxRight, boxTop); ctx.lineTo(boxRight, boxTop + bracketLen);
+    ctx.stroke();
+    // Bottom-Left
+    ctx.beginPath();
+    ctx.moveTo(boxLeft, boxBottom - bracketLen); ctx.lineTo(boxLeft, boxBottom); ctx.lineTo(boxLeft + bracketLen, boxBottom);
+    ctx.stroke();
+    // Bottom-Right
+    ctx.beginPath();
+    ctx.moveTo(boxRight - bracketLen, boxBottom); ctx.lineTo(boxRight, boxBottom); ctx.lineTo(boxRight, boxBottom - bracketLen);
+    ctx.stroke();
 
-    // Scale thickness based on distance (closer = thicker, 2m away = much thinner)
-    // At 0.5m scale is ~1.0. At 2.0m scale is ~0.4
-    const distScale = Math.max(0.3, Math.min(1.2, 1.5 - (distM * 0.45)));
+    ctx.shadowBlur = 0;
 
-    // ─── Body Skeleton (PoseLandmarker — real 33-point body detection) ───
-    const poseLm = poseLandmarksRef?.current;
-    if (poseLm && poseLm.length >= 25) {
-      const blue = `rgba(30, 100, 255, ${0.9 * pulse})`;
-      const blueGlow = `rgba(60, 140, 255, ${0.8 * pulse})`;
+    // Corner Micro-Telemetry Tags
+    const microFont = `${Math.max(8, Math.round(9 * distScale))}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+    ctx.font = microFont;
+    ctx.fillStyle = '#0000FF';
+    ctx.fillText(`[NEURAL MESH]`, boxLeft, boxTop - 4);
+    ctx.fillText(`[ACTIVE]`, boxRight - ctx.measureText(`[ACTIVE]`).width, boxTop - 4);
 
-      const drawBodyLine = (i1: number, i2: number, color: string, lw: number) => {
-        const p1 = poseLm[i1], p2 = poseLm[i2];
-        // Only drop line if EXTREMELY low visibility (e.g. clearly off screen) to support 2M distances
-        if (!p1 || !p2 || p1.visibility < 0.1 || p2.visibility < 0.1) return;
-        const scaledLw = lw * distScale;
-        ctx.beginPath();
-        ctx.lineWidth = scaledLw;
-        ctx.strokeStyle = color;
-        ctx.shadowBlur = scaledLw * 3;
-        ctx.shadowColor = color;
-        ctx.moveTo(p1.x * w, p1.y * h);
-        ctx.lineTo(p2.x * w, p2.y * h);
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-      };
+    const fontSize = Math.max(11, Math.round(12 * distScale));
+    ctx.font = `600 ${fontSize}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`;
 
-      const drawBodyJoint = (i: number, r: number, color: string) => {
-        const p = poseLm[i];
-        if (!p || p.visibility < 0.1) return;
-        const scaledR = r * distScale;
-        ctx.beginPath();
-        ctx.fillStyle = color;
-        ctx.shadowBlur = scaledR * 4;
-        ctx.shadowColor = color;
-        ctx.arc(p.x * w, p.y * h, scaledR, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      };
+    // ── 1. 3-Axis Gyro Attitude: DIRECTLY ABOVE AND CENTER OF HEAD ──
+    const headCenterX = (boxLeft + boxRight) / 2;
+    const orientText = `PITCH ${pitchStr}°   YAW ${yawStr}°   ROLL ${rollStr}°`;
+    const orientTw = ctx.measureText(orientText).width;
+    const headPillW = orientTw + 22 * distScale;
+    const headPillH = fontSize + 10;
+    const headPillX = Math.max(8, Math.min(w - headPillW - 8, headCenterX - headPillW / 2));
+    const headPillY = Math.max(10, boxTop - headPillH - 10 * distScale);
 
-      // Pose Landmark indices (MediaPipe Pose):
-      // 11=left shoulder, 12=right shoulder, 13=left elbow, 14=right elbow
-      // 15=left wrist, 16=right wrist, 23=left hip, 24=right hip
+    // Laser Tracking Dotted Guide from Badge to Head Top
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(headCenterX, headPillY + headPillH);
+    ctx.lineTo(headCenterX, boxTop);
+    ctx.strokeStyle = '#0000FF';
+    ctx.lineWidth = 1.0 * distScale;
+    ctx.setLineDash([3 * distScale, 3 * distScale]);
+    ctx.shadowBlur = 4 * distScale;
+    ctx.shadowColor = '#0000FF';
+    ctx.stroke();
+    ctx.restore();
 
-      // Shoulders
-      drawBodyLine(11, 12, blue, 10);
+    // Attitude Pod (Refined, Modern)
+    ctx.fillStyle = 'rgba(4, 8, 28, 0.90)';
+    ctx.beginPath();
+    ctx.roundRect(headPillX, headPillY, headPillW, headPillH, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#0000FF';
+    ctx.lineWidth = 1.0 * distScale;
+    ctx.shadowBlur = 6 * distScale;
+    ctx.shadowColor = '#0000FF';
+    ctx.stroke();
+    ctx.shadowBlur = 0;
 
-      // Left arm (Thicker, more prominent)
-      drawBodyLine(11, 13, blue, 8); // Upper arm
-      drawBodyLine(13, 15, blue, 7); // Lower arm
-      drawBodyLine(15, 17, blue, 5); // Wrist to pinky
-      drawBodyLine(15, 19, blue, 5); // Wrist to index
-      drawBodyLine(15, 21, blue, 5); // Wrist to thumb
-      drawBodyLine(17, 19, blue, 4); // Pinky to index
+    // Indicator Pip
+    ctx.fillStyle = '#0000FF';
+    ctx.beginPath();
+    ctx.arc(headPillX + 10 * distScale, headPillY + headPillH / 2, 2.8 * distScale, 0, Math.PI * 2);
+    ctx.fill();
 
-      // Right arm
-      drawBodyLine(12, 14, blue, 8);
-      drawBodyLine(14, 16, blue, 7);
-      drawBodyLine(16, 18, blue, 5);
-      drawBodyLine(16, 20, blue, 5);
-      drawBodyLine(16, 22, blue, 5);
-      drawBodyLine(18, 20, blue, 4);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(orientText, headPillX + 18 * distScale, headPillY + headPillH / 2 + fontSize * 0.35);
 
-      // Torso (Box + Cross + Spine + Geometric Ribcage)
-      drawBodyLine(11, 23, blue, 8); // Left side
-      drawBodyLine(12, 24, blue, 8); // Right side
-      drawBodyLine(23, 24, blue, 8); // Hip connector
-      drawBodyLine(11, 24, `rgba(0, 150, 255, ${0.4 * pulse})`, 4); // Cross torso L-R
-      drawBodyLine(12, 23, `rgba(0, 150, 255, ${0.4 * pulse})`, 4); // Cross torso R-L
+    // ── 2. Bottom-Center Badge: Dynamic AI Optical Range & Target ──
+    const distText = `AI RANGE: ${dynamicDistM.toFixed(2)}m   ●   TARGET: 1.00m   ●   IPD: ${liveIpdMm.toFixed(1)}mm`;
+    const distWidth = ctx.measureText(distText).width;
+    const bottomPillW = distWidth + 24 * distScale;
+    const bottomPillH = fontSize + 12;
+    const bottomPillX = (boxLeft + boxRight) / 2 - bottomPillW / 2;
+    const bottomPillY = Math.min(h - bottomPillH - 6, boxBottom + 8);
 
-      // Smart Ribcage Geometry (connecting mid-points)
-      if (poseLm[11] && poseLm[12] && Math.min(poseLm[11].visibility, poseLm[12].visibility) > 0.1) {
-        ctx.beginPath();
-        const chestX = (poseLm[11].x + poseLm[12].x) / 2 * w;
-        const chestY = (poseLm[11].y + poseLm[12].y) / 2 * h;
+    ctx.fillStyle = 'rgba(4, 8, 28, 0.90)';
+    ctx.beginPath();
+    ctx.roundRect(bottomPillX, bottomPillY, bottomPillW, bottomPillH, 8);
+    ctx.fill();
+    ctx.strokeStyle = '#0000FF';
+    ctx.lineWidth = 1.0;
+    ctx.shadowBlur = 6 * distScale;
+    ctx.shadowColor = '#0000FF';
+    ctx.stroke();
+    ctx.shadowBlur = 0;
 
-        ctx.fillStyle = `rgba(0, 255, 255, ${0.1 * pulse})`;
-        ctx.arc(chestX, chestY, 20 * distScale, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = `rgba(0, 255, 255, ${0.6 * pulse})`;
-        ctx.lineWidth = 2 * distScale;
-        ctx.moveTo(poseLm[11].x * w, poseLm[11].y * h);
-        ctx.lineTo(chestX, chestY);
-        ctx.lineTo(poseLm[12].x * w, poseLm[12].y * h);
-        ctx.stroke();
-      }
-
-      // Spine estimation (mid shoulder to mid hip)
-      if (poseLm[11] && poseLm[12] && poseLm[23] && poseLm[24]) {
-        const midShoulderX = (poseLm[11].x + poseLm[12].x) / 2;
-        const midShoulderY = (poseLm[11].y + poseLm[12].y) / 2;
-        const midHipX = (poseLm[23].x + poseLm[24].x) / 2;
-        const midHipY = (poseLm[23].y + poseLm[24].y) / 2;
-        ctx.beginPath();
-        ctx.lineWidth = 6 * distScale;
-        ctx.strokeStyle = `rgba(0, 200, 255, ${0.4 * pulse})`;
-        ctx.moveTo(midShoulderX * w, midShoulderY * h);
-        ctx.lineTo(midHipX * w, midHipY * h);
-        ctx.stroke();
-      }
-
-      // Legs (if visible) — Cybernetic jointing
-      drawBodyLine(23, 25, `rgba(20, 80, 220, ${0.8 * pulse})`, 8); // L Thigh
-      drawBodyLine(24, 26, `rgba(20, 80, 220, ${0.8 * pulse})`, 8); // R Thigh
-      drawBodyLine(25, 27, `rgba(20, 80, 220, ${0.7 * pulse})`, 6); // L Calf
-      drawBodyLine(26, 28, `rgba(20, 80, 220, ${0.7 * pulse})`, 6); // R Calf
-
-      // Feet
-      drawBodyLine(27, 29, `rgba(20, 80, 220, ${0.6 * pulse})`, 5); // L Ankle to heel
-      drawBodyLine(27, 31, `rgba(20, 80, 220, ${0.6 * pulse})`, 5); // L Ankle to toe
-      drawBodyLine(29, 31, `rgba(20, 80, 220, ${0.5 * pulse})`, 4); // L Heel to toe
-
-      drawBodyLine(28, 30, `rgba(20, 80, 220, ${0.6 * pulse})`, 5); // R Ankle to heel
-      drawBodyLine(28, 32, `rgba(20, 80, 220, ${0.6 * pulse})`, 5); // R Ankle to toe
-      drawBodyLine(30, 32, `rgba(20, 80, 220, ${0.5 * pulse})`, 4); // R Heel to toe
-
-      // Face tracking bounds overlay (from Pose array points 0-10)
-      if (poseLm[0] && poseLm[0].visibility > 0.1) {
-        // Draw cyber-goggles over eyes using pose features
-        drawBodyLine(2, 0, `rgba(0, 255, 255, ${0.8 * pulse})`, 3); // L Eye to Nose
-        drawBodyLine(5, 0, `rgba(0, 255, 255, ${0.8 * pulse})`, 3); // R Eye to Nose
-        drawBodyLine(7, 2, `rgba(0, 255, 255, ${0.6 * pulse})`, 2); // L Ear to Eye
-        drawBodyLine(8, 5, `rgba(0, 255, 255, ${0.6 * pulse})`, 2); // R Ear to Eye
-
-        // Face geometry bounding
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(0, 255, 255, ${0.05 * pulse})`;
-        ctx.moveTo(poseLm[7]?.x * w, poseLm[7]?.y * h);
-        ctx.lineTo(poseLm[8]?.x * w, poseLm[8]?.y * h);
-        ctx.lineTo(poseLm[10]?.x * w, poseLm[10]?.y * h);
-        ctx.lineTo(poseLm[9]?.x * w, poseLm[9]?.y * h);
-        ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = `rgba(0, 255, 255, ${0.4 * pulse})`;
-        ctx.lineWidth = 1 * distScale;
-        ctx.stroke();
-      }
-
-      // Neck (Connect Face Chin to Pose Shoulders)
-      const faceChin = lm[152]; // From FaceLandmarker (High precision)
-      const lShoulder = poseLm[11];
-      const rShoulder = poseLm[12];
-
-      if (faceChin && lShoulder && rShoulder) {
-        const midShoulderX = ((lShoulder.x + rShoulder.x) / 2) * w;
-        const midShoulderY = ((lShoulder.y + rShoulder.y) / 2) * h;
-
-        // Draw solid neck connection
-        ctx.beginPath();
-        ctx.lineWidth = 10 * distScale;
-        ctx.strokeStyle = `rgba(0, 150, 255, ${0.5 * pulse})`;
-        ctx.lineCap = 'round';
-        ctx.moveTo(faceChin.x * w, faceChin.y * h);
-        ctx.lineTo(midShoulderX, midShoulderY);
-        ctx.stroke();
-
-        // Inner glowing core of neck
-        ctx.beginPath();
-        ctx.lineWidth = 4 * distScale;
-        ctx.strokeStyle = `rgba(100, 200, 255, ${0.8 * pulse})`;
-        ctx.moveTo(faceChin.x * w, faceChin.y * h);
-        ctx.lineTo(midShoulderX, midShoulderY);
-        ctx.stroke();
-      }
-
-      // Joints (Larger, brighter)
-      const jointR = 10 * pulse;
-      [11, 12].forEach(i => drawBodyJoint(i, jointR, blueGlow)); // Shoulders
-      [13, 14].forEach(i => drawBodyJoint(i, jointR * 0.9, blueGlow)); // Elbows
-      [15, 16].forEach(i => drawBodyJoint(i, jointR * 0.8, blueGlow)); // Wrists
-      [17, 18, 19, 20, 21, 22].forEach(i => drawBodyJoint(i, jointR * 0.4, blueGlow)); // Fingers
-
-      [23, 24].forEach(i => drawBodyJoint(i, jointR * 0.9, blueGlow)); // Hips
-      [25, 26].forEach(i => drawBodyJoint(i, jointR * 0.8, `rgba(40, 120, 255, ${0.8 * pulse})`)); // Knees
-      [27, 28].forEach(i => drawBodyJoint(i, jointR * 0.7, `rgba(40, 120, 255, ${0.7 * pulse})`)); // Ankles
-      [29, 30, 31, 32].forEach(i => drawBodyJoint(i, jointR * 0.5, `rgba(40, 120, 255, ${0.6 * pulse})`)); // Heels/Toes
-    }
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(distText, bottomPillX + 12 * distScale, bottomPillY + bottomPillH / 2 + fontSize * 0.35);
 
     ctx.restore();
   };
@@ -430,67 +630,112 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
           </div>
 
           {/* ═══════════════════════════════════════════ */}
-          {/* REAL-TIME DISTANCE GAUGE */}
+          {/* MODERN INSTRUMENT-GRADE DISTANCE TELEMETRY */}
           {/* ═══════════════════════════════════════════ */}
-          <div className="w-full max-w-3xl mx-auto mt-1">
-            {/* Big Distance Number */}
-            <div className="text-center mb-2">
-              <span className="text-4xl md:text-5xl font-black tabular-nums leading-none" style={{ color: getDistanceColor() }}>
-                {effectiveDistanceM > 0 ? effectiveDistanceM.toFixed(2) : '0.00'}
-              </span>
-              <span className="text-xl text-slate-400 font-bold ml-1">m</span>
-              <span className="block text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">
-                Target: 1.00 m
-              </span>
+          <div className="w-full max-w-3xl mx-auto mt-1 bg-slate-950/70 border border-slate-700/60 rounded-3xl p-3 md:p-4 backdrop-blur-xl shadow-2xl relative overflow-hidden"
+            style={{ borderColor: getDistanceColor() + '40', boxShadow: `0 0 35px ${getDistanceColor()}20` }}
+          >
+            {/* Top Row: Distance readout + Delta badge + Stability status */}
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-2 px-1">
+              {/* Numeric Metric */}
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl md:text-5xl font-black font-mono tabular-nums leading-none tracking-tight" style={{ color: getDistanceColor() }}>
+                  {effectiveDistanceM > 0 ? effectiveDistanceM.toFixed(2) : '—.—'}
+                </span>
+                <span className="text-lg text-slate-400 font-bold uppercase">m</span>
+                <span className="text-[10px] md:text-xs font-mono font-bold text-slate-400 uppercase tracking-widest ml-1">
+                  (Target: 1.00m)
+                </span>
+              </div>
+
+              {/* Delta & Stability Pill */}
+              <div className="flex items-center gap-2">
+                {effectiveDistanceM > 0 && (
+                  <div className="px-3 py-1 rounded-full text-xs font-mono font-bold border flex items-center gap-1.5"
+                    style={{
+                      backgroundColor: localStatus === 'ok' ? 'rgba(16, 185, 129, 0.15)' : getDistanceColor() + '18',
+                      borderColor: getDistanceColor() + '50',
+                      color: getDistanceColor()
+                    }}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full animate-ping" style={{ backgroundColor: getDistanceColor() }} />
+                    <span>
+                      {localStatus === 'ok'
+                        ? Math.abs(Math.round((effectiveDistanceM - TARGET_M) * 100)) <= 2
+                          ? 'PERFECT ALIGNMENT'
+                          : `Δ ${(effectiveDistanceM - TARGET_M > 0 ? '+' : '') + Math.round((effectiveDistanceM - TARGET_M) * 100)}cm`
+                        : `Δ ${(effectiveDistanceM - TARGET_M > 0 ? '+' : '') + Math.round((effectiveDistanceM - TARGET_M) * 100)}cm`}
+                    </span>
+                  </div>
+                )}
+
+                {/* Countdown / Lock Badge */}
+                {localStatus === 'ok' && (
+                  <div className={`px-3 py-1 rounded-full text-xs font-mono font-black border flex items-center gap-1.5 shadow-sm ${effectiveStable || stableCountdown === 0
+                    ? 'bg-emerald-500/25 border-emerald-400/60 text-emerald-300 animate-pulse'
+                    : 'bg-cyan-500/20 border-cyan-400/50 text-cyan-300'
+                    }`}>
+                    <span className="text-xs">🔒</span>
+                    <span>{effectiveStable || stableCountdown === 0 ? 'LOCKED' : `HOLD ${stableCountdown}s`}</span>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Distance Bar */}
-            <div className="relative w-full h-8 md:h-10 rounded-full bg-slate-800/80 border border-slate-700/50 overflow-hidden">
+            {/* Precision Caliper Rail */}
+            <div className="relative w-full h-7 md:h-8 rounded-full bg-slate-900/90 border border-slate-700/80 overflow-hidden shadow-inner flex items-center">
               {/* Green target zone (0.85m - 1.15m on a 0-2m scale) */}
               <div
-                className="absolute top-0 h-full bg-emerald-500/20 border-x-2 border-emerald-400/50"
-                style={{ left: `${(0.85 / 2) * 100}%`, width: `${((1.15 - 0.85) / 2) * 100}%` }}
-              />
+                className="absolute top-0 h-full border-x transition-all duration-300 pointer-events-none"
+                style={{
+                  left: `${(0.85 / 2) * 100}%`,
+                  width: `${((1.15 - 0.85) / 2) * 100}%`,
+                  backgroundColor: localStatus === 'ok' ? 'rgba(16, 185, 129, 0.22)' : 'rgba(16, 185, 129, 0.12)',
+                  borderColor: 'rgba(52, 211, 153, 0.6)'
+                }}
+              >
+                <div className="w-full h-full opacity-20 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:6px_6px]" />
+              </div>
 
               {/* Filled bar up to current distance */}
               <div
-                className="absolute top-0 left-0 h-full rounded-full transition-all duration-500 ease-out"
+                className="h-full rounded-full transition-all duration-300 ease-out pointer-events-none"
                 style={{
                   width: `${Math.min((effectiveDistanceM / 2) * 100, 100)}%`,
-                  background: `linear-gradient(90deg, ${getDistanceColor()}88, ${getDistanceColor()})`,
-                  boxShadow: `0 0 20px ${getDistanceColor()}66`
+                  background: `linear-gradient(90deg, ${getDistanceColor()}33, ${getDistanceColor()})`,
+                  boxShadow: `0 0 15px ${getDistanceColor()}88`
                 }}
               />
 
-              {/* Target line at 1.0m */}
+              {/* Target wire at 1.0m */}
               <div
-                className="absolute top-0 h-full w-0.5 bg-white/80"
-                style={{ left: `${(1.0 / 2) * 100}%` }}
-              />
-              <div
-                className="absolute -top-6 text-xs font-bold text-white/70"
+                className="absolute top-0 h-full w-[2px] bg-white z-10 pointer-events-none shadow-[0_0_8px_rgba(255,255,255,0.8)]"
                 style={{ left: `${(1.0 / 2) * 100}%`, transform: 'translateX(-50%)' }}
-              >
-                1.0m
-              </div>
+              />
 
-              {/* Current position marker */}
+              {/* Current position reticle cursor */}
               {effectiveDistanceM > 0 && (
                 <div
-                  className="absolute top-1/2 -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 rounded-full border-3 border-white shadow-lg transition-all duration-500 ease-out"
+                  className="absolute top-1/2 w-6 h-6 rounded-full border-2 border-white transition-all duration-300 ease-out flex items-center justify-center z-20 pointer-events-none"
                   style={{
                     left: `${Math.min((effectiveDistanceM / 2) * 100, 100)}%`,
                     transform: 'translate(-50%, -50%)',
-                    background: getDistanceColor(),
-                    boxShadow: `0 0 15px ${getDistanceColor()}`
+                    backgroundColor: getDistanceColor(),
+                    boxShadow: `0 0 16px ${getDistanceColor()}`
                   }}
-                />
+                >
+                  <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                </div>
               )}
+            </div>
 
-              {/* Scale labels */}
-              <div className="absolute -bottom-5 left-0 text-[10px] text-slate-500 font-bold">0m</div>
-              <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-slate-500 font-bold">1m</div>
-              <div className="absolute -bottom-5 right-0 text-[10px] text-slate-500 font-bold">2m</div>
+            {/* Calibrated Ticks */}
+            <div className="flex justify-between items-center text-[10px] font-mono font-bold text-slate-500 px-2 mt-1.5 select-none">
+              <span>0.0m</span>
+              <span>0.5m</span>
+              <span className="text-emerald-400 font-black">1.0m (TARGET ZONE)</span>
+              <span>1.5m</span>
+              <span>2.0m</span>
             </div>
           </div>
         </div>

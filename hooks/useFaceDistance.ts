@@ -32,22 +32,24 @@ interface FaceDistanceOptions {
     stream?: MediaStream | null;
 }
 
-const OUTER_CANTHAL_WIDTH_MM = 90;
-const FACE_WIDTH_MM = 143;
-const DEFAULT_FACE_WIDTH_MM = 140;
-const FOCAL_MULTIPLIER = 0.87;
+const IPD_DEFAULT_MM = 63.0;          // Anatomical Interpupillary Distance (iris 468 ↔ 473)
+const IRIS_DIAMETER_MM = 11.7;        // Horizontal Visible Iris Diameter (HVID) anatomical standard
+const OUTER_CANTHAL_WIDTH_MM = 90.0;  // outer eye corner to outer eye corner (33 ↔ 263)
+const INNER_CANTHAL_WIDTH_MM = 32.0;  // inner eye corner to inner eye corner (133 ↔ 362)
+const FACE_WIDTH_MM = 140.0;          // cheekbone to cheekbone (234 ↔ 454)
+const DEFAULT_FACE_WIDTH_MM = 140.0;
+const FOREHEAD_WIDTH_MM = 110.0;      // forehead width (10 ↔ 338)
+const NOSE_TO_CHIN_MM = 115.0;        // nose tip to chin (1 ↔ 199)
 const SMOOTHING_BUFFER = 15;
-const WARMUP_FRAMES = 5;
-const STATE_UPDATE_INTERVAL = 30; // throttle React state updates to ~30fps 
-const EMA_ALPHA = 0.25; // exponential moving average weight (lower = smoother)
-const NO_FACE_TIMEOUT = 5000; // ms before declaring no face (was 3000)
-const GRACE_HOLD_MS = 1500; // hold last distance this long after face lost
+const WARMUP_FRAMES = 1;              // Instant: show mesh on very first detected frame
+const STATE_UPDATE_INTERVAL = 16;     // 60fps React state updates
+const NO_FACE_TIMEOUT = 4000;         // ms before declaring no face
+const GRACE_HOLD_MS = 600;            // Reduced: reset faster so new detection locks on quickly
 
 // Modern MediaPipe Tasks Vision CDN
 const VISION_CDN = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18';
+// Valid official model asset path (200 OK verified)
 const FACE_MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task';
-const POSE_MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task';
-const HAND_MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
 
 export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceReturn {
     const {
@@ -83,11 +85,8 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
     const currentStableRef = useRef(false);
     const lastStateUpdateRef = useRef(0);
 
-    // ML model refs
+    // ML model refs (FaceLandmarker ONLY — maximum speed and zero GPU contention)
     const faceLandmarkerRef = useRef<any>(null);
-    const poseLandmarkerRef = useRef<any>(null);
-    const handLandmarkerRef = useRef<any>(null);
-    const handLandmarksStateRef = useRef<any[] | null>(null);
     const faceDetectorRef = useRef<any>(null);
     const frameCountRef = useRef(0);
     const warmupCountRef = useRef(0);
@@ -104,13 +103,21 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
 
     const distanceBufferRef = useRef<number[]>([]);
     const emaRef = useRef<number>(0); // exponential moving average
+    const lastFilterTimeRef = useRef<number>(performance.now());
+    const distanceHistoryRef = useRef<Array<{ time: number; dist: number }>>([]);
+    const filterXhatRef = useRef<number>(0); // 1€ filter smoothed position
+    const filterDhatRef = useRef<number>(0); // 1€ filter smoothed derivative
     const pendingStatusRef = useRef<DistanceStatus>('no_face');
     const lastValidDistanceRef = useRef(0); // last good reading for grace period
     const lastValidTimeRef = useRef(0); // when last good reading was
     const complianceLogRef = useRef<DistanceReading[]>([]);
     const inRangeSinceRef = useRef<number | null>(null);
     const faceLandmarksRef = useRef<any[] | null>(null);
+    const smoothedFaceLandmarksRef = useRef<any[] | null>(null);
     const poseLandmarksRef = useRef<any[] | null>(null);
+    const handLandmarksRef = useRef<any[] | null>(null);
+    // First N frames after detection starts → use alpha=1.0 (instant snap, no filter lag)
+    const snapFramesRef = useRef(0);
 
     // ─── Throttled state flush — pushes ref values to React state at max ~10fps ───
     const flushStateToReact = useCallback(() => {
@@ -153,7 +160,7 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
                 );
                 if (!active) return;
 
-                const { FaceLandmarker, PoseLandmarker, HandLandmarker, FilesetResolver } = vision;
+                const { FaceLandmarker, FilesetResolver } = vision;
 
                 debugInfoRef.current.faceMeshStatus = 'loading_wasm';
                 const wasmFileset = await FilesetResolver.forVisionTasks(
@@ -161,69 +168,43 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
                 );
                 if (!active) return;
 
-                // Init FaceLandmarker
+                // Init FaceLandmarker (GPU first, automatic CPU fallback if unsupported/WebGL issue)
                 debugInfoRef.current.faceMeshStatus = 'creating_landmarker';
                 console.log('useFaceDistance: Creating FaceLandmarker...');
-                const faceLandmarker = await FaceLandmarker.createFromOptions(wasmFileset, {
-                    baseOptions: {
-                        modelAssetPath: FACE_MODEL_URL,
-                        delegate: 'GPU',
-                    },
-                    outputFaceBlendshapes: false,
-                    runningMode: 'VIDEO',
-                    numFaces: 1,
-                    minFaceDetectionConfidence: 0.3, // Lower threshold = easier to detect initially
-                    minFacePresenceConfidence: 0.3,  // Lower threshold = harder to lose face
-                    minTrackingConfidence: 0.3,      // Lower threshold = smoother tracking in tough angles
-                });
+                let faceLandmarker: any = null;
+                try {
+                    faceLandmarker = await FaceLandmarker.createFromOptions(wasmFileset, {
+                        baseOptions: {
+                            modelAssetPath: FACE_MODEL_URL,
+                            delegate: 'GPU',
+                        },
+                        outputFaceBlendshapes: false,
+                        runningMode: 'VIDEO',
+                        numFaces: 1,
+                        minFaceDetectionConfidence: 0.15,
+                        minFacePresenceConfidence: 0.15,
+                        minTrackingConfidence: 0.15,
+                    });
+                } catch (gpuErr) {
+                    console.warn('FaceLandmarker GPU delegate failed, falling back to CPU:', gpuErr);
+                    faceLandmarker = await FaceLandmarker.createFromOptions(wasmFileset, {
+                        baseOptions: {
+                            modelAssetPath: FACE_MODEL_URL,
+                            delegate: 'CPU',
+                        },
+                        outputFaceBlendshapes: false,
+                        runningMode: 'VIDEO',
+                        numFaces: 1,
+                        minFaceDetectionConfidence: 0.15,
+                        minFacePresenceConfidence: 0.15,
+                        minTrackingConfidence: 0.15,
+                    });
+                }
                 if (!active) return;
                 faceLandmarkerRef.current = faceLandmarker;
                 debugInfoRef.current.faceMeshStatus = 'ready';
                 debugInfoRef.current.faceMeshActive = true;
-                console.log('useFaceDistance: ✅ FaceLandmarker ready');
-
-                // Init PoseLandmarker for body skeleton
-                console.log('useFaceDistance: Creating PoseLandmarker...');
-                try {
-                    const poseLandmarker = await PoseLandmarker.createFromOptions(wasmFileset, {
-                        baseOptions: {
-                            modelAssetPath: POSE_MODEL_URL,
-                            delegate: 'GPU',
-                        },
-                        runningMode: 'VIDEO',
-                        numPoses: 1,
-                        minPoseDetectionConfidence: 0.1, // EXTREMELY sensitive to find bodies far away
-                        minPosePresenceConfidence: 0.1,
-                        minTrackingConfidence: 0.1,
-                    });
-                    if (!active) return;
-                    poseLandmarkerRef.current = poseLandmarker;
-                    console.log('useFaceDistance: ✅ PoseLandmarker ready');
-                } catch (poseErr) {
-                    console.warn('useFaceDistance: PoseLandmarker init failed (body lines unavailable):', poseErr);
-                }
-
-                // Init HandLandmarker for articulate finger tracking
-                console.log('useFaceDistance: Creating HandLandmarker...');
-                try {
-                    const handLandmarker = await HandLandmarker.createFromOptions(wasmFileset, {
-                        baseOptions: {
-                            modelAssetPath: HAND_MODEL_URL,
-                            delegate: 'GPU',
-                        },
-                        runningMode: 'VIDEO',
-                        numHands: 2,
-                        minHandDetectionConfidence: 0.1, // Extensively lowered for distance
-                        minHandPresenceConfidence: 0.1,
-                        minTrackingConfidence: 0.1,
-                    });
-                    if (!active) return;
-                    handLandmarkerRef.current = handLandmarker;
-                    console.log('useFaceDistance: ✅ HandLandmarker ready');
-                } catch (handErr) {
-                    console.warn('useFaceDistance: HandLandmarker init failed:', handErr);
-                }
-
+                console.log('useFaceDistance: ✅ FaceLandmarker ready (dedicated face-only pipeline)');
             } catch (error) {
                 console.error('useFaceDistance: Model init failed', error);
                 debugInfoRef.current.faceMeshStatus = 'error: ' + (error as any)?.message;
@@ -237,10 +218,6 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
             if (faceLandmarkerRef.current) {
                 try { faceLandmarkerRef.current.close(); } catch (e) { }
                 faceLandmarkerRef.current = null;
-            }
-            if (poseLandmarkerRef.current) {
-                try { poseLandmarkerRef.current.close(); } catch (e) { }
-                poseLandmarkerRef.current = null;
             }
             if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
             if (detectionVideoRef.current) {
@@ -262,10 +239,13 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
             vid.muted = true;
             vid.playsInline = true;
             vid.autoplay = true;
+            // Offscreen with real dimensions: prevents browser throttling/dropping frames on 1px elements
             vid.style.position = 'fixed';
-            vid.style.opacity = '0.001';
-            vid.style.width = '1px';
-            vid.style.height = '1px';
+            vid.style.left = '-9999px';
+            vid.style.top = '-9999px';
+            vid.style.width = '640px';
+            vid.style.height = '480px';
+            vid.style.opacity = '1';
             vid.style.pointerEvents = 'none';
             vid.style.zIndex = '-9999';
             document.body.appendChild(vid);
@@ -280,7 +260,7 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
             try {
                 await vid.play();
             } catch (e) {
-                if (!cancelled) setTimeout(ensurePlaying, 300);
+                if (!cancelled) setTimeout(ensurePlaying, 100);
                 return;
             }
             const waitForData = () => {
@@ -289,7 +269,7 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
                     console.log('useFaceDistance: detection video ready', vid.videoWidth, 'x', vid.videoHeight);
                     startDetectionLoop();
                 } else {
-                    setTimeout(waitForData, 100);
+                    setTimeout(waitForData, 30); // Poll at 30ms for near-instant start
                 }
             };
             waitForData();
@@ -304,39 +284,174 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
         return () => { cancelled = true; };
     }, [externalStream]);
 
-    // ─── Smoothing with EMA ───
+    // ─── Pinhole Camera Focal Length Calibration (~68° HFOV) ───
+    const getFocalLength = (w: number, h: number): number => {
+        const isPortrait = h > w;
+        const baseDim = isPortrait ? h : w;
+        return baseDim * 0.7413;
+    };
+
+    // ─── 3D Head Pose (Yaw, Pitch, Roll) Trigonometric Compensation ───
+    const calculateHeadAngles = (landmarks: any[], vidW: number, vidH: number) => {
+        const leftEye = landmarks[33];
+        const rightEye = landmarks[263];
+        const noseTip = landmarks[1];
+        const chin = landmarks[152] || landmarks[199];
+        const forehead = landmarks[10];
+
+        if (!leftEye || !rightEye || !noseTip) {
+            return { yawCos: 1.0, pitchCos: 1.0, yawDeg: 0, pitchDeg: 0, rollDeg: 0 };
+        }
+
+        // 1. Roll angle (ear tilt toward shoulder)
+        const dEyeX = (rightEye.x - leftEye.x) * vidW;
+        const dEyeY = (rightEye.y - leftEye.y) * vidH;
+        const rollRad = Math.atan2(dEyeY, dEyeX);
+        const rollDeg = (rollRad * 180) / Math.PI;
+
+        // 2. True inter-ocular 2D Euclidean distance (invariant to head roll tilt)
+        const eyeDistPx = Math.hypot(dEyeX, dEyeY);
+        const halfEyeDist = eyeDistPx / (2 * vidW);
+
+        // Midpoint of eyes
+        const midEyeX = (leftEye.x + rightEye.x) / 2;
+        const midEyeY = (leftEye.y + rightEye.y) / 2;
+
+        // Rotate nose displacement into head frame (decouples roll from yaw)
+        const dNoseX = (noseTip.x - midEyeX);
+        const dNoseY = (noseTip.y - midEyeY) * (vidH / vidW);
+        const cosRoll = Math.cos(-rollRad);
+        const sinRoll = Math.sin(-rollRad);
+        const rotNoseX = dNoseX * cosRoll - dNoseY * sinRoll;
+
+        // Yaw angle (head turn left/right)
+        const yawOffset = halfEyeDist > 0.001 ? rotNoseX / halfEyeDist : 0;
+        const clampedYaw = Math.max(-0.65, Math.min(0.65, yawOffset));
+        const yawRad = Math.asin(clampedYaw);
+        const yawDeg = (yawRad * 180) / Math.PI;
+        const yawCos = Math.max(0.70, Math.cos(yawRad));
+
+        // 3. Pitch angle (head tilt up/down)
+        let pitchRad = 0;
+        let pitchDeg = 0;
+        let pitchCos = 1.0;
+        if (forehead && chin) {
+            const faceHeight = Math.abs(chin.y - forehead.y);
+            if (faceHeight > 0.01) {
+                const expectedNoseY = midEyeY + 0.35 * faceHeight;
+                const pitchOffset = ((noseTip.y - expectedNoseY) / faceHeight) * 2.2;
+                const clampedPitch = Math.max(-0.55, Math.min(0.55, pitchOffset));
+                pitchRad = Math.asin(clampedPitch);
+                pitchDeg = (pitchRad * 180) / Math.PI;
+                pitchCos = Math.max(0.75, Math.cos(pitchRad));
+            }
+        }
+
+        return { yawCos, pitchCos, yawDeg, pitchDeg, rollDeg };
+    };
+
+    // Helper for 1€ filter smoothing coefficient
+    const calcOneEuroAlpha = (rate: number, cutoff: number) => {
+        const tau = 1.0 / (2 * Math.PI * cutoff);
+        const te = 1.0 / rate;
+        return 1.0 / (1.0 + tau / te);
+    };
+
+    // ─── 1€ Filter (One Euro Filter) — State-of-the-Art Speed-Adaptive Low-Pass Filter ───
     const smoothDistance = (newDist: number) => {
-        const ema = emaRef.current;
-        const buffer = distanceBufferRef.current;
+        const now = performance.now();
+        const dt = Math.max(0.008, Math.min(0.1, (now - lastFilterTimeRef.current) / 1000));
+        lastFilterTimeRef.current = now;
+        const rate = 1.0 / dt;
 
-        buffer.push(newDist);
-        if (buffer.length > SMOOTHING_BUFFER) buffer.shift();
-
-        // Trimmed mean: drop top and bottom 20% to remove jitter
-        let trimmedMean: number;
-        if (buffer.length >= 8) {
-            const sorted = [...buffer].sort((a, b) => a - b);
-            const trimCount = Math.max(1, Math.floor(sorted.length * 0.2));
-            const trimmed = sorted.slice(trimCount, -trimCount);
-            trimmedMean = trimmed.reduce((a, b) => a + b, 0) / trimmed.length;
-        } else {
-            trimmedMean = buffer.reduce((a, b) => a + b, 0) / buffer.length;
+        if (filterXhatRef.current === 0) {
+            filterXhatRef.current = newDist;
+            filterDhatRef.current = 0;
+            emaRef.current = newDist;
+            return newDist;
         }
 
-        // Apply exponential moving average on top of trimmed mean
-        if (ema === 0) {
-            emaRef.current = trimmedMean;
-        } else {
-            emaRef.current = EMA_ALPHA * trimmedMean + (1 - EMA_ALPHA) * ema;
+        const prevX = filterXhatRef.current;
+        const delta = Math.abs(newDist - prevX);
+
+        // Stationary deadband (2mm): prevents micro-pixel noise from toggling millimeters
+        if (delta < 0.002 && Math.abs(filterDhatRef.current) < 0.025) {
+            return prevX;
         }
 
-        return emaRef.current;
+        // 1. Filter derivative (instant velocity in m/s)
+        const rawDx = (newDist - prevX) / dt;
+        const aD = calcOneEuroAlpha(rate, 1.2); // derivative cutoff = 1.2 Hz
+        const dHat = aD * rawDx + (1 - aD) * filterDhatRef.current;
+        filterDhatRef.current = dHat;
+
+        // 2. Dynamic cutoff frequency: minCutoff = 0.55 Hz, beta = 0.95
+        const cutoff = 0.55 + 0.95 * Math.abs(dHat);
+
+        // 3. Filter position
+        const a = calcOneEuroAlpha(rate, cutoff);
+        const xHat = a * newDist + (1 - a) * prevX;
+        filterXhatRef.current = xHat;
+        emaRef.current = xHat;
+        return xHat;
+    };
+
+    // ─── Adaptive Temporal Landmark Smoothing (Rock-Solid Stability) ───
+    const smoothFaceLandmarks = (raw: any[]): any[] => {
+        const prev = smoothedFaceLandmarksRef.current;
+        if (!prev || prev.length !== raw.length) {
+            // First detection (or face re-acquired after loss): snap instantly with zero lag
+            const initial = raw.map(p => ({ ...p }));
+            smoothedFaceLandmarksRef.current = initial;
+            snapFramesRef.current = 5; // burn next 5 frames at alpha=1.0
+            return initial;
+        }
+
+        // For the first N frames after initial lock-on, bypass filter entirely (instant snap)
+        if (snapFramesRef.current > 0) {
+            snapFramesRef.current--;
+            const instant = raw.map(p => ({ ...p }));
+            smoothedFaceLandmarksRef.current = instant;
+            return instant;
+        }
+
+        // Measure head movement velocity using landmark 1 (nose tip)
+        const nose = raw[1];
+        const prevNose = prev[1];
+        let movement = 0;
+        if (nose && prevNose) {
+            const dx = nose.x - prevNose.x;
+            const dy = nose.y - prevNose.y;
+            movement = Math.hypot(dx, dy);
+        }
+
+        // Adaptive alpha:
+        // When stationary (movement < 0.002), alpha is 0.26 for rock-solid stability and zero jitter.
+        // When moving quickly (movement > 0.02), alpha ramps to 0.88 for instantaneous response with zero lag.
+        const alpha = Math.min(0.88, Math.max(0.26, 0.26 + movement * 25));
+
+        const smoothed = raw.map((curr, idx) => {
+            const p = prev[idx];
+            if (!p) return { ...curr };
+            return {
+                x: p.x + (curr.x - p.x) * alpha,
+                y: p.y + (curr.y - p.y) * alpha,
+                z: p.z !== undefined && p.z !== null ? p.z + ((curr.z ?? 0) - p.z) * alpha : curr.z,
+                visibility: curr.visibility
+            };
+        });
+
+        smoothedFaceLandmarksRef.current = smoothed;
+        return smoothed;
     };
 
     // ─── Process face landmarks ───
     const firstResultLoggedRef = useRef(false);
 
-    const processLandmarks = (landmarks: any[], video: HTMLVideoElement) => {
+    const processLandmarks = (rawLandmarks: any[], video: HTMLVideoElement) => {
+        // Apply temporal jitter suppression
+        const landmarks = smoothFaceLandmarks(rawLandmarks);
+
         resultCountRef.current++;
         debugInfoRef.current.resultCount = resultCountRef.current;
 
@@ -351,49 +466,184 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
 
         const vidW = video.videoWidth || 640;
         const vidH = video.videoHeight || 480;
-        const focalLength = vidW * FOCAL_MULTIPLIER;
 
-        const measurements: number[] = [];
+        const focalLength = getFocalLength(vidW, vidH);
+        const { yawCos, pitchCos, yawDeg, pitchDeg, rollDeg } = calculateHeadAngles(landmarks, vidW, vidH);
 
-        // Method 1: Outer eye corners (33, 263)
-        const leftEye = landmarks[33];
-        const rightEye = landmarks[263];
-        if (leftEye && rightEye) {
-            const dx = (rightEye.x - leftEye.x) * vidW;
-            const dy = (rightEye.y - leftEye.y) * vidH;
-            const pxDist = Math.sqrt(dx * dx + dy * dy);
-            if (pxDist > 3) {
-                measurements.push((focalLength * OUTER_CANTHAL_WIDTH_MM) / pxDist);
+        // Share telemetry with UI components (BiometricScan HUD, etc.)
+        (window as any).__covisionTelemetry = {
+            yawDeg: Math.round(yawDeg * 10) / 10,
+            pitchDeg: Math.round(pitchDeg * 10) / 10,
+            rollDeg: Math.round(rollDeg * 10) / 10,
+            focalLength: Math.round(focalLength),
+            nodesCount: landmarks.length,
+            trackingLocked: true
+        };
+
+        const userIpdMm = ipdMm || IPD_DEFAULT_MM;
+        const measurements: Array<{ distMm: number; weight: number; name: string }> = [];
+
+        // ── Method 1: True Iris Interpupillary Distance (landmarks 468 ↔ 473) — Optometric Gold Standard ──
+        const rightIris = landmarks[468];
+        const leftIris = landmarks[473];
+        if (rightIris && leftIris) {
+            const dx = (leftIris.x - rightIris.x) * vidW;
+            const dy = (leftIris.y - rightIris.y) * vidH;
+            const rawPx = Math.sqrt(dx * dx + dy * dy);
+            const compPx = rawPx / yawCos;
+            if (compPx > 4) {
+                measurements.push({
+                    distMm: (focalLength * userIpdMm) / compPx,
+                    weight: 1.7,
+                    name: 'iris_ipd'
+                });
             }
         }
 
-        // Method 2: Cheekbone width (234, 454)
+        // ── Method 1b: Right Iris Horizontal Diameter HVID (469 ↔ 471, 11.7mm) ──
+        const rIrisR = landmarks[469];
+        const rIrisL = landmarks[471];
+        if (rIrisR && rIrisL) {
+            const dx = (rIrisL.x - rIrisR.x) * vidW;
+            const dy = (rIrisL.y - rIrisR.y) * vidH;
+            const rawPx = Math.sqrt(dx * dx + dy * dy);
+            const compPx = rawPx / yawCos;
+            if (compPx > 2) {
+                measurements.push({
+                    distMm: (focalLength * IRIS_DIAMETER_MM) / compPx,
+                    weight: 1.3,
+                    name: 'right_iris_hvid'
+                });
+            }
+        }
+
+        // ── Method 1c: Left Iris Horizontal Diameter HVID (474 ↔ 476, 11.7mm) ──
+        const lIrisR = landmarks[474];
+        const lIrisL = landmarks[476];
+        if (lIrisR && lIrisL) {
+            const dx = (lIrisL.x - lIrisR.x) * vidW;
+            const dy = (lIrisL.y - lIrisR.y) * vidH;
+            const rawPx = Math.sqrt(dx * dx + dy * dy);
+            const compPx = rawPx / yawCos;
+            if (compPx > 2) {
+                measurements.push({
+                    distMm: (focalLength * IRIS_DIAMETER_MM) / compPx,
+                    weight: 1.3,
+                    name: 'left_iris_hvid'
+                });
+            }
+        }
+
+        // ── Method 2: Outer canthus (33 ↔ 263) — Highly reliable lateral eye baseline ──
+        const leftOuter = landmarks[33];
+        const rightOuter = landmarks[263];
+        if (leftOuter && rightOuter) {
+            const dx = (rightOuter.x - leftOuter.x) * vidW;
+            const dy = (rightOuter.y - leftOuter.y) * vidH;
+            const rawPx = Math.sqrt(dx * dx + dy * dy);
+            const compPx = rawPx / yawCos;
+            if (compPx > 5) {
+                measurements.push({
+                    distMm: (focalLength * OUTER_CANTHAL_WIDTH_MM) / compPx,
+                    weight: 1.2,
+                    name: 'outer_canthus'
+                });
+            }
+        }
+
+        // ── Method 3: Cheekbone width (234 ↔ 454) ──
         const leftCheek = landmarks[234];
         const rightCheek = landmarks[454];
         if (leftCheek && rightCheek) {
             const dx = (rightCheek.x - leftCheek.x) * vidW;
             const dy = (rightCheek.y - leftCheek.y) * vidH;
-            const pxDist = Math.sqrt(dx * dx + dy * dy);
-            if (pxDist > 3) {
-                // Smoothing dynamic distance based on cheeks
-                measurements.push((focalLength * FACE_WIDTH_MM) / pxDist);
+            const rawPx = Math.sqrt(dx * dx + dy * dy);
+            const compPx = rawPx / yawCos;
+            if (compPx > 5) {
+                measurements.push({
+                    distMm: (focalLength * FACE_WIDTH_MM) / compPx,
+                    weight: 1.0,
+                    name: 'cheekbone'
+                });
+            }
+        }
+
+        // ── Method 4: Inner eye corners IPD (133 ↔ 362) ──
+        const leftInner = landmarks[133];
+        const rightInner = landmarks[362];
+        if (leftInner && rightInner) {
+            const dx = (rightInner.x - leftInner.x) * vidW;
+            const dy = (rightInner.y - leftInner.y) * vidH;
+            const rawPx = Math.sqrt(dx * dx + dy * dy);
+            const compPx = rawPx / yawCos;
+            if (compPx > 3) {
+                measurements.push({
+                    distMm: (focalLength * INNER_CANTHAL_WIDTH_MM) / compPx,
+                    weight: 0.9,
+                    name: 'inner_canthus'
+                });
+            }
+        }
+
+        // ── Method 5: Forehead width (landmark 10 ↔ 338) ──
+        const foreheadLeft = landmarks[10];
+        const foreheadRight = landmarks[338];
+        if (foreheadLeft && foreheadRight) {
+            const dx = (foreheadRight.x - foreheadLeft.x) * vidW;
+            const dy = (foreheadRight.y - foreheadLeft.y) * vidH;
+            const rawPx = Math.sqrt(dx * dx + dy * dy);
+            const compPx = rawPx / yawCos;
+            if (compPx > 3) {
+                measurements.push({
+                    distMm: (focalLength * FOREHEAD_WIDTH_MM) / compPx,
+                    weight: 0.7,
+                    name: 'forehead'
+                });
+            }
+        }
+
+        // ── Method 6: Nose tip to chin (1 ↔ 199) — pitch-compensated ──
+        const noseTip = landmarks[1];
+        const chin = landmarks[199];
+        if (noseTip && chin) {
+            const dy = (chin.y - noseTip.y) * vidH;
+            const dx = (chin.x - noseTip.x) * vidW;
+            const rawPx = Math.sqrt(dx * dx + dy * dy);
+            const compPx = rawPx / pitchCos;
+            if (compPx > 3) {
+                measurements.push({
+                    distMm: (focalLength * NOSE_TO_CHIN_MM) / compPx,
+                    weight: 0.7,
+                    name: 'nose_chin'
+                });
             }
         }
 
         if (measurements.length === 0) return;
 
-        const avgDistMm = measurements.reduce((a, b) => a + b, 0) / measurements.length;
-        updateDistance(avgDistMm / 1000, 'facemesh');
+        // ── Robust Consensus Filtering: Outlier Rejection (>15% from median) ──
+        const sortedDistances = measurements.map(m => m.distMm).sort((a, b) => a - b);
+        const medianDistMm = sortedDistances[Math.floor(sortedDistances.length / 2)];
+
+        const consensus = measurements.filter(m => Math.abs(m.distMm - medianDistMm) / medianDistMm <= 0.15);
+        const finalSet = consensus.length > 0 ? consensus : [{ distMm: medianDistMm, weight: 1.0, name: 'median' }];
+
+        const totalWeight = finalSet.reduce((acc, m) => acc + m.weight, 0);
+        const weightedMm = finalSet.reduce((acc, m) => acc + m.distMm * m.weight, 0) / totalWeight;
+
+        // Clamp to plausible range (0.2m – 3.5m)
+        const clampedM = Math.min(3.5, Math.max(0.2, weightedMm / 1000));
+        updateDistance(clampedM, 'facemesh');
     };
 
     // ─── Update distance (writes to refs, NOT direct React state) ───
-    // Real-time exponential moving average (higher alpha = more reactive, lower = smoother)
     const updateDistance = (rawDist: number, method: 'facemesh' | 'detection' | 'pixels') => {
         lastUpdateRef.current = Date.now();
         if (warmupCountRef.current < WARMUP_FRAMES) return;
 
         const smoothed = smoothDistance(Math.max(0.3, rawDist));
         currentDistanceRef.current = smoothed;
+        (window as any).__covisionCurrentDistance = smoothed;
         lastValidDistanceRef.current = smoothed;
         lastValidTimeRef.current = Date.now();
 
@@ -424,9 +674,22 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
             complianceLogRef.current.push({ timestamp: now, distanceM: smoothed, inRange });
         }
 
-        if (inRange) {
+        // Rolling history for precision stability verification (1500ms window)
+        distanceHistoryRef.current.push({ time: now, dist: smoothed });
+        distanceHistoryRef.current = distanceHistoryRef.current.filter(entry => now - entry.time <= 1500);
+
+        let isStationary = false;
+        if (distanceHistoryRef.current.length >= 10) {
+            const distances = distanceHistoryRef.current.map(e => e.dist);
+            const mean = distances.reduce((a, b) => a + b, 0) / distances.length;
+            const variance = distances.reduce((a, b) => a + (b - mean) ** 2, 0) / distances.length;
+            const stdDev = Math.sqrt(variance);
+            isStationary = stdDev < 0.025; // under 2.5cm variance
+        }
+
+        if (inRange && isStationary) {
             if (!inRangeSinceRef.current) inRangeSinceRef.current = now;
-            currentStableRef.current = (now - inRangeSinceRef.current >= 3000);
+            currentStableRef.current = (now - inRangeSinceRef.current >= 1500);
         } else {
             inRangeSinceRef.current = null;
             currentStableRef.current = false;
@@ -453,7 +716,11 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
     const lastHandSendRef = useRef(0);
 
     const detectLoop = () => {
-        const video = detectionVideoRef.current || videoRef.current;
+        // Prioritize active on-screen visible video if ready; fall back to offscreen detection video
+        const video = (videoRef.current && videoRef.current.readyState >= 2 && videoRef.current.videoWidth > 0 && !videoRef.current.paused)
+            ? videoRef.current
+            : (detectionVideoRef.current || videoRef.current);
+
         if (!video || video.readyState < 2 || video.paused || video.ended) {
             animFrameRef.current = requestAnimationFrame(detectLoop);
             return;
@@ -477,13 +744,15 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
                 // Keep current status — don't flicker
                 flushStateToReact();
             } else if (timeSinceUpdate >= NO_FACE_TIMEOUT) {
-                // Fully timed out — declare no face
+                // Fully timed out — declare no face; reset snap so next detection is instant
                 currentStatusRef.current = 'no_face';
                 currentDistanceRef.current = 0;
                 currentStableRef.current = false;
                 faceLandmarksRef.current = null;
+                smoothedFaceLandmarksRef.current = null;
                 poseLandmarksRef.current = null;
-                handLandmarksStateRef.current = null;
+                handLandmarksRef.current = null;
+                snapFramesRef.current = 0;
                 emaRef.current = 0;
                 distanceBufferRef.current = [];
                 pendingStatusRef.current = 'no_face';
@@ -494,8 +763,8 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
 
         const timestamp = performance.now();
 
-        // FaceLandmarker — run at ~30fps (33ms)
-        if (faceLandmarkerRef.current && timestamp - lastFaceSendRef.current > 33) {
+        // FaceLandmarker ONLY — unthrottled dedicated execution with zero competing models
+        if (faceLandmarkerRef.current && timestamp - lastFaceSendRef.current > 10) {
             try {
                 lastFaceSendRef.current = timestamp;
                 sendCountRef.current++;
@@ -509,41 +778,6 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
                 if (sendCountRef.current < 5) {
                     console.warn('FaceLandmarker error:', e?.message || e);
                 }
-            }
-        }
-
-        // PoseLandmarker — run at ~30fps for stable body tracking
-        if (poseLandmarkerRef.current && timestamp - lastPoseSendRef.current > 33) {
-            try {
-                lastPoseSendRef.current = timestamp;
-                const poseResults = poseLandmarkerRef.current.detectForVideo(video, timestamp);
-                if (poseResults?.landmarks?.length > 0) {
-                    poseLandmarksRef.current = poseResults.landmarks[0];
-                    (window as any).__sharedPoseLandmarks = poseResults.landmarks[0];
-                } else {
-                    (window as any).__sharedPoseLandmarks = null;
-                }
-            } catch (e: any) {
-                // Silently fail — pose is optional overlay
-            }
-        }
-
-        // HandLandmarker — run at ~15fps
-        if (handLandmarkerRef.current && timestamp - lastHandSendRef.current > 66) {
-            try {
-                lastHandSendRef.current = timestamp;
-                const handResults = handLandmarkerRef.current.detectForVideo(video, timestamp);
-                if (handResults?.landmarks?.length > 0) {
-                    handLandmarksStateRef.current = handResults.landmarks;
-                    (window as any).__sharedHandLandmarks = handResults.landmarks;
-                    (window as any).__sharedHandednesses = handResults.handednesses;
-                } else {
-                    handLandmarksStateRef.current = null;
-                    (window as any).__sharedHandLandmarks = null;
-                    (window as any).__sharedHandednesses = null;
-                }
-            } catch (e: any) {
-                // Silently fail
             }
         }
 
@@ -561,8 +795,7 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
                     faceDetectorRef.current.detect(canvas).then((faces: any) => {
                         if (faces.length > 0) {
                             const widthPx = faces[0].boundingBox.width;
-                            const vidW = video.videoWidth;
-                            const focalLength = vidW * FOCAL_MULTIPLIER;
+                            const focalLength = getFocalLength(video.videoWidth, video.videoHeight);
                             const distMm = (focalLength * DEFAULT_FACE_WIDTH_MM) / widthPx;
                             updateDistance(distMm / 1000, 'detection');
                         }
@@ -575,13 +808,16 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
     };
 
     const startCamera = useCallback(async () => {
-        if (externalStream && detectionVideoRef.current) {
-            try { await detectionVideoRef.current.play(); } catch (e) { }
+        // Already running or no stream
+        if (animFrameRef.current) return;
+        startDetectionLoop();
+    }, []);
+
+    useEffect(() => {
+        if (videoRef.current && videoRef.current.srcObject) {
             startDetectionLoop();
-        } else {
-            console.log('useFaceDistance.startCamera: waiting for external stream...');
         }
-    }, [externalStream]);
+    }, [videoRef.current?.srcObject]);
 
     const stopCamera = useCallback(() => {
         if (animFrameRef.current) {
@@ -594,7 +830,7 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
         videoRef,
         faceLandmarksRef,
         poseLandmarksRef,
-        handLandmarksRef: handLandmarksStateRef,
+        handLandmarksRef,
         status,
         distanceM,
         isStable,

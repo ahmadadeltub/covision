@@ -1,7 +1,8 @@
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Language, AcuityTrial, AcuityResult, DistanceStatus } from '../types';
 import { translations } from '../translations';
+import { useVoiceCommand } from '../hooks/useVoiceCommand';
 
 
 /**
@@ -50,7 +51,7 @@ const LOGMAR_LEVELS = [
     { logMAR: 0.0, snellen: '6/6', sizePx: 20 },
 ];
 
-const TOTAL_TRIALS = 15;
+const TOTAL_TRIALS = 3;
 const TIMEOUT_SECONDS = 8;
 const START_LEVEL = 3; // logMAR 0.7 = 6/30
 
@@ -64,6 +65,21 @@ const TumblingETest: React.FC<Props> = ({ lang, distanceStatus, distanceComplian
     const [timeLeft, setTimeLeft] = useState(TIMEOUT_SECONDS);
     const [isPaused, setIsPaused] = useState(false);
     const [showFeedback, setShowFeedback] = useState<'correct' | 'wrong' | null>(null);
+
+    const voiceCommands = useMemo(() => {
+        return {
+            'up': 'up', 'top': 'up', 'above': 'up', 'فوق': 'up', 'أعلى': 'up',
+            'down': 'down', 'bottom': 'down', 'below': 'down', 'تحت': 'down', 'أسفل': 'down',
+            'left': 'left', 'يسار': 'left', 'شمال': 'left',
+            'right': 'right', 'يمين': 'right'
+        };
+    }, []);
+
+    const { isListening, transcript } = useVoiceCommand({
+        commands: voiceCommands,
+        onCommand: (cmd) => handleAnswer(cmd as Direction),
+        isActive: !isPaused && currentTrial < TOTAL_TRIALS,
+    });
 
     const trialStartRef = useRef(Date.now());
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -111,7 +127,7 @@ const TumblingETest: React.FC<Props> = ({ lang, distanceStatus, distanceComplian
         if (timerRef.current) clearInterval(timerRef.current);
 
         const responseTime = Date.now() - trialStartRef.current;
-        const isCorrect = answer === direction && answer !== 'timeout';
+        const isCorrect = answer !== 'timeout' && answer === direction;
 
         const trial: AcuityTrial = {
             trialNumber: currentTrial + 1,
@@ -127,7 +143,7 @@ const TumblingETest: React.FC<Props> = ({ lang, distanceStatus, distanceComplian
 
         // Show feedback briefly
         setShowFeedback(isCorrect ? 'correct' : 'wrong');
-        setTimeout(() => setShowFeedback(null), 400);
+        setTimeout(() => setShowFeedback(null), 300);
 
         // Adaptive staircase logic
         let newLevel = levelIndex;
@@ -264,7 +280,9 @@ const TumblingETest: React.FC<Props> = ({ lang, distanceStatus, distanceComplian
                     display: 'flex', alignItems: 'center', gap: 6,
                 }}>
                     ⏱ {timeLeft} {t.seconds}
+                    {isListening && <span style={{ color: 'var(--accent)', marginLeft: 8 }}>🎤 {t.listening || 'Listening...'}</span>}
                 </div>
+                {transcript && <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>"{transcript}"</div>}
 
 
 

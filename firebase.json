@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "covision-41ab1",
     "public": "dist",
     "ignore": [
       "firebase.json",

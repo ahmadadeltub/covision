@@ -152,6 +152,7 @@ export const translations: Record<string, Record<string, string>> = {
     // Theme (English fallback)
     dark_mode: "Dark Mode",
     light_mode: "Light Mode",
+    listening: "جاري الاستماع...",
   },
   en: {
     // App
@@ -305,5 +306,6 @@ export const translations: Record<string, Record<string, string>> = {
     // Theme
     dark_mode: "Dark Mode",
     light_mode: "Light Mode",
+    listening: "Listening...",
   }
 };

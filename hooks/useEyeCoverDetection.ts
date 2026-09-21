@@ -40,15 +40,16 @@ export function useEyeCoverDetection({
   coverCanvasRef,
   stream,
 }: UseEyeCoverDetectionOptions): UseEyeCoverDetectionReturn {
-  // ── Short-circuit: when disabled, never report eye as uncovered ──
-  if (EYE_COVER_DISABLED) {
-    return { isEyeUncovered: false, eyeCoverStatus: 'no_detection', coverConfidence: 0 };
-  }
   const [eyeCoverStatus, setEyeCoverStatus] = useState<EyeCoverStatus>('no_detection');
   const [isEyeUncovered, setIsEyeUncovered] = useState(false);
   const [coverConfidence, setCoverConfidence] = useState(0);
   const coverHistoryRef = useRef<EyeCoverStatus[]>([]);
   const testingStartTimeRef = useRef<number>(0);
+
+  // ── Short-circuit: when disabled, never report eye as uncovered ──
+  if (EYE_COVER_DISABLED) {
+    return { isEyeUncovered: false, eyeCoverStatus: 'no_detection', coverConfidence: 0 };
+  }
 
   // ─── Update cover status with history smoothing ───
   const updateCoverStatus = useCallback((status: EyeCoverStatus) => {
@@ -160,58 +161,6 @@ export function useEyeCoverDetection({
           // Draw Face Oval (some points)
           drawDots([10, 152, 234, 454]); 
 
-          // Draw Hand Landmarks if available
-          const hands = (window as any).__sharedHandLandmarks;
-          const handednesses = (window as any).__sharedHandednesses;
-          if (hands && hands.length > 0) {
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = 'rgba(16, 185, 129, 0.6)';
-            ctx.fillStyle = 'rgba(16, 185, 129, 0.8)';
-            const connections = [
-              [0,1],[1,2],[2,3],[3,4], // Thumb
-              [0,5],[5,6],[6,7],[7,8], // Index
-              [5,9],[9,10],[10,11],[11,12], // Middle
-              [9,13],[13,14],[14,15],[15,16], // Ring
-              [13,17],[17,18],[18,19],[19,20], // Pinky
-              [0,17] // Base
-            ];
-            hands.forEach((hand: any[], idx: number) => {
-              // Draw lines
-              ctx.beginPath();
-              connections.forEach(([start, end]) => {
-                const s = hand[start], e = hand[end];
-                if (s && e) {
-                  ctx.moveTo(s.x * canvas.width, s.y * canvas.height);
-                  ctx.lineTo(e.x * canvas.width, e.y * canvas.height);
-                }
-              });
-              ctx.stroke();
-              // Draw joints
-              hand.forEach((joint: any) => {
-                ctx.beginPath();
-                ctx.arc(joint.x * canvas.width, joint.y * canvas.height, 3, 0, Math.PI * 2);
-                ctx.fill();
-              });
-
-              // Draw Left/Right label at wrist (joint 0)
-              if (handednesses && handednesses[idx] && handednesses[idx].length > 0) {
-                 const label = handednesses[idx][0].categoryName;
-                 const score = Math.round(handednesses[idx][0].score * 100);
-                 const wrist = hand[0];
-                 ctx.save();
-                 ctx.translate(wrist.x * canvas.width, wrist.y * canvas.height);
-                 // Need to scale back x because canvas is mirrored (-1) so text isn't backwards
-                 ctx.scale(-1, 1);
-                 ctx.font = 'bold 14px Inter, sans-serif';
-                 ctx.fillStyle = '#10b981';
-                 ctx.shadowBlur = 4;
-                 ctx.shadowColor = '#000';
-                 ctx.textAlign = 'center';
-                 ctx.fillText(`${label} Hand (${score}%)`, 0, 20);
-                 ctx.restore();
-              }
-            });
-          }
 
           drawZone(rightEyeCenter, rightClosed, 'R');
           drawZone(leftEyeCenter, leftClosed, 'L');

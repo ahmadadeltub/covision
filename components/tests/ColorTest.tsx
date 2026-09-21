@@ -35,7 +35,7 @@ const COLOR_SAMPLES: { name: string; confusers: string[] }[] = [
   { name: 'Gray',   confusers: ['Silver', 'Blue', 'White'] },
 ];
 
-const TOTAL_SAMPLES = 5;
+const TOTAL_SAMPLES = 3;
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -105,12 +105,17 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
     };
 
     if (phase === 'testing' && currentSample) {
-        [currentSample.name, ...currentSample.confusers].forEach(c => {
+        const colors = [currentSample.name, ...currentSample.confusers];
+        colors.forEach(c => {
             map[c.toLowerCase()] = c;
             const arabic = arabicColors[c];
             if (arabic) {
                 map[arabic] = c;
                 if (arabic.startsWith('ا')) map['أ' + arabic.slice(1)] = c;
+                // Add common variations
+                if (c === 'Red') map['حمار'] = c;
+                if (c === 'Green') map['خضار'] = c;
+                if (c === 'Blue') map['زرق'] = c;
             }
         });
     } else if (phase === 'ishihara-testing') {
@@ -119,8 +124,8 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
         map["can't see"] = "none"; map["cant see"] = "none"; map["nothing"] = "none"; map["لا أرى"] = "none"; map["لا اعرف"] = "none"; map["مش شايف"] = "none";
         
         const arabicNums: Record<string, string> = {
-            'اثنان': '2', 'اتنين': '2', 'ثلاثة': '3', 'تلاتة': '3', 'خمسة': '5', 'ستة': '6', 'سبعة': '7', 'ثمانية': '8', 'تمانية': '8', 'تسعة': '9',
-            'اثنا عشر': '12', 'اتناشر': '12', 'خمسة عشر': '15', 'خمستاشر': '15', 'ستة عشر': '16', 'ستاشر': '16',
+            'اثنان': '2', 'اتنين': '2', 'تنين': '2', 'ثلاثة': '3', 'تلاتة': '3', 'تلات': '3', 'خمسة': '5', 'خمس': '5', 'ستة': '6', 'ست': '6', 'سبعة': '7', 'سبع': '7', 'ثمانية': '8', 'تمانية': '8', 'تمان': '8', 'تسعة': '9', 'تسع': '9',
+            'اثنا عشر': '12', 'اتناشر': '12', 'اطناشر': '12', 'خمسة عشر': '15', 'خمستاشر': '15', 'ستة عشر': '16', 'ستاشر': '16',
             'خمسة وعشرون': '25', 'خمسة وعشرين': '25', 'تسعة وعشرون': '29', 'تسعة وعشرين': '29',
             'خمسة وثلاثون': '35', 'خمسة وتلاتين': '35', 'اثنان وأربعون': '42', 'اتنين واربعين': '42',
             'خمسة وأربعون': '45', 'خمسة واربعين': '45', 'أربعة وسبعون': '74', 'اربعة وسبعين': '74',
@@ -171,7 +176,39 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
       setIshiharaIdx(prev => prev + 1);
       ishiharaStartTime.current = Date.now();
     } else {
-      finishTestWithIshihara(results, newIshiharaResults);
+      // Finish with combined results
+      setPhase('done');
+      const colorOk = results.filter(r => r.correct).length;
+      const ishiharaOk = newIshiharaResults.filter(r => r.correct).length;
+      const totalCorrect = colorOk + ishiharaOk;
+      const totalAttempted = results.length + newIshiharaResults.length;
+      const allTimes = [...results.map(r => r.timeMs), ...newIshiharaResults.map(r => r.timeMs)];
+
+      let findings: string, confidence: number;
+      if (totalCorrect >= totalAttempted - 1) {
+        findings = `Excellent color vision — Arrangement: ${colorOk}/${results.length}, Ishihara: ${ishiharaOk}/${newIshiharaResults.length} (both eyes).`;
+        confidence = 0.98;
+      } else if (totalCorrect >= totalAttempted * 0.6) {
+        findings = `Mild color concern — Arrangement: ${colorOk}/${results.length}, Ishihara: ${ishiharaOk}/${newIshiharaResults.length} (both eyes).`;
+        confidence = 0.90;
+      } else {
+        findings = `Significant color deficiency — Arrangement: ${colorOk}/${results.length}, Ishihara: ${ishiharaOk}/${newIshiharaResults.length} (both eyes). Professional exam recommended.`;
+        confidence = 0.95;
+      }
+
+      botFinish(totalCorrect, totalAttempted);
+      onFinish({
+        testName: 'Color Arrangement + Ishihara',
+        score: totalCorrect,
+        total: totalAttempted,
+        confidence,
+        findings,
+        perSampleScores: [
+          ...results.map((r, i) => ({ sample: i + 1, correct: r.correct, timeMs: r.timeMs })),
+          ...newIshiharaResults.map((r, i) => ({ sample: results.length + i + 1, correct: r.correct, timeMs: r.timeMs })),
+        ],
+        rawResponseTimes: allTimes,
+      });
     }
   };
 
@@ -181,10 +218,10 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
     const total = colorResults.length;
 
     let findings: string, confidence: number;
-    if (colorOk >= 4) {
+    if (colorOk >= 3) {
       findings = `Excellent color vision — Arrangement: ${colorOk}/${TOTAL_SAMPLES} (both eyes). Normal color discrimination.`;
       confidence = 0.98;
-    } else if (colorOk >= 3) {
+    } else if (colorOk >= 2) {
       findings = `Mild color concern — Arrangement: ${colorOk}/${TOTAL_SAMPLES} (both eyes). Some difficulty with similar hues.`;
       confidence = 0.90;
     } else {

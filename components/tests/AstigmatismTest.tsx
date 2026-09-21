@@ -21,7 +21,7 @@ const PATTERNS: { key: Pattern; label: string; icon: string }[] = [
   { key: 'parallel', label: 'Parallel Lines', icon: '\u{2261}' },
 ];
 
-const TOTAL_TRIALS = 5;
+const TOTAL_TRIALS = 3;
 
 type Phase = 'testing' | 'done';
 
@@ -109,7 +109,7 @@ const AstigmatismTest: React.FC<Props> = ({ t, stream, onFinish }) => {
       total,
       confidence: 0.95,
       findings,
-      difficulty: totalIssues >= 4 ? 'hard' : 'easy',
+      difficulty: totalIssues >= 2 ? 'hard' : 'easy',
       perSampleScores: allResults.map((r, i) => ({ sample: i + 1, correct: !r.hasIssues, timeMs: 0 })),
       rawResponseTimes: [],
     });

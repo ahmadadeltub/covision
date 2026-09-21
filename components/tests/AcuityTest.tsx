@@ -30,13 +30,11 @@ const ROW_TO_SNELLEN = [
   { label: '20/10',  denom: 10 },
 ];
 
-// ─── 5 Letter sizes from large to small ───
+// ─── 3 Letter sizes from large to small ───
 const LETTER_LEVELS = [
-  { sizePx: 300, opacity: 1.00, rowMap: 0 },  // 20/200 — largest
-  { sizePx: 220, opacity: 1.00, rowMap: 2 },  // 20/70
-  { sizePx: 160, opacity: 1.00, rowMap: 4 },  // 20/40
-  { sizePx: 110, opacity: 1.00, rowMap: 6 },  // 20/25
-  { sizePx: 70,  opacity: 1.00, rowMap: 7 },  // 20/20 — smallest
+  { sizePx: 300, opacity: 1.00, rowMap: 0 },  // 20/200 — large
+  { sizePx: 160, opacity: 1.00, rowMap: 4 },  // 20/40 — medium
+  { sizePx: 70,  opacity: 1.00, rowMap: 7 },  // 20/20 — small
 ];
 
 interface Trial {
@@ -52,7 +50,7 @@ interface Trial {
 function buildTrialSequence(): Trial[] {
   // Create trials for each size level
   const trials = LETTER_LEVELS.map((level) => {
-    const type = Math.random() > 0.5 ? 'E' : 'C';
+    const type: 'E' | 'C' = Math.random() > 0.5 ? 'E' : 'C';
     const direction = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
     
     return {
@@ -90,15 +88,7 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
 
   const { botState, botStart, botRecordTrial, botFinish } = useAIBot();
 
-  // Letter choices (only for letter-type trials)
-  const letterChoices = useMemo(() => {
-    if (currentTrial.type !== 'letter' || !currentTrial.letter) return [];
-    const correct = currentTrial.letter;
-    const others = ALL_LETTERS.filter(l => l !== correct);
-    const shuffled = [...others].sort(() => Math.random() - 0.5).slice(0, 5);
-    return [...shuffled, correct].sort(() => Math.random() - 0.5);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTrial.letter, currentTrial.type, currentIndex]);
+
 
   // AI Bot lifecycle — start immediately
   useEffect(() => {
@@ -217,40 +207,54 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
 
   // ─── Testing Phase UI ───
   return (
-    <div className="w-full h-full flex flex-col md:flex-row gap-2 md:gap-4 animate-in fade-in duration-500 overflow-x-hidden overflow-y-auto relative">
+    <div style={{
+      width: '100%', height: '100%', display: 'flex', flexDirection: window.innerWidth <= 768 ? 'column' : 'row', gap: 16,
+      animation: 'fadeIn 0.5s ease-out', position: 'relative', overflow: 'hidden'
+    }}>
 
       {/* ─── LEFT: Test Info Panel (hidden on mobile) ─── */}
-      <div className="hidden md:flex shrink-0 flex-col gap-3 items-center" style={{ width: 300 }}>
+      <div className="hidden md:flex" style={{
+        display: window.innerWidth <= 768 ? 'none' : 'flex',
+        flexDirection: 'column', gap: 12, alignItems: 'center', width: 300, flexShrink: 0
+      }}>
         {/* Test Info Panel */}
-        <div className="w-full glass rounded-2xl border border-white/5 p-3 space-y-2">
-          <div className="text-center">
-            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{currentTrial.type} Chart</div>
-            <div className="text-lg font-black text-white">
+        <div style={{
+          width: '100%', background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(12px)',
+          borderRadius: 24, border: '1px solid rgba(255,255,255,0.05)', padding: 12, display: 'flex', flexDirection: 'column', gap: 8
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.15em' }}>{currentTrial.type} Chart</div>
+            <div style={{ fontSize: 18, fontWeight: 900, color: '#fff' }}>
               {currentTrial.label} · {currentTrial.sizePx}px
             </div>
           </div>
-          <div className="h-px bg-white/5"></div>
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-500 uppercase font-bold">Trial</span>
-            <span className="text-sm font-black text-white">{currentIndex + 1}/{totalTrials}</span>
+          <div style={{ height: 1, background: 'rgba(255,255,255,0.05)' }}></div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: 10, color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Trial</span>
+            <span style={{ fontSize: 14, fontWeight: 900, color: '#fff' }}>{currentIndex + 1}/{totalTrials}</span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-500 uppercase font-bold">Type</span>
-            <span className="text-sm font-black text-white">{currentTrial.type === 'E' ? 'Tumbling E' : 'Landolt C'}</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: 10, color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Type</span>
+            <span style={{ fontSize: 14, fontWeight: 900, color: '#fff' }}>{currentTrial.type === 'E' ? 'Tumbling E' : 'Landolt C'}</span>
           </div>
-          <div className="flex items-center justify-center pt-1 gap-2">
-            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 4, gap: 8 }}>
+            <span style={{
+              padding: '4px 12px', borderRadius: 999, fontSize: 10, fontWeight: 900, textTransform: 'uppercase',
+              background: 'rgba(6, 182, 212, 0.2)', color: '#22d3ee', border: '1px solid rgba(6, 182, 212, 0.4)'
+            }}>
               BOTH EYES
             </span>
-            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider"
-              style={{ background: difficultyColor + '20', color: difficultyColor, border: `1px solid ${difficultyColor}40` }}>
+            <span style={{
+              padding: '4px 12px', borderRadius: 999, fontSize: 10, fontWeight: 900, textTransform: 'uppercase',
+              background: difficultyColor + '20', color: difficultyColor, border: `1px solid ${difficultyColor}40`
+            }}>
               {difficultyLabel}
             </span>
           </div>
         </div>
 
-        <div className="text-center px-2">
-          <div className="text-[10px] font-bold text-cyan-400/80 flex items-center gap-1 justify-center">
+        <div style={{ textAlign: 'center', padding: '0 8px' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(34, 211, 238, 0.8)', display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center' }}>
             <span>Select the direction</span>
           </div>
         </div>
@@ -258,54 +262,58 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
       </div>
 
       {/* ─── RIGHT: Test Content ─── */}
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0 relative">
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0, position: 'relative' }}>
         
         {/* Feedback Overlay */}
         {feedback && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-900/40 backdrop-blur-[2px] rounded-[2rem] animate-in fade-in duration-200 pointer-events-none">
-            <div className={`w-32 h-32 rounded-full flex items-center justify-center text-6xl shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in zoom-in duration-300 ${feedback === 'correct' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
+          <div style={{
+            position: 'absolute', inset: 0, zIndex: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(2px)', borderRadius: 32, pointerEvents: 'none'
+          }}>
+            <div style={{
+              width: 128, height: 128, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 60, boxShadow: '0 0 50px rgba(0,0,0,0.5)',
+              background: feedback === 'correct' ? '#10b981' : '#ef4444', color: '#fff'
+            }}>
               {feedback === 'correct' ? '✅' : '❌'}
             </div>
           </div>
         )}
 
         {/* Header Bar */}
-        <div className="shrink-0 px-3 md:px-6 py-2 md:py-3">
-          <h3 className="text-base md:text-2xl font-black text-white uppercase tracking-tight leading-none">{t.visual_acuity}</h3>
-          <p className="text-[10px] md:text-xs text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
+        <div style={{ flexShrink: 0, padding: '12px 24px' }}>
+          <h3 style={{ fontSize: 'clamp(16px, 4vw, 24px)', fontWeight: 900, color: '#fff', textTransform: 'uppercase', margin: 0 }}>{t.visual_acuity}</h3>
+          <p style={{ fontSize: 12, color: '#22d3ee', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>
             Trial {currentIndex + 1}/{totalTrials} · {currentTrial.label}
           </p>
         </div>
 
         {/* Progress Bar */}
-        <div className="shrink-0 px-3 md:px-6 pt-1 md:pt-2">
-          <div className="w-full bg-slate-800 h-1 md:h-1.5 rounded-full overflow-hidden">
-            <div
-              className="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full transition-all duration-500 rounded-full"
-              style={{ width: `${progressPct}%` }}
-            />
+        <div style={{ flexShrink: 0, padding: '4px 24px' }}>
+          <div style={{ width: '100%', background: '#1e293b', height: 6, borderRadius: 999, overflow: 'hidden' }}>
+            <div style={{
+              background: 'linear-gradient(90deg, #06b6d4, #6366f1)', height: '100%',
+              transition: 'all 0.5s ease-out', borderRadius: 999, width: `${progressPct}%`
+            }} />
           </div>
         </div>
 
         {/* Optotype Display — centered */}
-        <div className="flex-1 min-h-0 flex items-center justify-center p-2 md:p-4 overflow-hidden">
-          <div className="flex items-center justify-center transition-all duration-300"
-            style={{ width: `${currentTrial.sizePx}px`, height: `${currentTrial.sizePx}px` }}
-          >
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, overflow: 'hidden' }}>
+          <div style={{
+            width: currentTrial.sizePx, height: currentTrial.sizePx,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s'
+          }}>
             {/* Rotated Optotype */}
             {currentTrial.type === 'E' ? (
-              <svg viewBox="0 0 100 100" className="w-full h-full text-white fill-current drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]"
-                style={{ transform: `rotate(${rotation}deg)` }}
-              >
+              <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', color: '#fff', fill: 'currentColor', filter: 'drop-shadow(0 0 20px rgba(255,255,255,0.4))', transform: `rotate(${rotation}deg)` }}>
                 <rect x="0" y="0" width="100" height="20" />
                 <rect x="0" y="40" width="100" height="20" />
                 <rect x="0" y="80" width="100" height="20" />
                 <rect x="0" y="0" width="20" height="100" />
               </svg>
             ) : (
-              <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]"
-                style={{ transform: `rotate(${rotation}deg)` }}
-              >
+              <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', filter: 'drop-shadow(0 0 20px rgba(255,255,255,0.4))', transform: `rotate(${rotation}deg)` }}>
                 <circle cx="50" cy="50" r="50" fill="white" />
                 <circle cx="50" cy="50" r="30" fill="black" />
                 <rect x="50" y="40" width="55" height="20" fill="black" />
@@ -315,22 +323,23 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
         </div>
 
         {/* Answer Buttons */}
-        <div className="shrink-0 p-2 md:p-4 pt-0">
-          {/* Direction choice grid — 2×2 for Tumbling E / Landolt C */}
-          <div className="grid grid-cols-2 gap-2 md:gap-3 max-w-md mx-auto">
+        <div style={{ flexShrink: 0, padding: 16 }}>
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, maxWidth: 450, margin: '0 auto'
+          }}>
             {DIRECTIONS.map(dir => (
               <button
                 key={dir}
                 onClick={() => handleSelect(dir)}
-                className={`
-                  py-3 md:py-7 glass border-2 rounded-xl md:rounded-3xl
-                  text-2xl md:text-5xl lg:text-6xl transition-all active:scale-95
-                  ${activeButton === dir
-                    ? 'border-cyan-400 bg-cyan-500/40 shadow-[0_0_50px_rgba(0,243,255,0.6)] scale-105'
-                    : 'border-white/10 hover:border-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_40px_rgba(0,243,255,0.4)]'}
-                `}
+                style={{
+                  padding: '12px 0', background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)',
+                  border: `2px solid ${activeButton === dir ? '#22d3ee' : 'rgba(255,255,255,0.1)'}`,
+                  borderRadius: 24, fontSize: 32, transition: 'all 0.2s', cursor: 'pointer',
+                  boxShadow: activeButton === dir ? '0 0 40px rgba(34, 211, 238, 0.4)' : 'none',
+                  transform: activeButton === dir ? 'scale(1.05)' : 'scale(1)'
+                }}
               >
-                <span className="inline-block drop-shadow-lg">
+                <span style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))' }}>
                   {dir === 'up' && '⬆️'}
                   {dir === 'down' && '⬇️'}
                   {dir === 'left' && '⬅️'}
@@ -340,17 +349,21 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
             ))}
           </div>
 
-          <div className="text-center mt-3">
+          <div style={{ textAlign: 'center', marginTop: 12 }}>
             <button
               onClick={() => handleSelect('?')}
-              className="px-6 py-2 glass border border-white/5 rounded-full text-xs text-slate-500 font-black uppercase tracking-[0.3em] hover:text-white transition-colors"
+              style={{
+                padding: '8px 24px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 999, fontSize: 10, color: '#94a3b8', fontWeight: 900, textTransform: 'uppercase',
+                letterSpacing: '0.2em', cursor: 'pointer', transition: 'all 0.2s'
+              }}
             >
               Can't See
             </button>
           </div>
-          <div className="text-center mt-2 text-xs text-slate-500 uppercase tracking-widest opacity-60 flex items-center justify-center gap-2">
+          <div style={{ textAlign: 'center', marginTop: 8, fontSize: 10, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.6, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
             <span>Voice: Say "Up", "Down", "Left", "Right" or "can't see"</span>
-            {isListening && <span className="text-emerald-400 font-bold animate-pulse">🎤 Listening</span>}
+            {isListening && <span style={{ color: '#10b981', fontWeight: 'bold' }}>🎤 Listening</span>}
           </div>
         </div>
       </div>

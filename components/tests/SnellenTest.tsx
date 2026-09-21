@@ -26,7 +26,7 @@ const SNELLEN_LEVELS = [
   { label: '20/10',  denom: 10,  sizePx: 14 },
 ];
 
-const TOTAL_SAMPLES = 5;
+const TOTAL_SAMPLES = 3;
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -49,10 +49,10 @@ interface Props {
 const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
   const [phase, setPhase] = useState<Phase>('testing');
   
-  // Generate a random sequence of 5 different levels
+  // Generate a random sequence of 3 different levels
   const trialSequence = useMemo(() => {
-    // Pick 5 levels across the spectrum (large, medium, small)
-    const indices = [0, 3, 5, 8, 11]; // 20/200, 20/100, 20/70, 20/40, 20/20
+    // Pick 3 levels across the spectrum (large, medium, small)
+    const indices = [0, 5, 8]; // 20/200, 20/70, 20/20
     return shuffle(indices.map(idx => ({ ...SNELLEN_LEVELS[idx], originalIdx: idx })));
   }, []);
 
