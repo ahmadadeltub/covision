@@ -603,8 +603,8 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
   const canProceed = localStatus === 'ok';
 
   return (
-    <div className="w-full flex-1 flex items-center justify-center p-0 md:p-2 overflow-hidden bg-transparent">
-      <div className="glass w-full max-w-[98vw] h-auto min-h-0 max-h-[96vh] rounded-[1.5rem] md:rounded-[2rem] shadow-[0_0_150px_rgba(0,0,0,0.8)] border border-white/10 flex flex-col items-center justify-between relative overflow-hidden bg-slate-900/60 p-2 md:p-4 animate-in fade-in zoom-in-95 duration-700">
+    <div className="w-full flex-1 flex items-center justify-center p-1 sm:p-2 md:p-3 overflow-y-auto md:overflow-hidden bg-transparent">
+      <div className="glass w-full max-w-[98vw] lg:max-w-7xl h-auto min-h-0 md:h-[94vh] md:max-h-[96vh] rounded-2xl md:rounded-[2.5rem] shadow-2xl border border-slate-200/80 dark:border-white/10 flex flex-col items-center justify-between relative overflow-y-auto md:overflow-hidden bg-white/70 dark:bg-slate-900/60 p-2 sm:p-3 md:p-4 lg:p-5 animate-in fade-in zoom-in-95 duration-700">
 
         {/* Background Elements */}
         <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
@@ -613,204 +613,207 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
         </div>
 
         {/* Header */}
-        <div className="relative z-10 w-full text-center shrink-0">
-          <h2 className="text-3xl md:text-5xl lg:text-5xl font-black text-white uppercase tracking-tighter leading-none drop-shadow-2xl">
+        <div className="relative z-10 w-full text-center shrink-0 mb-1 sm:mb-2">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none drop-shadow-sm">
             {t.calibration_title}
           </h2>
         </div>
 
-        {/* Instruction Note */}
-        <div className="relative z-10 w-full max-w-4xl mx-auto flex flex-col items-center gap-2 shrink-0 mt-2">
-          {/* Guidance Arrow */}
-          <div className="flex items-center gap-2 py-1 px-4 rounded-full" style={{ background: getDistanceColor() + '15', borderColor: getDistanceColor() + '30' }}>
-            <span className="text-lg">{guidance.icon}</span>
-            <span className="font-black text-sm md:text-base uppercase tracking-wider animate-pulse" style={{ color: getDistanceColor() }}>
-              {guidance.text}
-            </span>
-          </div>
-
-          {/* ═══════════════════════════════════════════ */}
-          {/* MODERN INSTRUMENT-GRADE DISTANCE TELEMETRY */}
-          {/* ═══════════════════════════════════════════ */}
-          <div className="w-full max-w-3xl mx-auto mt-1 bg-slate-950/70 border border-slate-700/60 rounded-3xl p-3 md:p-4 backdrop-blur-xl shadow-2xl relative overflow-hidden"
-            style={{ borderColor: getDistanceColor() + '40', boxShadow: `0 0 35px ${getDistanceColor()}20` }}
-          >
-            {/* Top Row: Distance readout + Delta badge + Stability status */}
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-2 px-1">
-              {/* Numeric Metric */}
-              <div className="flex items-baseline gap-2">
-                <span className="text-4xl md:text-5xl font-black font-mono tabular-nums leading-none tracking-tight" style={{ color: getDistanceColor() }}>
-                  {effectiveDistanceM > 0 ? effectiveDistanceM.toFixed(2) : '—.—'}
-                </span>
-                <span className="text-lg text-slate-400 font-bold uppercase">m</span>
-                <span className="text-[10px] md:text-xs font-mono font-bold text-slate-400 uppercase tracking-widest ml-1">
-                  (Target: 1.00m)
-                </span>
-              </div>
-
-              {/* Delta & Stability Pill */}
-              <div className="flex items-center gap-2">
-                {effectiveDistanceM > 0 && (
-                  <div className="px-3 py-1 rounded-full text-xs font-mono font-bold border flex items-center gap-1.5"
-                    style={{
-                      backgroundColor: localStatus === 'ok' ? 'rgba(16, 185, 129, 0.15)' : getDistanceColor() + '18',
-                      borderColor: getDistanceColor() + '50',
-                      color: getDistanceColor()
-                    }}
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full animate-ping" style={{ backgroundColor: getDistanceColor() }} />
-                    <span>
-                      {localStatus === 'ok'
-                        ? Math.abs(Math.round((effectiveDistanceM - TARGET_M) * 100)) <= 2
-                          ? 'PERFECT ALIGNMENT'
-                          : `Δ ${(effectiveDistanceM - TARGET_M > 0 ? '+' : '') + Math.round((effectiveDistanceM - TARGET_M) * 100)}cm`
-                        : `Δ ${(effectiveDistanceM - TARGET_M > 0 ? '+' : '') + Math.round((effectiveDistanceM - TARGET_M) * 100)}cm`}
-                    </span>
-                  </div>
-                )}
-
-                {/* Countdown / Lock Badge */}
-                {localStatus === 'ok' && (
-                  <div className={`px-3 py-1 rounded-full text-xs font-mono font-black border flex items-center gap-1.5 shadow-sm ${effectiveStable || stableCountdown === 0
-                    ? 'bg-emerald-500/25 border-emerald-400/60 text-emerald-300 animate-pulse'
-                    : 'bg-cyan-500/20 border-cyan-400/50 text-cyan-300'
-                    }`}>
-                    <span className="text-xs">🔒</span>
-                    <span>{effectiveStable || stableCountdown === 0 ? 'LOCKED' : `HOLD ${stableCountdown}s`}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Precision Caliper Rail */}
-            <div className="relative w-full h-7 md:h-8 rounded-full bg-slate-900/90 border border-slate-700/80 overflow-hidden shadow-inner flex items-center">
-              {/* Green target zone (0.85m - 1.15m on a 0-2m scale) */}
-              <div
-                className="absolute top-0 h-full border-x transition-all duration-300 pointer-events-none"
-                style={{
-                  left: `${(0.85 / 2) * 100}%`,
-                  width: `${((1.15 - 0.85) / 2) * 100}%`,
-                  backgroundColor: localStatus === 'ok' ? 'rgba(16, 185, 129, 0.22)' : 'rgba(16, 185, 129, 0.12)',
-                  borderColor: 'rgba(52, 211, 153, 0.6)'
-                }}
-              >
-                <div className="w-full h-full opacity-20 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:6px_6px]" />
-              </div>
-
-              {/* Filled bar up to current distance */}
-              <div
-                className="h-full rounded-full transition-all duration-300 ease-out pointer-events-none"
-                style={{
-                  width: `${Math.min((effectiveDistanceM / 2) * 100, 100)}%`,
-                  background: `linear-gradient(90deg, ${getDistanceColor()}33, ${getDistanceColor()})`,
-                  boxShadow: `0 0 15px ${getDistanceColor()}88`
-                }}
-              />
-
-              {/* Target wire at 1.0m */}
-              <div
-                className="absolute top-0 h-full w-[2px] bg-white z-10 pointer-events-none shadow-[0_0_8px_rgba(255,255,255,0.8)]"
-                style={{ left: `${(1.0 / 2) * 100}%`, transform: 'translateX(-50%)' }}
-              />
-
-              {/* Current position reticle cursor */}
-              {effectiveDistanceM > 0 && (
-                <div
-                  className="absolute top-1/2 w-6 h-6 rounded-full border-2 border-white transition-all duration-300 ease-out flex items-center justify-center z-20 pointer-events-none"
-                  style={{
-                    left: `${Math.min((effectiveDistanceM / 2) * 100, 100)}%`,
-                    transform: 'translate(-50%, -50%)',
-                    backgroundColor: getDistanceColor(),
-                    boxShadow: `0 0 16px ${getDistanceColor()}`
-                  }}
-                >
-                  <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                </div>
-              )}
-            </div>
-
-            {/* Calibrated Ticks */}
-            <div className="flex justify-between items-center text-[10px] font-mono font-bold text-slate-500 px-2 mt-1.5 select-none">
-              <span>0.0m</span>
-              <span>0.5m</span>
-              <span className="text-emerald-400 font-black">1.0m (TARGET ZONE)</span>
-              <span>1.5m</span>
-              <span>2.0m</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content Area (Buttons + Camera) */}
-        <div className="relative z-10 w-full mx-auto flex-1 min-h-0 flex flex-col md:flex-row gap-4 md:gap-6 my-2">
-
-          {/* Action Buttons (Left Side) */}
-          <div className="relative z-10 w-full md:w-56 shrink-0 flex flex-row md:flex-col justify-center gap-3 md:gap-4 order-2 md:order-1">
-            <button
-              onClick={handleFinish}
-              className="w-full py-3 rounded-2xl font-bold text-sm uppercase tracking-widest transition-all bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white border border-slate-700 shadow-sm"
-            >
-              Skip 1m (Testing)
-            </button>
-
-            <button
-              onClick={handleFinish}
-              disabled={!canProceed}
-              className={`group w-full py-4 md:py-6 rounded-2xl md:rounded-3xl font-black text-base md:text-2xl uppercase tracking-widest md:tracking-[0.3em] transition-all transform hover:scale-[1.02] active:scale-95 relative overflow-hidden shadow-xl flex-1 md:flex-none ${canProceed
-                ? 'bg-white text-slate-950 hover:bg-cyan-400 hover:shadow-[0_0_80px_rgba(0,243,255,0.7)]'
-                : 'bg-slate-800 text-slate-600 cursor-not-allowed'
-                }`}
-            >
-              <span className="relative z-10">{t.next}</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-300/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-            </button>
-          </div>
-
-          {/* Camera Feed — compact, reduced width */}
-          <div className="relative min-h-0 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden bg-black border-2 shadow-[0_0_40px_rgba(0,200,255,0.1)] order-1 md:order-2 mx-auto"
-            style={{ borderColor: getDistanceColor() + '40', maxHeight: 'clamp(360px, 64vh, 640px)', width: 'clamp(320px, 80vw, 720px)' }}
-          >
-            <video
-              ref={videoRef}
-              autoPlay
-              muted
-              playsInline
-              className="w-full h-full object-cover scale-x-[-1] brightness-110"
-            />
-            {/* Face Mesh + Body Overlay */}
-            <canvas
-              ref={overlayCanvasRef}
-              className="absolute inset-0 w-full h-full pointer-events-none"
-              style={{ zIndex: 5 }}
-            />
-            {/* Camera overlay corners */}
-            <div className="absolute inset-0 pointer-events-none p-6">
-              <div className="absolute top-6 left-6 w-14 h-14 border-t-4 border-l-4 rounded-tl-xl" style={{ borderColor: getDistanceColor() }}></div>
-              <div className="absolute top-6 right-6 w-14 h-14 border-t-4 border-r-4 rounded-tr-xl" style={{ borderColor: getDistanceColor() }}></div>
-              <div className="absolute bottom-6 left-6 w-14 h-14 border-b-4 border-l-4 rounded-bl-xl" style={{ borderColor: getDistanceColor() }}></div>
-              <div className="absolute bottom-6 right-6 w-14 h-14 border-b-4 border-r-4 rounded-br-xl" style={{ borderColor: getDistanceColor() }}></div>
-            </div>
-
-            {/* Live Distance Overlay */}
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 glass px-6 py-2 rounded-full border flex items-center gap-2"
-              style={{ borderColor: getDistanceColor() + '50' }}
-            >
-              <span className="text-sm animate-pulse" style={{ color: getDistanceColor() }}>●</span>
-              <span className="text-white font-black text-sm md:text-base uppercase tracking-widest whitespace-nowrap">
-                {t.distance_live || 'DISTANCE'}: <span style={{ color: getDistanceColor(), fontSize: '1.2rem' }}>
-                  {effectiveDistanceM > 0 ? effectiveDistanceM.toFixed(2) : '--'}
-                </span> <span className="text-slate-400 text-xs">{t.meters?.toUpperCase?.() || 'METERS'}</span>
+        {/* ═══════════════════════════════════════════ */}
+        {/* MODERN INSTRUMENT-GRADE DISTANCE TELEMETRY */}
+        {/* ═══════════════════════════════════════════ */}
+        <div
+          className="distance-telemetry-pod w-full max-w-5xl lg:max-w-6xl mx-auto shrink-0 bg-slate-950/85 dark:bg-slate-950/85 border border-slate-700/60 rounded-xl sm:rounded-2xl md:rounded-3xl p-2.5 sm:p-3 md:p-3.5 backdrop-blur-xl shadow-xl relative overflow-hidden"
+          style={{ borderColor: getDistanceColor() + '40', boxShadow: `0 0 30px ${getDistanceColor()}18` }}
+        >
+          {/* Top Row: Distance readout + Guidance + Delta + Stability status */}
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5 sm:mb-2 px-1">
+            {/* Left: Distance metric */}
+            <div className="flex items-baseline gap-1.5 sm:gap-2">
+              <span className="text-2xl sm:text-3xl md:text-4xl font-black font-mono tabular-nums leading-none tracking-tight" style={{ color: getDistanceColor() }}>
+                {effectiveDistanceM > 0 ? effectiveDistanceM.toFixed(2) : '—.—'}
+              </span>
+              <span className="text-sm sm:text-base text-slate-400 font-bold uppercase">m</span>
+              <span className="text-[10px] md:text-xs font-mono font-bold text-slate-400 uppercase tracking-widest ml-1 hidden sm:inline">
+                (Target: 1.00m)
               </span>
             </div>
 
-            {/* Stability countdown */}
-            {localStatus === 'ok' && !effectiveStable && (
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 glass px-6 py-2 rounded-full border border-amber-400/30">
-                <span className="text-amber-400 font-black text-sm uppercase tracking-wider animate-pulse">
-                  ⏱ {stableCountdown}s
-                </span>
+            {/* Right: Badges */}
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* Guidance Instruction Badge */}
+              <div
+                className="flex items-center gap-1.5 py-1 px-2.5 sm:px-3 rounded-full border text-[11px] sm:text-xs font-black uppercase tracking-wider animate-pulse"
+                style={{ background: getDistanceColor() + '18', borderColor: getDistanceColor() + '40', color: getDistanceColor() }}
+              >
+                <span className="text-sm sm:text-base">{guidance.icon}</span>
+                <span>{guidance.text}</span>
+              </div>
+
+              {/* Delta Badge */}
+              {effectiveDistanceM > 0 && (
+                <div
+                  className="px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-mono font-bold border items-center gap-1 hidden md:flex"
+                  style={{
+                    backgroundColor: localStatus === 'ok' ? 'rgba(16, 185, 129, 0.15)' : getDistanceColor() + '18',
+                    borderColor: getDistanceColor() + '50',
+                    color: getDistanceColor()
+                  }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full animate-ping" style={{ backgroundColor: getDistanceColor() }} />
+                  <span>
+                    {localStatus === 'ok'
+                      ? Math.abs(Math.round((effectiveDistanceM - TARGET_M) * 100)) <= 2
+                        ? 'PERFECT ALIGNMENT'
+                        : `Δ ${(effectiveDistanceM - TARGET_M > 0 ? '+' : '') + Math.round((effectiveDistanceM - TARGET_M) * 100)}cm`
+                      : `Δ ${(effectiveDistanceM - TARGET_M > 0 ? '+' : '') + Math.round((effectiveDistanceM - TARGET_M) * 100)}cm`}
+                  </span>
+                </div>
+              )}
+
+              {/* Countdown / Lock Badge */}
+              {localStatus === 'ok' && (
+                <div className={`px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-mono font-black border flex items-center gap-1 shadow-sm ${effectiveStable || stableCountdown === 0
+                  ? 'bg-emerald-500/25 border-emerald-400/60 text-emerald-300 animate-pulse'
+                  : 'bg-cyan-500/20 border-cyan-400/50 text-cyan-300'
+                  }`}>
+                  <span className="text-xs">🔒</span>
+                  <span>{effectiveStable || stableCountdown === 0 ? 'LOCKED' : `HOLD ${stableCountdown}s`}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Precision Caliper Rail */}
+          <div className="relative w-full h-6 sm:h-7 rounded-full bg-slate-900/90 border border-slate-700/80 overflow-hidden shadow-inner flex items-center">
+            {/* Green target zone (0.85m - 1.15m on a 0-2m scale) */}
+            <div
+              className="absolute top-0 h-full border-x transition-all duration-300 pointer-events-none"
+              style={{
+                left: `${(0.85 / 2) * 100}%`,
+                width: `${((1.15 - 0.85) / 2) * 100}%`,
+                backgroundColor: localStatus === 'ok' ? 'rgba(16, 185, 129, 0.22)' : 'rgba(16, 185, 129, 0.12)',
+                borderColor: 'rgba(52, 211, 153, 0.6)'
+              }}
+            >
+              <div className="w-full h-full opacity-20 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:6px_6px]" />
+            </div>
+
+            {/* Filled bar up to current distance */}
+            <div
+              className="h-full rounded-full transition-all duration-300 ease-out pointer-events-none"
+              style={{
+                width: `${Math.min((effectiveDistanceM / 2) * 100, 100)}%`,
+                background: `linear-gradient(90deg, ${getDistanceColor()}33, ${getDistanceColor()})`,
+                boxShadow: `0 0 15px ${getDistanceColor()}88`
+              }}
+            />
+
+            {/* Target wire at 1.0m */}
+            <div
+              className="absolute top-0 h-full w-[2px] bg-white z-10 pointer-events-none shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+              style={{ left: `${(1.0 / 2) * 100}%`, transform: 'translateX(-50%)' }}
+            />
+
+            {/* Current position reticle cursor */}
+            {effectiveDistanceM > 0 && (
+              <div
+                className="absolute top-1/2 w-5 sm:w-6 h-5 sm:h-6 rounded-full border-2 border-white transition-all duration-300 ease-out flex items-center justify-center z-20 pointer-events-none"
+                style={{
+                  left: `${Math.min((effectiveDistanceM / 2) * 100, 100)}%`,
+                  transform: 'translate(-50%, -50%)',
+                  backgroundColor: getDistanceColor(),
+                  boxShadow: `0 0 16px ${getDistanceColor()}`
+                }}
+              >
+                <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-white animate-pulse" />
               </div>
             )}
           </div>
+
+          {/* Calibrated Ticks */}
+          <div className="flex justify-between items-center text-[9px] sm:text-[10px] font-mono font-bold text-slate-500 px-2 mt-1 select-none">
+            <span>0.0m</span>
+            <span>0.5m</span>
+            <span className="text-emerald-400 font-black">1.0m (TARGET ZONE)</span>
+            <span>1.5m</span>
+            <span>2.0m</span>
+          </div>
+        </div>
+
+        {/* ═══════════════════════════════════════════ */}
+        {/* CAMERA FEED — ENLARGED, CENTERED, FITS PAGE */}
+        {/* ═══════════════════════════════════════════ */}
+        <div
+          className="relative flex-1 w-full max-w-5xl lg:max-w-6xl min-h-[340px] sm:min-h-[420px] md:min-h-[480px] lg:min-h-[520px] max-h-[64vh] md:max-h-[68vh] rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] overflow-hidden bg-black border-2 shadow-[0_0_50px_rgba(0,200,255,0.15)] mx-auto flex items-center justify-center my-2 transition-all duration-300"
+          style={{ borderColor: getDistanceColor() + '60' }}
+        >
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            className="w-full h-full object-cover scale-x-[-1] brightness-110"
+          />
+          {/* Face Mesh + Biometric Overlay */}
+          <canvas
+            ref={overlayCanvasRef}
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            style={{ zIndex: 5 }}
+          />
+          {/* Camera overlay corners */}
+          <div className="absolute inset-0 pointer-events-none p-4 sm:p-6 md:p-8">
+            <div className="absolute top-4 sm:top-6 left-4 sm:left-6 w-10 sm:w-16 h-10 sm:h-16 border-t-4 border-l-4 rounded-tl-2xl transition-colors duration-300" style={{ borderColor: getDistanceColor() }}></div>
+            <div className="absolute top-4 sm:top-6 right-4 sm:right-6 w-10 sm:w-16 h-10 sm:h-16 border-t-4 border-r-4 rounded-tr-2xl transition-colors duration-300" style={{ borderColor: getDistanceColor() }}></div>
+            <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 w-10 sm:w-16 h-10 sm:h-16 border-b-4 border-l-4 rounded-bl-2xl transition-colors duration-300" style={{ borderColor: getDistanceColor() }}></div>
+            <div className="absolute bottom-4 sm:bottom-6 right-4 sm:right-6 w-10 sm:w-16 h-10 sm:h-16 border-b-4 border-r-4 rounded-br-2xl transition-colors duration-300" style={{ borderColor: getDistanceColor() }}></div>
+          </div>
+
+          {/* Live Distance Overlay */}
+          <div
+            className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 glass px-5 sm:px-7 py-2 sm:py-2.5 rounded-full border flex items-center gap-2 backdrop-blur-md shadow-2xl z-20"
+            style={{ borderColor: getDistanceColor() + '60' }}
+          >
+            <span className="text-xs sm:text-sm animate-pulse" style={{ color: getDistanceColor() }}>●</span>
+            <span className="text-white font-black text-xs sm:text-sm md:text-base uppercase tracking-widest whitespace-nowrap">
+              {t.distance_live || 'DISTANCE'}: <span style={{ color: getDistanceColor(), fontSize: '1.25rem' }}>
+                {effectiveDistanceM > 0 ? effectiveDistanceM.toFixed(2) : '--'}
+              </span> <span className="text-slate-400 text-[10px] sm:text-xs">{t.meters?.toUpperCase?.() || 'METERS'}</span>
+            </span>
+          </div>
+
+          {/* Stability countdown indicator */}
+          {localStatus === 'ok' && !effectiveStable && (
+            <div className="absolute top-3 sm:top-4 left-1/2 -translate-x-1/2 glass px-5 py-2 rounded-full border border-amber-400/50 backdrop-blur-md shadow-2xl z-20">
+              <span className="text-amber-300 font-black text-xs sm:text-sm uppercase tracking-wider animate-pulse flex items-center gap-2">
+                <span>⏱</span> {t.hold_steady || 'HOLD STEADY'}: {stableCountdown}s
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* ═══════════════════════════════════════════ */}
+        {/* ACTION CONTROLS */}
+        {/* ═══════════════════════════════════════════ */}
+        <div className="relative z-10 w-full max-w-5xl lg:max-w-6xl mx-auto flex flex-row items-center justify-between gap-3 sm:gap-4 shrink-0 mt-1 sm:mt-2">
+          <button
+            onClick={handleFinish}
+            className="py-3 sm:py-3.5 px-4 sm:px-6 rounded-2xl font-bold text-xs sm:text-sm uppercase tracking-wider md:tracking-widest transition-all bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 hover:text-black dark:hover:text-white border border-slate-300 dark:border-slate-700 shadow-sm shrink-0"
+          >
+            Skip 1m (Testing)
+          </button>
+
+          <button
+            onClick={handleFinish}
+            disabled={!canProceed}
+            className={`group flex-1 py-3.5 sm:py-4 rounded-2xl md:rounded-3xl font-black text-sm sm:text-base md:text-xl uppercase tracking-wider md:tracking-[0.25em] transition-all transform hover:scale-[1.01] active:scale-95 relative overflow-hidden shadow-xl ${canProceed
+              ? 'bg-gradient-to-r from-sky-600 to-indigo-600 text-white hover:from-sky-500 hover:to-indigo-500 hover:shadow-[0_0_40px_rgba(2,132,199,0.5)] cursor-pointer'
+              : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
+              }`}
+          >
+            <span className="relative z-10">{t.next}</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-sky-300/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+          </button>
         </div>
       </div>
     </div>
