@@ -143,107 +143,112 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    // Helper: Draw smooth curved spline with delicate micro-node dots (Clean, non-bold, modern)
-    const drawStreamlineWithDots = (
+    // Helper: Draw smooth modern dotted lines (dots line) in luminous light blue
+    const drawDottedLineMesh = (
       pts: Array<{ x: number; y: number } | null | undefined>,
-      lineColor: string,
-      lineWidth: number,
       dotColor: string,
-      dotRadius: number,
-      dotSpacing: number,
-      showLine = true
+      dotSize: number, // diameter of dots
+      dotSpacing: number, // distance between dots
+      accentColor = '#ffffff'
     ) => {
       const validPts = pts.filter((p): p is { x: number; y: number } => !!p && isFinite(p.x) && isFinite(p.y));
       if (validPts.length < 2) return;
 
-      // 1. Smooth fine spline curve (sleek, non-bold line)
-      if (showLine) {
-        ctx.beginPath();
-        ctx.strokeStyle = lineColor;
-        ctx.lineWidth = lineWidth * distScale;
-        ctx.shadowBlur = 3 * distScale;
-        ctx.shadowColor = '#0000FF';
-        ctx.moveTo(validPts[0].x * w, validPts[0].y * h);
-        for (let i = 1; i < validPts.length - 1; i++) {
-          const xc = ((validPts[i].x + validPts[i + 1].x) / 2) * w;
-          const yc = ((validPts[i].y + validPts[i + 1].y) / 2) * h;
-          ctx.quadraticCurveTo(validPts[i].x * w, validPts[i].y * h, xc, yc);
-        }
-        ctx.lineTo(validPts[validPts.length - 1].x * w, validPts[validPts.length - 1].y * h);
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-      }
+      const size = dotSize * distScale;
+      const spacing = dotSpacing * distScale;
 
-      // 2. Delicate glowing micro-nodes spaced along the path (BATCHED GPU DRAW CALL)
-      const r = dotRadius * distScale;
       ctx.save();
-      ctx.fillStyle = dotColor;
-      ctx.shadowBlur = 4 * distScale;
-      ctx.shadowColor = '#0000FF';
-      ctx.beginPath();
-      for (let i = 0; i < validPts.length - 1; i++) {
-        const p1x = validPts[i].x * w, p1y = validPts[i].y * h;
-        const p2x = validPts[i + 1].x * w, p2y = validPts[i + 1].y * h;
-        const segLen = Math.hypot(p2x - p1x, p2y - p1y);
-        const numDots = Math.max(1, Math.floor(segLen / (dotSpacing * distScale)));
 
-        for (let s = 0; s < numDots; s++) {
-          const t = s / numDots;
-          const nx = p1x + (p2x - p1x) * t;
-          const ny = p1y + (p2y - p1y) * t;
-          ctx.moveTo(nx + r, ny);
-          ctx.arc(nx, ny, r, 0, Math.PI * 2);
-        }
+      // 1. Ultra-subtle ethereal hairline guide trace connecting the points
+      ctx.beginPath();
+      ctx.strokeStyle = `rgba(56, 189, 248, ${0.14 * pulse})`;
+      ctx.lineWidth = 0.5 * distScale;
+      ctx.setLineDash([]);
+      ctx.moveTo(validPts[0].x * w, validPts[0].y * h);
+      for (let i = 1; i < validPts.length - 1; i++) {
+        const xc = ((validPts[i].x + validPts[i + 1].x) / 2) * w;
+        const yc = ((validPts[i].y + validPts[i + 1].y) / 2) * h;
+        ctx.quadraticCurveTo(validPts[i].x * w, validPts[i].y * h, xc, yc);
       }
-      const last = validPts[validPts.length - 1];
-      ctx.moveTo(last.x * w + r, last.y * h);
-      ctx.arc(last.x * w, last.y * h, r, 0, Math.PI * 2);
+      ctx.lineTo(validPts[validPts.length - 1].x * w, validPts[validPts.length - 1].y * h);
+      ctx.stroke();
+
+      // 2. High-precision Dotted Line (Dots Line) with luminous light blue glow
+      ctx.beginPath();
+      ctx.strokeStyle = dotColor;
+      ctx.lineWidth = size;
+      ctx.lineCap = 'round';
+      ctx.setLineDash([0, spacing]); // Dash length 0 + round cap = perfect circular dots
+      ctx.shadowBlur = 5 * distScale;
+      ctx.shadowColor = '#38bdf8';
+      ctx.moveTo(validPts[0].x * w, validPts[0].y * h);
+      for (let i = 1; i < validPts.length - 1; i++) {
+        const xc = ((validPts[i].x + validPts[i + 1].x) / 2) * w;
+        const yc = ((validPts[i].y + validPts[i + 1].y) / 2) * h;
+        ctx.quadraticCurveTo(validPts[i].x * w, validPts[i].y * h, xc, yc);
+      }
+      ctx.lineTo(validPts[validPts.length - 1].x * w, validPts[validPts.length - 1].y * h);
+      ctx.stroke();
+
+      // 3. Highlight luminous micro-nodes at key facial landmark vertices
+      ctx.setLineDash([]);
+      ctx.fillStyle = accentColor;
+      ctx.shadowBlur = 6 * distScale;
+      ctx.shadowColor = '#7dd3fc';
+      ctx.beginPath();
+      const nodeR = Math.max(0.9, size * 0.55);
+      for (let i = 0; i < validPts.length; i++) {
+        const px = validPts[i].x * w;
+        const py = validPts[i].y * h;
+        ctx.moveTo(px + nodeR, py);
+        ctx.arc(px, py, nodeR, 0, Math.PI * 2);
+      }
       ctx.fill();
+
       ctx.restore();
     };
 
-    // Modern Refined Palette: Pure Cyber Blue filaments with glowing Cyan/White micro-nodes
-    const cLineBlue = `rgba(0, 70, 255, ${0.70 * pulse})`;
-    const cLineBrightBlue = `rgba(0, 130, 255, ${0.85 * pulse})`;
-    const cDotCyan = `rgba(0, 240, 255, ${0.90 * pulse})`;
+    // Modern Light Blue Biometric Palette
+    const cLightBlue = `rgba(56, 189, 248, ${0.92 * pulse})`; // Sky-400 light blue
+    const cCyanLight = `rgba(125, 211, 252, ${0.95 * pulse})`; // Sky-300 bright light blue
     const cDotWhite = '#ffffff';
 
-    // ── 1. Forehead / Brow Contours (Simple & Architectural) ──
+    // ── 1. Forehead / Brow Contours (Modern Light Blue Dotted Lines) ──
     const foreheadRib1 = [54, 103, 67, 109, 10, 338, 297, 332, 284].map(i => landmarks[i]);
     const foreheadRib2 = [70, 63, 105, 66, 8, 296, 334, 293, 300].map(i => landmarks[i]);
-    drawStreamlineWithDots(foreheadRib1, cLineBrightBlue, 0.85, cDotWhite, 1.0, 20);
-    drawStreamlineWithDots(foreheadRib2, cLineBlue, 0.75, cDotCyan, 0.9, 22);
+    drawDottedLineMesh(foreheadRib1, cCyanLight, 2.1, 9, cDotWhite);
+    drawDottedLineMesh(foreheadRib2, cLightBlue, 1.8, 10, cCyanLight);
 
     // ── 2. Nasal Centerline & Tip Loop ──
     const nasalMidline = [168, 6, 197, 195, 5, 4, 1, 19, 94, 2].map(i => landmarks[i]);
     const nasalTipLoop = [98, 97, 2, 326, 327].map(i => landmarks[i]);
-    drawStreamlineWithDots(nasalMidline, cLineBrightBlue, 0.9, cDotWhite, 1.0, 16);
-    drawStreamlineWithDots(nasalTipLoop, cLineBlue, 0.8, cDotCyan, 0.9, 14);
+    drawDottedLineMesh(nasalMidline, cCyanLight, 2.2, 8, cDotWhite);
+    drawDottedLineMesh(nasalTipLoop, cLightBlue, 1.9, 8, cCyanLight);
 
-    // ── 3. Cheeks & Mid-Face Contours (Clean 3D Facial Structure) ──
+    // ── 3. Cheeks & Mid-Face Contours (Modern Facial Topography) ──
     const cheekVertR1 = [143, 111, 117, 118, 100, 47, 50, 205, 187, 147, 150].map(i => landmarks[i]);
     const cheekVertR2 = [127, 234, 93, 132, 58, 172, 136, 150, 149, 176].map(i => landmarks[i]);
     const cheekVertL1 = [372, 340, 346, 347, 329, 277, 280, 425, 411, 376, 379].map(i => landmarks[i]);
     const cheekVertL2 = [356, 454, 323, 361, 288, 397, 365, 379, 378, 400].map(i => landmarks[i]);
-    drawStreamlineWithDots(cheekVertR1, cLineBlue, 0.75, cDotCyan, 0.9, 18);
-    drawStreamlineWithDots(cheekVertR2, cLineBlue, 0.75, cDotCyan, 0.9, 18);
-    drawStreamlineWithDots(cheekVertL1, cLineBlue, 0.75, cDotCyan, 0.9, 18);
-    drawStreamlineWithDots(cheekVertL2, cLineBlue, 0.75, cDotCyan, 0.9, 18);
+    drawDottedLineMesh(cheekVertR1, cLightBlue, 1.8, 9, cCyanLight);
+    drawDottedLineMesh(cheekVertR2, cLightBlue, 1.8, 9, cCyanLight);
+    drawDottedLineMesh(cheekVertL1, cLightBlue, 1.8, 9, cCyanLight);
+    drawDottedLineMesh(cheekVertL2, cLightBlue, 1.8, 9, cCyanLight);
 
     // Infraorbital Zygomatic Curve
     const infraOrbital = [116, 123, 147, 213, 192, 4, 416, 433, 376, 352, 345].map(i => landmarks[i]);
-    drawStreamlineWithDots(infraOrbital, cLineBrightBlue, 0.85, cDotWhite, 1.0, 18);
+    drawDottedLineMesh(infraOrbital, cCyanLight, 2.0, 9, cDotWhite);
 
     // ── 4. Outer Mandibular Jaw Silhouette & Chin ──
     const jawContour = [234, 127, 162, 21, 54, 103, 67, 109, 10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234].map(i => landmarks[i]);
-    drawStreamlineWithDots(jawContour, '#0000FF', 1.0, cDotWhite, 1.1, 20);
+    drawDottedLineMesh(jawContour, cLightBlue, 2.2, 10, cDotWhite);
 
     const chinArcs = [172, 136, 150, 149, 176, 148, 152, 377, 400, 378, 379, 365, 397].map(i => landmarks[i]);
-    drawStreamlineWithDots(chinArcs, cLineBrightBlue, 0.85, cDotCyan, 0.95, 16);
+    drawDottedLineMesh(chinArcs, cCyanLight, 2.0, 8, cCyanLight);
 
     // ── 5. Perioral Lips Contour ──
     const outerLips = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146, 61].map(i => landmarks[i]);
-    drawStreamlineWithDots(outerLips, cLineBrightBlue, 0.85, cDotWhite, 1.0, 16);
+    drawDottedLineMesh(outerLips, cCyanLight, 2.0, 8, cDotWhite);
 
     // ── 6. Minimalist Collar Arcs (3 subtle rings) ──
     const pForehead = landmarks[10];
@@ -269,18 +274,18 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
           const py = ringY + (Math.sin(t * Math.PI) * dip / h);
           ringPts.push({ x: px, y: py });
         }
-        drawStreamlineWithDots(ringPts, cLineBlue, 0.75, cDotCyan, 0.9, 20);
+        drawDottedLineMesh(ringPts, cLightBlue, 1.8, 10, cCyanLight);
       }
     }
 
-    // ── 7. Luminous Modern AI Eyes (Refined, Non-Bold) ──
+    // ── 7. Luminous Modern AI Eyes (Light Blue Dotted Outlines & Rings) ──
     const drawRadiantEye = (centerIdx: number, palpebralIndices: number[]) => {
       const pCenter = landmarks[centerIdx];
       if (!pCenter) return;
       const cx = pCenter.x * w;
       const cy = pCenter.y * h;
 
-      // Palpebral Almond Eyelid Outline (sleek, non-bold)
+      // Palpebral Almond Eyelid Outline (Modern light blue dotted line)
       const eyePts = palpebralIndices.map(i => landmarks[i]).filter(Boolean);
       if (eyePts.length > 2) {
         ctx.save();
@@ -290,13 +295,15 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
           ctx.lineTo(eyePts[i].x * w, eyePts[i].y * h);
         }
         ctx.closePath();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
-        ctx.lineWidth = 1.1 * distScale;
-        ctx.shadowBlur = 8 * distScale;
-        ctx.shadowColor = '#00f0ff';
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1.8 * distScale;
+        ctx.lineCap = 'round';
+        ctx.setLineDash([0, 6 * distScale]);
+        ctx.shadowBlur = 6 * distScale;
+        ctx.shadowColor = '#38bdf8';
         ctx.stroke();
 
-        ctx.fillStyle = `rgba(0, 180, 255, ${0.10 * pulse})`;
+        ctx.fillStyle = `rgba(56, 189, 248, ${0.08 * pulse})`;
         ctx.fill();
         ctx.restore();
       }
@@ -309,10 +316,10 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
       // Outer limbal ring
       ctx.beginPath();
       ctx.arc(cx, cy, rOuter, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(0, 220, 255, ${0.85 * pulse})`;
-      ctx.lineWidth = 0.9 * distScale;
+      ctx.strokeStyle = `rgba(56, 189, 248, ${0.85 * pulse})`;
+      ctx.lineWidth = 1.0 * distScale;
       ctx.shadowBlur = 8 * distScale;
-      ctx.shadowColor = '#00f0ff';
+      ctx.shadowColor = '#38bdf8';
       ctx.stroke();
 
       // Inner glowing core beacon
@@ -320,14 +327,14 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
       ctx.arc(cx, cy, rInner, 0, Math.PI * 2);
       ctx.fillStyle = '#ffffff';
       ctx.shadowBlur = 10 * distScale;
-      ctx.shadowColor = '#00f0ff';
+      ctx.shadowColor = '#38bdf8';
       ctx.fill();
 
       // Fine crosshair
       ctx.beginPath();
       ctx.moveTo(cx - 5 * distScale, cy); ctx.lineTo(cx + 5 * distScale, cy);
       ctx.moveTo(cx, cy - 5 * distScale); ctx.lineTo(cx, cy + 5 * distScale);
-      ctx.strokeStyle = 'rgba(0, 240, 255, 0.8)';
+      ctx.strokeStyle = 'rgba(125, 211, 252, 0.8)';
       ctx.lineWidth = 0.8 * distScale;
       ctx.stroke();
       ctx.restore();
@@ -338,7 +345,7 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
     drawRadiantEye(468, rightEyeIndices);
     drawRadiantEye(473, leftEyeIndices);
 
-    // ── 8. Minimalist IPD Caliper ──
+    // ── 8. Minimalist Light Blue IPD Caliper ──
     const pR = landmarks[468];
     const pL = landmarks[473];
     if (pR && pL) {
@@ -349,13 +356,15 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
       ctx.beginPath();
       ctx.moveTo(rx, ry);
       ctx.lineTo(lx, ly);
-      ctx.strokeStyle = '#0000FF';
+      ctx.strokeStyle = '#38bdf8';
       ctx.lineWidth = 1.0 * distScale;
+      ctx.setLineDash([2 * distScale, 3 * distScale]);
       ctx.shadowBlur = 6 * distScale;
-      ctx.shadowColor = '#0000FF';
+      ctx.shadowColor = '#38bdf8';
       ctx.stroke();
 
       const capH = 5 * distScale;
+      ctx.setLineDash([]);
       ctx.beginPath();
       ctx.moveTo(rx, ry - capH); ctx.lineTo(rx, ry + capH);
       ctx.moveTo(lx, ly - capH); ctx.lineTo(lx, ly + capH);
@@ -378,10 +387,10 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
       ctx.beginPath();
       ctx.roundRect(midX - ipdBoxW / 2, midY - ipdBoxH / 2, ipdBoxW, ipdBoxH, 5);
       ctx.fill();
-      ctx.strokeStyle = '#0000FF';
+      ctx.strokeStyle = '#38bdf8';
       ctx.lineWidth = 1.0;
       ctx.shadowBlur = 6 * distScale;
-      ctx.shadowColor = '#0000FF';
+      ctx.shadowColor = '#38bdf8';
       ctx.stroke();
       ctx.shadowBlur = 0;
 
@@ -392,7 +401,7 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
       ctx.restore();
     }
 
-    // ── 9. Delicate Laser Scan Tracer ──
+    // ── 9. Delicate Light Blue Laser Scan Tracer ──
     const pTop = landmarks[10];
     const pBottom = landmarks[152];
     const pLeft = landmarks[234];
@@ -409,9 +418,9 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
 
       const gradH = 16 * distScale;
       const grad = ctx.createLinearGradient(0, scanY - gradH, 0, scanY + gradH);
-      grad.addColorStop(0, 'rgba(0, 0, 255, 0)');
-      grad.addColorStop(0.5, `rgba(0, 150, 255, ${0.18 * pulseFast})`);
-      grad.addColorStop(1, 'rgba(0, 0, 255, 0)');
+      grad.addColorStop(0, 'rgba(56, 189, 248, 0)');
+      grad.addColorStop(0.5, `rgba(56, 189, 248, ${0.18 * pulseFast})`);
+      grad.addColorStop(1, 'rgba(56, 189, 248, 0)');
 
       ctx.fillStyle = grad;
       ctx.fillRect(xMin, scanY - gradH, xMax - xMin, gradH * 2);
@@ -422,7 +431,7 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
       ctx.strokeStyle = `rgba(255, 255, 255, ${0.90 * pulseFast})`;
       ctx.lineWidth = 0.9 * distScale;
       ctx.shadowBlur = 8 * distScale;
-      ctx.shadowColor = '#0000FF';
+      ctx.shadowColor = '#38bdf8';
       ctx.stroke();
       ctx.shadowBlur = 0;
     }
@@ -430,7 +439,7 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
     ctx.restore(); // Restore mirrored space
 
     // ─────────────────────────────────────────────────────────────
-    // PART B: MODERN BLUE #0000FF FRAME & ATTITUDE HUD (Unmirrored Screen Space)
+    // PART B: MODERN LIGHT BLUE FRAME & ATTITUDE HUD (Unmirrored Screen Space)
     // ─────────────────────────────────────────────────────────────
     let minX = 1, maxX = 0, minY = 1, maxY = 0;
     for (let i = 0; i < landmarks.length; i += 4) {
@@ -450,11 +459,11 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
     ctx.save();
     ctx.lineCap = 'square';
     ctx.lineWidth = 1.2 * distScale;
-    ctx.strokeStyle = '#0000FF';
+    ctx.strokeStyle = '#38bdf8';
     ctx.shadowBlur = 8 * distScale;
-    ctx.shadowColor = '#0000FF';
+    ctx.shadowColor = '#38bdf8';
 
-    // Corner Frame Brackets (Thin & Crisp)
+    // Corner Frame Brackets (Thin & Crisp Light Blue)
     // Top-Left
     ctx.beginPath();
     ctx.moveTo(boxLeft, boxTop + bracketLen); ctx.lineTo(boxLeft, boxTop); ctx.lineTo(boxLeft + bracketLen, boxTop);
@@ -477,7 +486,7 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
     // Corner Micro-Telemetry Tags
     const microFont = `${Math.max(8, Math.round(9 * distScale))}px ui-monospace, SFMono-Regular, Menlo, monospace`;
     ctx.font = microFont;
-    ctx.fillStyle = '#0000FF';
+    ctx.fillStyle = '#38bdf8';
     ctx.fillText(`[NEURAL MESH]`, boxLeft, boxTop - 4);
     ctx.fillText(`[ACTIVE]`, boxRight - ctx.measureText(`[ACTIVE]`).width, boxTop - 4);
 
@@ -498,28 +507,28 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
     ctx.beginPath();
     ctx.moveTo(headCenterX, headPillY + headPillH);
     ctx.lineTo(headCenterX, boxTop);
-    ctx.strokeStyle = '#0000FF';
+    ctx.strokeStyle = '#38bdf8';
     ctx.lineWidth = 1.0 * distScale;
     ctx.setLineDash([3 * distScale, 3 * distScale]);
     ctx.shadowBlur = 4 * distScale;
-    ctx.shadowColor = '#0000FF';
+    ctx.shadowColor = '#38bdf8';
     ctx.stroke();
     ctx.restore();
 
-    // Attitude Pod (Refined, Modern)
+    // Attitude Pod (Refined Light Blue Modern)
     ctx.fillStyle = 'rgba(4, 8, 28, 0.90)';
     ctx.beginPath();
     ctx.roundRect(headPillX, headPillY, headPillW, headPillH, 6);
     ctx.fill();
-    ctx.strokeStyle = '#0000FF';
+    ctx.strokeStyle = '#38bdf8';
     ctx.lineWidth = 1.0 * distScale;
     ctx.shadowBlur = 6 * distScale;
-    ctx.shadowColor = '#0000FF';
+    ctx.shadowColor = '#38bdf8';
     ctx.stroke();
     ctx.shadowBlur = 0;
 
     // Indicator Pip
-    ctx.fillStyle = '#0000FF';
+    ctx.fillStyle = '#38bdf8';
     ctx.beginPath();
     ctx.arc(headPillX + 10 * distScale, headPillY + headPillH / 2, 2.8 * distScale, 0, Math.PI * 2);
     ctx.fill();
@@ -539,10 +548,10 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
     ctx.beginPath();
     ctx.roundRect(bottomPillX, bottomPillY, bottomPillW, bottomPillH, 8);
     ctx.fill();
-    ctx.strokeStyle = '#0000FF';
+    ctx.strokeStyle = '#38bdf8';
     ctx.lineWidth = 1.0;
     ctx.shadowBlur = 6 * distScale;
-    ctx.shadowColor = '#0000FF';
+    ctx.shadowColor = '#38bdf8';
     ctx.stroke();
     ctx.shadowBlur = 0;
 
