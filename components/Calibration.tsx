@@ -213,44 +213,136 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
     const cCyanLight = `rgba(125, 211, 252, ${0.95 * pulse})`; // Sky-300 bright light blue
     const cDotWhite = '#ffffff';
 
-    // ── 1. Forehead / Brow Contours (Modern Light Blue Dotted Lines) ──
-    const foreheadRib1 = [54, 103, 67, 109, 10, 338, 297, 332, 284].map(i => landmarks[i]);
-    const foreheadRib2 = [70, 63, 105, 66, 8, 296, 334, 293, 300].map(i => landmarks[i]);
-    drawDottedLineMesh(foreheadRib1, cCyanLight, 2.1, 9, cDotWhite);
-    drawDottedLineMesh(foreheadRib2, cLightBlue, 1.8, 10, cCyanLight);
+    // ── 1. Forehead Matrix (3 Horizontal Arcs + 3 Vertical Ribs) ──
+    const foreheadTop = [21, 54, 103, 67, 109, 10, 338, 297, 332, 284, 251].map(i => landmarks[i]);
+    const foreheadMid = [162, 71, 68, 104, 69, 108, 151, 337, 299, 333, 298, 301, 389].map(i => landmarks[i]);
+    const foreheadLow = [70, 63, 105, 66, 107, 9, 336, 296, 334, 293, 300].map(i => landmarks[i]);
+    const foreheadVertMid = [10, 151, 9, 8, 168].map(i => landmarks[i]);
+    const foreheadVertR = [67, 68, 69, 108, 107].map(i => landmarks[i]);
+    const foreheadVertL = [297, 298, 299, 337, 336].map(i => landmarks[i]);
 
-    // ── 2. Nasal Centerline & Tip Loop ──
+    drawDottedLineMesh(foreheadTop, cCyanLight, 2.1, 5, cDotWhite);
+    drawDottedLineMesh(foreheadMid, cLightBlue, 1.9, 5, cCyanLight);
+    drawDottedLineMesh(foreheadLow, cCyanLight, 2.0, 5, cDotWhite);
+    drawDottedLineMesh(foreheadVertMid, cCyanLight, 2.0, 5, cDotWhite);
+    drawDottedLineMesh(foreheadVertR, cLightBlue, 1.8, 5.5, cCyanLight);
+    drawDottedLineMesh(foreheadVertL, cLightBlue, 1.8, 5.5, cCyanLight);
+
+    // ── 2. Eyebrows (Full Upper & Lower Arches) ──
+    const browRightLower = [70, 63, 105, 66, 107].map(i => landmarks[i]);
+    const browRightUpper = [46, 53, 52, 65, 55, 107].map(i => landmarks[i]);
+    const browLeftLower = [336, 296, 334, 293, 300].map(i => landmarks[i]);
+    const browLeftUpper = [336, 285, 295, 282, 283, 276].map(i => landmarks[i]);
+
+    drawDottedLineMesh(browRightLower, cCyanLight, 2.1, 4.5, cDotWhite);
+    drawDottedLineMesh(browRightUpper, cLightBlue, 1.8, 5, cCyanLight);
+    drawDottedLineMesh(browLeftLower, cCyanLight, 2.1, 4.5, cDotWhite);
+    drawDottedLineMesh(browLeftUpper, cLightBlue, 1.8, 5, cCyanLight);
+
+    // ── 3. Outer Eye Orbit Sockets ──
+    const orbitRight = [226, 247, 30, 29, 27, 28, 56, 190, 243, 112, 26, 22, 23, 24, 110, 25, 226].map(i => landmarks[i]);
+    const orbitLeft = [446, 467, 260, 259, 257, 258, 286, 414, 463, 341, 256, 252, 253, 254, 339, 255, 446].map(i => landmarks[i]);
+    drawDottedLineMesh(orbitRight, cLightBlue, 1.8, 5.5, cCyanLight);
+    drawDottedLineMesh(orbitLeft, cLightBlue, 1.8, 5.5, cCyanLight);
+
+    // ── 4. Nasal Complex & Bridge Architecture ──
     const nasalMidline = [168, 6, 197, 195, 5, 4, 1, 19, 94, 2].map(i => landmarks[i]);
+    const nasalBridgeHoriz1 = [189, 221, 55, 193, 168, 417, 285, 441, 413].map(i => landmarks[i]);
+    const nasalBridgeHoriz2 = [122, 196, 197, 419, 351].map(i => landmarks[i]);
+    const nasalRightRidge = [196, 198, 131, 115, 49, 102, 64, 98].map(i => landmarks[i]);
+    const nasalLeftRidge = [419, 420, 360, 344, 279, 331, 294, 327].map(i => landmarks[i]);
     const nasalTipLoop = [98, 97, 2, 326, 327].map(i => landmarks[i]);
-    drawDottedLineMesh(nasalMidline, cCyanLight, 2.2, 8, cDotWhite);
-    drawDottedLineMesh(nasalTipLoop, cLightBlue, 1.9, 8, cCyanLight);
+    const nasalBaseWing = [129, 98, 2, 327, 358].map(i => landmarks[i]);
+    const philtrumColumella = [98, 164, 0, 327].map(i => landmarks[i]);
 
-    // ── 3. Cheeks & Mid-Face Contours (Modern Facial Topography) ──
+    drawDottedLineMesh(nasalMidline, cCyanLight, 2.2, 4.5, cDotWhite);
+    drawDottedLineMesh(nasalBridgeHoriz1, cLightBlue, 1.8, 5, cCyanLight);
+    drawDottedLineMesh(nasalBridgeHoriz2, cLightBlue, 1.8, 5, cCyanLight);
+    drawDottedLineMesh(nasalRightRidge, cLightBlue, 1.9, 5, cCyanLight);
+    drawDottedLineMesh(nasalLeftRidge, cLightBlue, 1.9, 5, cCyanLight);
+    drawDottedLineMesh(nasalTipLoop, cCyanLight, 2.1, 4.5, cDotWhite);
+    drawDottedLineMesh(nasalBaseWing, cLightBlue, 1.8, 5, cCyanLight);
+    drawDottedLineMesh(philtrumColumella, cLightBlue, 1.8, 5, cCyanLight);
+
+    // ── 5. Cheeks, Temples & Zygomatic Arches ──
     const cheekVertR1 = [143, 111, 117, 118, 100, 47, 50, 205, 187, 147, 150].map(i => landmarks[i]);
     const cheekVertR2 = [127, 234, 93, 132, 58, 172, 136, 150, 149, 176].map(i => landmarks[i]);
+    const cheekVertR3 = [227, 137, 177, 215, 138, 135, 169, 170, 140, 171, 175].map(i => landmarks[i]);
     const cheekVertL1 = [372, 340, 346, 347, 329, 277, 280, 425, 411, 376, 379].map(i => landmarks[i]);
     const cheekVertL2 = [356, 454, 323, 361, 288, 397, 365, 379, 378, 400].map(i => landmarks[i]);
-    drawDottedLineMesh(cheekVertR1, cLightBlue, 1.8, 9, cCyanLight);
-    drawDottedLineMesh(cheekVertR2, cLightBlue, 1.8, 9, cCyanLight);
-    drawDottedLineMesh(cheekVertL1, cLightBlue, 1.8, 9, cCyanLight);
-    drawDottedLineMesh(cheekVertL2, cLightBlue, 1.8, 9, cCyanLight);
-
-    // Infraorbital Zygomatic Curve
+    const cheekVertL3 = [447, 366, 401, 435, 367, 364, 394, 395, 369, 396, 399].map(i => landmarks[i]);
     const infraOrbital = [116, 123, 147, 213, 192, 4, 416, 433, 376, 352, 345].map(i => landmarks[i]);
-    drawDottedLineMesh(infraOrbital, cCyanLight, 2.0, 9, cDotWhite);
+    const nasolabialR = [98, 203, 92, 165, 186, 57, 43, 106, 182].map(i => landmarks[i]);
+    const nasolabialL = [327, 423, 322, 391, 410, 287, 273, 335, 406].map(i => landmarks[i]);
+    const zygomaticCheekArcR = [116, 123, 147, 187, 205, 207, 214].map(i => landmarks[i]);
+    const zygomaticCheekArcL = [345, 352, 376, 411, 425, 427, 434].map(i => landmarks[i]);
+    const templeRidgeR = [103, 54, 21, 162, 127, 234].map(i => landmarks[i]);
+    const templeRidgeL = [332, 284, 251, 389, 356, 454].map(i => landmarks[i]);
 
-    // ── 4. Outer Mandibular Jaw Silhouette & Chin ──
-    const jawContour = [234, 127, 162, 21, 54, 103, 67, 109, 10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234].map(i => landmarks[i]);
-    drawDottedLineMesh(jawContour, cLightBlue, 2.2, 10, cDotWhite);
+    drawDottedLineMesh(cheekVertR1, cLightBlue, 1.8, 5, cCyanLight);
+    drawDottedLineMesh(cheekVertR2, cLightBlue, 1.8, 5, cCyanLight);
+    drawDottedLineMesh(cheekVertR3, cLightBlue, 1.7, 5.5, cCyanLight);
+    drawDottedLineMesh(cheekVertL1, cLightBlue, 1.8, 5, cCyanLight);
+    drawDottedLineMesh(cheekVertL2, cLightBlue, 1.8, 5, cCyanLight);
+    drawDottedLineMesh(cheekVertL3, cLightBlue, 1.7, 5.5, cCyanLight);
+    drawDottedLineMesh(infraOrbital, cCyanLight, 2.0, 5, cDotWhite);
+    drawDottedLineMesh(nasolabialR, cCyanLight, 2.0, 4.8, cDotWhite);
+    drawDottedLineMesh(nasolabialL, cCyanLight, 2.0, 4.8, cDotWhite);
+    drawDottedLineMesh(zygomaticCheekArcR, cLightBlue, 1.8, 5, cCyanLight);
+    drawDottedLineMesh(zygomaticCheekArcL, cLightBlue, 1.8, 5, cCyanLight);
+    drawDottedLineMesh(templeRidgeR, cLightBlue, 1.8, 5.5, cCyanLight);
+    drawDottedLineMesh(templeRidgeL, cLightBlue, 1.8, 5.5, cCyanLight);
 
-    const chinArcs = [172, 136, 150, 149, 176, 148, 152, 377, 400, 378, 379, 365, 397].map(i => landmarks[i]);
-    drawDottedLineMesh(chinArcs, cCyanLight, 2.0, 8, cCyanLight);
-
-    // ── 5. Perioral Lips Contour ──
+    // ── 6. Perioral Lips & Mouth Structure ──
     const outerLips = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146, 61].map(i => landmarks[i]);
-    drawDottedLineMesh(outerLips, cCyanLight, 2.0, 8, cDotWhite);
+    const innerLips = [78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95, 78].map(i => landmarks[i]);
+    drawDottedLineMesh(outerLips, cCyanLight, 2.1, 4.5, cDotWhite);
+    drawDottedLineMesh(innerLips, cLightBlue, 1.8, 5, cCyanLight);
 
-    // ── 6. Minimalist Collar Arcs (3 subtle rings) ──
+    // ── 7. Mandibular Jawline & Chin Architecture ──
+    const jawContour = [234, 127, 162, 21, 54, 103, 67, 109, 10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234].map(i => landmarks[i]);
+    const chinArcs = [172, 136, 150, 149, 176, 148, 152, 377, 400, 378, 379, 365, 397].map(i => landmarks[i]);
+    const chinMentalCrease = [202, 212, 214, 192, 213, 148, 152, 377, 433, 416, 434, 432, 422].map(i => landmarks[i]);
+    const jawInnerFlangeR = [132, 58, 172, 136, 150, 149, 176].map(i => landmarks[i]);
+    const jawInnerFlangeL = [361, 288, 397, 365, 379, 378, 400].map(i => landmarks[i]);
+
+    drawDottedLineMesh(jawContour, cLightBlue, 2.2, 5.5, cDotWhite);
+    drawDottedLineMesh(chinArcs, cCyanLight, 2.0, 4.8, cCyanLight);
+    drawDottedLineMesh(chinMentalCrease, cLightBlue, 1.8, 5, cCyanLight);
+    drawDottedLineMesh(jawInnerFlangeR, cLightBlue, 1.8, 5, cCyanLight);
+    drawDottedLineMesh(jawInnerFlangeL, cLightBlue, 1.8, 5, cCyanLight);
+
+    // ── 8. High-Density Facial Landmark Dot Matrix (Glowing Surface Dots) ──
+    const surfaceDotIndices = [
+      10, 151, 9, 8, 168, 6, 197, 195, 5, 4, 1, 19, 94, 2,
+      116, 123, 147, 213, 192, 214, 207, 205, 187, 120, 119, 100, 47, 50,
+      345, 352, 376, 433, 416, 434, 427, 425, 411, 349, 348, 329, 277, 280,
+      70, 63, 105, 66, 107, 55, 65, 52, 53, 46,
+      336, 296, 334, 293, 300, 276, 283, 282, 295, 285,
+      162, 127, 234, 93, 132, 58, 172, 136, 150, 149, 176, 148, 152,
+      389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377,
+      198, 131, 115, 49, 102, 64, 98, 97, 326, 327, 279, 331, 294, 420, 360, 344,
+      164, 0, 11, 12, 13, 14, 15, 16, 17, 18
+    ];
+    ctx.save();
+    ctx.fillStyle = cCyanLight;
+    ctx.shadowBlur = 6 * distScale;
+    ctx.shadowColor = '#38bdf8';
+    ctx.beginPath();
+    const dotR = 1.35 * distScale;
+    for (const idx of surfaceDotIndices) {
+      const p = landmarks[idx];
+      if (p && isFinite(p.x) && isFinite(p.y)) {
+        const px = p.x * w;
+        const py = p.y * h;
+        ctx.moveTo(px + dotR, py);
+        ctx.arc(px, py, dotR, 0, Math.PI * 2);
+      }
+    }
+    ctx.fill();
+    ctx.restore();
+
+    // ── 9. Minimalist Collar Arcs (3 subtle rings) ──
     const pForehead = landmarks[10];
     const pChin = landmarks[152];
     const pLeftEar = landmarks[234];
@@ -274,11 +366,11 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
           const py = ringY + (Math.sin(t * Math.PI) * dip / h);
           ringPts.push({ x: px, y: py });
         }
-        drawDottedLineMesh(ringPts, cLightBlue, 1.8, 10, cCyanLight);
+        drawDottedLineMesh(ringPts, cLightBlue, 1.8, 6, cCyanLight);
       }
     }
 
-    // ── 7. Luminous Modern AI Eyes (Light Blue Dotted Outlines & Rings) ──
+    // ── 10. Luminous Modern AI Eyes (Light Blue Dotted Outlines & Rings) ──
     const drawRadiantEye = (centerIdx: number, palpebralIndices: number[]) => {
       const pCenter = landmarks[centerIdx];
       if (!pCenter) return;
