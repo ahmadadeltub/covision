@@ -1350,7 +1350,7 @@ Return strictly JSON matching this structure:
         {/* ─── Futuristic AI Camera Frame & Reticle Container ─── */}
         <div 
           ref={containerRef} 
-          className={`relative aspect-[16/10] sm:aspect-video flex-1 min-h-0 max-h-[50vh] sm:max-h-[54vh] w-full max-w-3xl mx-auto rounded-2xl md:rounded-3xl overflow-hidden bg-black transition-all duration-500 ${
+          className={`relative aspect-[16/10] sm:aspect-video flex-1 min-h-0 max-h-[46vh] sm:max-h-[50vh] w-full max-w-3xl mx-auto rounded-2xl md:rounded-3xl overflow-hidden bg-black transition-all duration-500 ${
             scanning
               ? 'border-2 border-cyan-400 shadow-[0_0_40px_rgba(0,243,255,0.45),inset_0_0_25px_rgba(0,243,255,0.2)]'
               : canAuthorize
@@ -1555,23 +1555,26 @@ Return strictly JSON matching this structure:
               <button
                 disabled={!canAuthorize}
                 onClick={runScan}
-                className={`w-full py-3.5 sm:py-4 md:py-4.5 min-h-[54px] sm:min-h-[64px] rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm md:text-base lg:text-lg uppercase tracking-wider md:tracking-[0.2em] transition-all shadow-xl group relative overflow-hidden flex items-center justify-center
+                className={`w-full py-4 sm:py-5 md:py-5.5 min-h-[68px] sm:min-h-[78px] md:min-h-[86px] rounded-2xl md:rounded-3xl font-black text-sm sm:text-xl md:text-2xl uppercase tracking-wider sm:tracking-[0.22em] transition-all shadow-2xl group relative overflow-hidden flex items-center justify-center border-2
                   ${canAuthorize 
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-black hover:scale-[1.01] hover:shadow-[0_0_50px_rgba(16,185,129,0.5)] cursor-pointer' 
-                    : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'}`}
+                    ? 'bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 text-slate-950 border-emerald-300 shadow-[0_0_50px_rgba(16,185,129,0.55),0_10px_35px_rgba(0,0,0,0.5)] hover:scale-[1.015] active:scale-[0.99] cursor-pointer' 
+                    : 'bg-slate-800 text-slate-500 border-white/5 cursor-not-allowed opacity-50'}`}
               >
-                <span className="relative z-10">{canAuthorize ? 'AUTHORIZE SCAN' : (cameraReady ? 'DETECTING FACE...' : 'CONNECTING CAMERA...')}</span>
-                {canAuthorize && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-300/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>}
+                <span className="relative z-10 flex items-center justify-center gap-2.5 sm:gap-3">
+                  <span className="text-xl sm:text-2xl md:text-3xl">⛶</span>
+                  <span>{canAuthorize ? 'AUTHORIZE SCAN' : (cameraReady ? 'DETECTING FACE...' : 'CONNECTING CAMERA...')}</span>
+                </span>
+                {canAuthorize && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>}
               </button>
             ) : (
-              <div className="w-full p-3 sm:p-4 glass rounded-xl sm:rounded-2xl text-center border-2 border-cyan-500/20 flex items-center justify-center gap-4 bg-black/40 shadow-inner min-h-[54px] sm:min-h-[64px]">
-                <div className="flex gap-2 sm:gap-3">
-                  <div className="w-2.5 sm:w-3.5 h-2.5 sm:h-3.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.3s] shadow-[0_0_12px_#00f3ff]"></div>
-                  <div className="w-2.5 sm:w-3.5 h-2.5 sm:h-3.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.15s] shadow-[0_0_12px_#00f3ff]"></div>
-                  <div className="w-2.5 sm:w-3.5 h-2.5 sm:h-3.5 bg-cyan-400 rounded-full animate-bounce shadow-[0_0_12px_#00f3ff]"></div>
+              <div className="w-full py-4 sm:py-5 md:py-5.5 glass rounded-2xl md:rounded-3xl text-center border-2 border-cyan-400/50 flex items-center justify-center gap-4 bg-slate-900/80 shadow-[0_0_40px_rgba(0,243,255,0.3)] min-h-[68px] sm:min-h-[78px] md:min-h-[86px]">
+                <div className="flex gap-2.5 sm:gap-3.5">
+                  <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.3s] shadow-[0_0_15px_#00f3ff]"></div>
+                  <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.15s] shadow-[0_0_15px_#00f3ff]"></div>
+                  <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 bg-cyan-400 rounded-full animate-bounce shadow-[0_0_15px_#00f3ff]"></div>
                 </div>
-                <span className="text-xs sm:text-sm md:text-lg font-black text-cyan-400 uppercase tracking-widest sm:tracking-[0.2em] md:tracking-[0.3em] animate-pulse">
-                  SCANNING
+                <span className="text-sm sm:text-xl md:text-2xl font-black text-cyan-400 uppercase tracking-widest sm:tracking-[0.25em] animate-pulse">
+                  SCANNING BIOMETRICS...
                 </span>
               </div>
             )}
