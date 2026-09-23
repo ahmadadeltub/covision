@@ -248,8 +248,8 @@ const AmslerTest: React.FC<Props> = ({ t, stream, onFinish }) => {
         </div>
 
         {/* Grid Display */}
-        <div className="flex-1 min-h-0 flex items-center justify-center p-4">
-          <div className="p-2 md:p-6 rounded-[2.5rem] border-4 border-white/10 shadow-2xl overflow-hidden aspect-square h-[min(70vw,44vh)]"
+        <div className="flex-1 min-h-0 flex items-center justify-center p-3 sm:p-4">
+          <div className="p-2 md:p-5 rounded-2xl md:rounded-[2rem] border-4 border-white/10 shadow-2xl overflow-hidden aspect-square h-[min(65vw,34vh)]"
             style={{ background: currentVariant.bg }}>
             <div className="w-full h-full border relative"
               style={{
@@ -270,32 +270,32 @@ const AmslerTest: React.FC<Props> = ({ t, stream, onFinish }) => {
         </div>
 
         {/* Smart Answer Buttons */}
-        <div className="shrink-0 p-4 pt-0 space-y-2">
-          <p className="text-center text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Focus on center dot — how does the grid look?</p>
-          <div className="grid grid-cols-2 gap-2 max-w-2xl mx-auto">
+        <div className="shrink-0 p-2 sm:p-3 md:p-4 pt-0 space-y-2">
+          <p className="text-center text-[10px] sm:text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">Focus on center dot — how does the grid look?</p>
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5 max-w-2xl mx-auto">
             <button onClick={() => handleChoice(false)}
-              className="py-4 bg-emerald-500/10 border-2 border-emerald-500/30 text-emerald-400 rounded-2xl font-black uppercase text-sm tracking-wider hover:bg-emerald-500/20 transition-all active:scale-95">
-              <span className="text-2xl block mb-1">✅</span>
+              className="py-3 sm:py-4 md:py-5 min-h-[68px] sm:min-h-[80px] md:min-h-[90px] bg-emerald-500/10 border-2 border-emerald-500/30 text-emerald-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-base md:text-lg tracking-wider hover:bg-emerald-500/20 transition-all active:scale-95 flex flex-col items-center justify-center">
+              <span className="text-2xl sm:text-3xl md:text-4xl block mb-0.5 sm:mb-1">✅</span>
               All Lines Straight
-              <span className="block text-[9px] text-emerald-400/60 normal-case tracking-normal mt-0.5">Grid looks perfectly even</span>
+              <span className="block text-[8px] sm:text-[10px] md:text-xs text-emerald-400/70 normal-case tracking-normal mt-0.5">Grid looks perfectly even</span>
             </button>
             <button onClick={() => handleChoice(true)}
-              className="py-4 bg-amber-500/10 border-2 border-amber-500/30 text-amber-400 rounded-2xl font-black uppercase text-sm tracking-wider hover:bg-amber-500/20 transition-all active:scale-95">
-              <span className="text-2xl block mb-1">⚠️</span>
+              className="py-3 sm:py-4 md:py-5 min-h-[68px] sm:min-h-[80px] md:min-h-[90px] bg-amber-500/10 border-2 border-amber-500/30 text-amber-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-base md:text-lg tracking-wider hover:bg-amber-500/20 transition-all active:scale-95 flex flex-col items-center justify-center">
+              <span className="text-2xl sm:text-3xl md:text-4xl block mb-0.5 sm:mb-1">⚠️</span>
               Lines Are Wavy
-              <span className="block text-[9px] text-amber-400/60 normal-case tracking-normal mt-0.5">Some lines appear bent or curved</span>
+              <span className="block text-[8px] sm:text-[10px] md:text-xs text-amber-400/70 normal-case tracking-normal mt-0.5">Some lines appear bent or curved</span>
             </button>
             <button onClick={() => { setSelectedQuadrants(['TL', 'TR', 'BL', 'BR']); handleChoice(true, true); }}
-              className="py-4 bg-orange-500/10 border-2 border-orange-500/30 text-orange-400 rounded-2xl font-black uppercase text-sm tracking-wider hover:bg-orange-500/20 transition-all active:scale-95">
-              <span className="text-2xl block mb-1">🖤</span>
+              className="py-3 sm:py-4 md:py-5 min-h-[68px] sm:min-h-[80px] md:min-h-[90px] bg-orange-500/10 border-2 border-orange-500/30 text-orange-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-base md:text-lg tracking-wider hover:bg-orange-500/20 transition-all active:scale-95 flex flex-col items-center justify-center">
+              <span className="text-2xl sm:text-3xl md:text-4xl block mb-0.5 sm:mb-1">🖤</span>
               Missing Areas
-              <span className="block text-[9px] text-orange-400/60 normal-case tracking-normal mt-0.5">Dark spots or blank areas visible</span>
+              <span className="block text-[8px] sm:text-[10px] md:text-xs text-orange-400/70 normal-case tracking-normal mt-0.5">Dark spots or blank areas visible</span>
             </button>
             <button onClick={() => { setSelectedQuadrants(['TL', 'TR', 'BL', 'BR']); handleChoice(true, true); }}
-              className="py-4 bg-red-500/10 border-2 border-red-500/30 text-red-400 rounded-2xl font-black uppercase text-sm tracking-wider hover:bg-red-500/20 transition-all active:scale-95">
-              <span className="text-2xl block mb-1">❌</span>
+              className="py-3 sm:py-4 md:py-5 min-h-[68px] sm:min-h-[80px] md:min-h-[90px] bg-red-500/10 border-2 border-red-500/30 text-red-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-base md:text-lg tracking-wider hover:bg-red-500/20 transition-all active:scale-95 flex flex-col items-center justify-center">
+              <span className="text-2xl sm:text-3xl md:text-4xl block mb-0.5 sm:mb-1">❌</span>
               Can't See Center
-              <span className="block text-[9px] text-red-400/60 normal-case tracking-normal mt-0.5">Center dot or area is missing</span>
+              <span className="block text-[8px] sm:text-[10px] md:text-xs text-red-400/70 normal-case tracking-normal mt-0.5">Center dot or area is missing</span>
             </button>
           </div>
         </div>

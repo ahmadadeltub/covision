@@ -299,19 +299,19 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
         </div>
 
         {/* Optotype Display — High-Contrast Clinical Card */}
-        <div style={{ flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px 12px', overflow: 'hidden' }}>
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px 8px', overflow: 'hidden' }}>
           <div className="rounded-2xl md:rounded-3xl flex items-center justify-center shadow-xl border-2"
             style={{
               background: '#ffffff',
               borderColor: 'rgba(0,0,0,0.08)',
-              padding: 'clamp(8px, 1.5vh, 18px)',
-              width: 'min(92%, 360px)',
-              height: 'min(92%, 260px)',
+              padding: 'clamp(6px, 1.2vh, 16px)',
+              width: 'min(92%, 340px)',
+              height: 'min(90%, 220px)',
               maxHeight: '100%',
             }}>
             <div style={{
-              width: 'min(100%, ' + Math.min(currentTrial.sizePx, 200) + 'px)',
-              height: 'min(100%, ' + Math.min(currentTrial.sizePx, 200) + 'px)',
+              width: 'min(100%, ' + Math.min(currentTrial.sizePx, 180) + 'px)',
+              height: 'min(100%, ' + Math.min(currentTrial.sizePx, 180) + 'px)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s'
             }}>
               {/* Rotated Optotype — Always Clinical High-Contrast Black */}
@@ -333,24 +333,25 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
           </div>
         </div>
 
-        {/* Answer Buttons */}
+        {/* Answer Buttons — Significantly Enlarged */}
         <div style={{ flexShrink: 0, padding: '6px 16px' }}>
           <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, maxWidth: 360, margin: '0 auto'
+            display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, maxWidth: 480, margin: '0 auto'
           }}>
             {DIRECTIONS.map(dir => (
               <button
                 key={dir}
                 onClick={() => handleSelect(dir)}
                 style={{
-                  padding: '6px 0', background: 'var(--bg-card)', backdropFilter: 'blur(10px)',
+                  padding: 'clamp(10px, 2vh, 16px) 0', background: 'var(--bg-card)', backdropFilter: 'blur(10px)',
                   border: `2px solid ${activeButton === dir ? 'var(--accent)' : 'var(--border-color)'}`,
-                  borderRadius: 16, fontSize: 22, transition: 'all 0.2s', cursor: 'pointer',
-                  boxShadow: activeButton === dir ? '0 0 20px rgba(2, 132, 199, 0.35)' : 'none',
-                  transform: activeButton === dir ? 'scale(1.05)' : 'scale(1)'
+                  borderRadius: 20, transition: 'all 0.2s', cursor: 'pointer',
+                  boxShadow: activeButton === dir ? '0 0 25px rgba(2, 132, 199, 0.45)' : '0 4px 14px rgba(0,0,0,0.1)',
+                  transform: activeButton === dir ? 'scale(1.04)' : 'scale(1)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
               >
-                <span style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.15))' }}>
+                <span style={{ fontSize: 'clamp(28px, 4.5vh, 42px)', lineHeight: 1, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.15))' }}>
                   {dir === 'up' && '⬆️'}
                   {dir === 'down' && '⬇️'}
                   {dir === 'left' && '⬅️'}
@@ -360,12 +361,12 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
             ))}
           </div>
 
-          <div style={{ textAlign: 'center', marginTop: 4 }}>
+          <div style={{ textAlign: 'center', marginTop: 6 }}>
             <button
               onClick={() => handleSelect('?')}
               style={{
-                padding: '5px 18px', background: 'var(--bg-card)', border: '1px solid var(--border-color)',
-                borderRadius: 999, fontSize: 9, color: 'var(--text-muted)', fontWeight: 900, textTransform: 'uppercase',
+                padding: '7px 24px', background: 'var(--bg-card)', border: '1.5px solid var(--border-color)',
+                borderRadius: 999, fontSize: 11, color: 'var(--text-muted)', fontWeight: 900, textTransform: 'uppercase',
                 letterSpacing: '0.15em', cursor: 'pointer', transition: 'all 0.2s'
               }}
             >

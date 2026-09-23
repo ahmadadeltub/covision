@@ -267,12 +267,12 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
         </div>
 
         {/* Target Letter on white background */}
-        <div className="flex-1 min-h-0 flex items-center justify-center p-4">
-          <div className="w-full h-full flex items-center justify-center bg-white rounded-3xl border-4 border-slate-200 dark:border-white/20 relative overflow-hidden shadow-2xl">
+        <div className="flex-1 min-h-0 flex items-center justify-center p-3 sm:p-4">
+          <div className="w-full h-full max-h-[36vh] sm:max-h-[40vh] md:max-h-[44vh] flex items-center justify-center bg-white rounded-3xl border-4 border-slate-200 dark:border-white/20 relative overflow-hidden shadow-2xl">
             <div className="absolute inset-0 bg-white shadow-inner"></div>
             <div
               className="font-black select-none transition-all duration-300 relative z-10 leading-none"
-              style={{ opacity: CONTRAST_LEVELS[level], color: '#000', fontSize: 'clamp(5rem, 20vw, 18rem)' }}
+              style={{ opacity: CONTRAST_LEVELS[level], color: '#000', fontSize: 'clamp(4.5rem, 16vw, 12rem)' }}
             >
               {currentLetter}
             </div>
@@ -280,13 +280,13 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
         </div>
 
         {/* Letter Grid + Can't See */}
-        <div className="shrink-0 p-2 md:p-4 pt-0 space-y-2">
-          <div className="grid grid-cols-5 gap-1 md:gap-2 max-w-3xl mx-auto">
+        <div className="shrink-0 p-2 sm:p-3 md:p-4 pt-0 space-y-2 sm:space-y-2.5">
+          <div className="grid grid-cols-5 gap-1.5 sm:gap-2.5 md:gap-3 max-w-4xl mx-auto">
             {LETTERS.split('').map(l => (
               <button
                 key={l}
                 onClick={() => handleSelect(l)}
-                className={`py-2 md:py-4 glass border-2 rounded-xl md:rounded-2xl font-black text-xl md:text-3xl text-slate-900 dark:text-white transition-all active:scale-90
+                className={`py-3 sm:py-4 md:py-5 min-h-[56px] sm:min-h-[64px] md:min-h-[74px] glass border-2 rounded-xl sm:rounded-2xl font-black text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-slate-900 dark:text-white transition-all active:scale-90 flex items-center justify-center
                   ${activeButton === l
                     ? 'border-cyan-400 bg-cyan-500/40 shadow-[0_0_50px_rgba(0,243,255,0.6)]'
                     : 'border-slate-200 dark:border-white/10 hover:border-cyan-400 hover:bg-cyan-500/20'}
@@ -298,7 +298,7 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
           </div>
           <button
             onClick={handleCantSee}
-            className="w-full py-2.5 glass border border-slate-200 dark:border-white/5 rounded-full text-[10px] md:text-xs text-slate-600 dark:text-slate-400 font-black uppercase tracking-[0.4em] hover:text-slate-900 dark:hover:text-white transition-colors"
+            className="w-full max-w-4xl mx-auto block py-3 sm:py-3.5 glass border border-slate-200 dark:border-white/5 rounded-full text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-black uppercase tracking-[0.3em] hover:text-slate-900 dark:hover:text-white transition-colors min-h-[44px] sm:min-h-[48px]"
           >
             I cannot see any letter ✗
           </button>

@@ -248,14 +248,14 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
           </div>
         </div>
 
-        {/* Choice Buttons */}
-        <div className="shrink-0 p-2 md:p-4 pt-0 space-y-2">
-          <div className="grid grid-cols-3 gap-2 md:gap-3 max-w-2xl mx-auto">
+        {/* Choice Buttons — Significantly Enlarged */}
+        <div className="shrink-0 p-2 md:p-3 pt-0 space-y-2">
+          <div className="grid grid-cols-3 gap-3 md:gap-4 max-w-2xl mx-auto">
             {choiceLetters.map((letter, i) => (
               <button
                 key={`${letter}-${i}`}
                 onClick={() => handleSelect(letter)}
-                className={`py-3 md:py-5 glass border-2 rounded-xl md:rounded-3xl text-2xl md:text-4xl lg:text-5xl font-black transition-all active:scale-95
+                className={`py-4 sm:py-5 md:py-6 glass border-2 rounded-2xl md:rounded-3xl text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black transition-all active:scale-95 min-h-[64px] sm:min-h-[80px] flex items-center justify-center
                   ${activeButton === letter
                     ? 'border-cyan-400 bg-cyan-500/40 shadow-[0_0_50px_rgba(0,243,255,0.6)] scale-105'
                     : 'border-white/10 hover:border-cyan-400 hover:bg-cyan-500/20'}`}
@@ -264,20 +264,20 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
               </button>
             ))}
           </div>
-          <div className="max-w-2xl mx-auto mt-2 md:mt-3">
+          <div className="max-w-2xl mx-auto mt-2">
             <button
               onClick={() => handleSelect('__CANT_SEE__')}
-              className={`w-full py-2.5 md:py-3 glass border-2 rounded-xl md:rounded-2xl text-sm md:text-base font-black uppercase tracking-wider md:tracking-widest transition-all active:scale-95
+              className={`w-full py-3 sm:py-3.5 glass border-2 rounded-xl md:rounded-2xl text-sm md:text-base font-black uppercase tracking-wider md:tracking-widest transition-all active:scale-95
                 ${activeButton === '__CANT_SEE__'
                   ? 'border-red-400 bg-red-500/40 shadow-[0_0_30px_rgba(239,68,68,0.5)] scale-105 text-red-700 dark:text-red-300'
                   : 'border-slate-200 dark:border-white/10 hover:border-red-400 hover:bg-red-500/10 text-slate-700 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-300'}`}>
               <span className="flex items-center justify-center gap-2">
-                <span>🚫</span>
+                <span className="text-lg">🚫</span>
                 <span>Can&apos;t See</span>
               </span>
             </button>
           </div>
-          <div className="text-center mt-1 md:mt-2 text-[10px] md:text-xs text-slate-500 uppercase tracking-widest opacity-60 flex items-center justify-center gap-2">
+          <div className="text-center mt-1 text-[10px] md:text-xs text-slate-500 uppercase tracking-widest opacity-60 flex items-center justify-center gap-2">
             <span>Voice: Say the letter or &quot;can&apos;t see&quot;</span>
             {isListening && <span className="text-emerald-400 font-bold animate-pulse">🎤 Listening</span>}
           </div>

@@ -221,8 +221,8 @@ const AstigmatismTest: React.FC<Props> = ({ t, stream, onFinish }) => {
         </div>
 
         {/* Pattern Display */}
-        <div className="flex-1 min-h-0 flex items-center justify-center p-4">
-          <div className="w-[min(70vw,42vh)] h-[min(70vw,42vh)] bg-white rounded-[2.5rem] p-4 md:p-6 border-4 border-white/10 shadow-2xl">
+        <div className="flex-1 min-h-0 flex items-center justify-center p-3 sm:p-4">
+          <div className="w-[min(65vw,34vh)] h-[min(65vw,34vh)] bg-white rounded-2xl md:rounded-[2rem] p-3 md:p-5 border-4 border-white/10 shadow-2xl">
             <svg viewBox="0 0 100 100" className="w-full h-full">
               {currentPattern.key === 'clock' && (
                 <>
@@ -286,32 +286,32 @@ const AstigmatismTest: React.FC<Props> = ({ t, stream, onFinish }) => {
         </div>
 
         {/* Smart Answer Buttons */}
-        <div className="shrink-0 p-2 md:p-4 pt-0 space-y-2">
-          <p className="text-center text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">How do all the lines appear to you?</p>
-          <div className="grid grid-cols-2 gap-2 max-w-2xl mx-auto">
+        <div className="shrink-0 p-2 sm:p-3 md:p-4 pt-0 space-y-2">
+          <p className="text-center text-[10px] sm:text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">How do all the lines appear to you?</p>
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5 max-w-2xl mx-auto">
             <button onClick={() => handleChoice(false)}
-              className="py-2.5 sm:py-3.5 md:py-4 bg-emerald-500/10 border-2 border-emerald-500/30 text-emerald-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-sm tracking-wider hover:bg-emerald-500/20 transition-all active:scale-95">
-              <span className="text-xl sm:text-2xl block mb-0.5 sm:mb-1">&#x2705;</span>
+              className="py-3 sm:py-4 md:py-5 min-h-[68px] sm:min-h-[80px] md:min-h-[90px] bg-emerald-500/10 border-2 border-emerald-500/30 text-emerald-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-base md:text-lg tracking-wider hover:bg-emerald-500/20 transition-all active:scale-95 flex flex-col items-center justify-center">
+              <span className="text-2xl sm:text-3xl md:text-4xl block mb-0.5 sm:mb-1">&#x2705;</span>
               All Lines Sharp
-              <span className="block text-[8px] sm:text-[9px] text-emerald-400/60 normal-case tracking-normal mt-0.5">Equal darkness &amp; clarity</span>
+              <span className="block text-[8px] sm:text-[10px] md:text-xs text-emerald-400/70 normal-case tracking-normal mt-0.5">Equal darkness &amp; clarity</span>
             </button>
             <button onClick={() => handleChoice(true)}
-              className="py-2.5 sm:py-3.5 md:py-4 bg-amber-500/10 border-2 border-amber-500/30 text-amber-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-sm tracking-wider hover:bg-amber-500/20 transition-all active:scale-95">
-              <span className="text-xl sm:text-2xl block mb-0.5 sm:mb-1">&#x26A0;&#xFE0F;</span>
+              className="py-3 sm:py-4 md:py-5 min-h-[68px] sm:min-h-[80px] md:min-h-[90px] bg-amber-500/10 border-2 border-amber-500/30 text-amber-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-base md:text-lg tracking-wider hover:bg-amber-500/20 transition-all active:scale-95 flex flex-col items-center justify-center">
+              <span className="text-2xl sm:text-3xl md:text-4xl block mb-0.5 sm:mb-1">&#x26A0;&#xFE0F;</span>
               Some Lines Blurred
-              <span className="block text-[8px] sm:text-[9px] text-amber-400/60 normal-case tracking-normal mt-0.5">Certain directions look lighter</span>
+              <span className="block text-[8px] sm:text-[10px] md:text-xs text-amber-400/70 normal-case tracking-normal mt-0.5">Certain directions look lighter</span>
             </button>
             <button onClick={() => { setSelectedPositions([1,2,3,4,5,6]); handleChoice(true, true); }}
-              className="py-2.5 sm:py-3.5 md:py-4 bg-orange-500/10 border-2 border-orange-500/30 text-orange-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-sm tracking-wider hover:bg-orange-500/20 transition-all active:scale-95">
-              <span className="text-xl sm:text-2xl block mb-0.5 sm:mb-1">&#x1F300;</span>
+              className="py-3 sm:py-4 md:py-5 min-h-[68px] sm:min-h-[80px] md:min-h-[90px] bg-orange-500/10 border-2 border-orange-500/30 text-orange-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-base md:text-lg tracking-wider hover:bg-orange-500/20 transition-all active:scale-95 flex flex-col items-center justify-center">
+              <span className="text-2xl sm:text-3xl md:text-4xl block mb-0.5 sm:mb-1">&#x1F300;</span>
               Lines Are Wavy
-              <span className="block text-[8px] sm:text-[9px] text-orange-400/60 normal-case tracking-normal mt-0.5">Lines bend or curve</span>
+              <span className="block text-[8px] sm:text-[10px] md:text-xs text-orange-400/70 normal-case tracking-normal mt-0.5">Lines bend or curve</span>
             </button>
             <button onClick={() => { setSelectedPositions([1,2,3,4,5,6,7,8,9,10,11,12]); handleChoice(true, true); }}
-              className="py-2.5 sm:py-3.5 md:py-4 bg-red-500/10 border-2 border-red-500/30 text-red-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-sm tracking-wider hover:bg-red-500/20 transition-all active:scale-95">
-              <span className="text-xl sm:text-2xl block mb-0.5 sm:mb-1">&#x274C;</span>
+              className="py-3 sm:py-4 md:py-5 min-h-[68px] sm:min-h-[80px] md:min-h-[90px] bg-red-500/10 border-2 border-red-500/30 text-red-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-base md:text-lg tracking-wider hover:bg-red-500/20 transition-all active:scale-95 flex flex-col items-center justify-center">
+              <span className="text-2xl sm:text-3xl md:text-4xl block mb-0.5 sm:mb-1">&#x274C;</span>
               Very Distorted
-              <span className="block text-[8px] sm:text-[9px] text-red-400/60 normal-case tracking-normal mt-0.5">Can&apos;t see pattern clearly</span>
+              <span className="block text-[8px] sm:text-[10px] md:text-xs text-red-400/70 normal-case tracking-normal mt-0.5">Can&apos;t see pattern clearly</span>
             </button>
           </div>
         </div>
