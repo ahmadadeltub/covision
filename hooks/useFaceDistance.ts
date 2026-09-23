@@ -41,15 +41,77 @@ const DEFAULT_FACE_WIDTH_MM = 140.0;
 const FOREHEAD_WIDTH_MM = 110.0;      // forehead width (10 ↔ 338)
 const NOSE_TO_CHIN_MM = 115.0;        // nose tip to chin (1 ↔ 199)
 const SMOOTHING_BUFFER = 15;
-const WARMUP_FRAMES = 1;              // Instant: show mesh on very first detected frame
+const WARMUP_FRAMES = 0;              // Instant: show mesh on very first detected frame (0 delay)
 const STATE_UPDATE_INTERVAL = 16;     // 60fps React state updates
-const NO_FACE_TIMEOUT = 4000;         // ms before declaring no face
-const GRACE_HOLD_MS = 600;            // Reduced: reset faster so new detection locks on quickly
+const NO_FACE_TIMEOUT = 1200;         // ms before declaring no face
+const GRACE_HOLD_MS = 250;            // Reset fast so new detection locks on instantly
 
 // Modern MediaPipe Tasks Vision CDN
 const VISION_CDN = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18';
 // Valid official model asset path (200 OK verified)
 const FACE_MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task';
+
+// Global singleton cache for FaceLandmarker to eliminate reloading latency between page steps
+let cachedFaceLandmarkerInstance: any = null;
+let globalModelInitPromise: Promise<any> | null = null;
+
+export function getFaceLandmarker(): Promise<any> {
+    if (cachedFaceLandmarkerInstance) return Promise.resolve(cachedFaceLandmarkerInstance);
+    if (globalModelInitPromise) return globalModelInitPromise;
+
+    globalModelInitPromise = (async () => {
+        try {
+            console.log('useFaceDistance: [Global] Preloading MediaPipe Tasks Vision...');
+            const vision = await import(/* @vite-ignore */ `${VISION_CDN}/vision_bundle.mjs`);
+            const { FaceLandmarker, FilesetResolver } = vision;
+            const wasmFileset = await FilesetResolver.forVisionTasks(`${VISION_CDN}/wasm`);
+
+            let landmarker: any = null;
+            try {
+                landmarker = await FaceLandmarker.createFromOptions(wasmFileset, {
+                    baseOptions: {
+                        modelAssetPath: FACE_MODEL_URL,
+                        delegate: 'GPU',
+                    },
+                    outputFaceBlendshapes: false,
+                    runningMode: 'VIDEO',
+                    numFaces: 1,
+                    minFaceDetectionConfidence: 0.3,
+                    minFacePresenceConfidence: 0.3,
+                    minTrackingConfidence: 0.3,
+                });
+            } catch (gpuErr) {
+                console.warn('FaceLandmarker GPU delegate failed, falling back to CPU:', gpuErr);
+                landmarker = await FaceLandmarker.createFromOptions(wasmFileset, {
+                    baseOptions: {
+                        modelAssetPath: FACE_MODEL_URL,
+                        delegate: 'CPU',
+                    },
+                    outputFaceBlendshapes: false,
+                    runningMode: 'VIDEO',
+                    numFaces: 1,
+                    minFaceDetectionConfidence: 0.3,
+                    minFacePresenceConfidence: 0.3,
+                    minTrackingConfidence: 0.3,
+                });
+            }
+            cachedFaceLandmarkerInstance = landmarker;
+            console.log('useFaceDistance: ✅ [Global] FaceLandmarker ready and cached');
+            return landmarker;
+        } catch (err) {
+            console.error('Failed to initialize FaceLandmarker:', err);
+            globalModelInitPromise = null;
+            return null;
+        }
+    })();
+
+    return globalModelInitPromise;
+}
+
+// Start preloading immediately in browser background
+if (typeof window !== 'undefined') {
+    getFaceLandmarker().catch(() => {});
+}
 
 export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceReturn {
     const {
@@ -151,60 +213,17 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
         }
 
         const initModels = async () => {
-            debugInfoRef.current.faceMeshStatus = 'loading_module';
-            console.log('useFaceDistance: Loading MediaPipe Tasks Vision module...');
+            debugInfoRef.current.faceMeshStatus = 'loading';
             try {
-                const vision = await import(
-                    /* @vite-ignore */
-                    `${VISION_CDN}/vision_bundle.mjs`
-                );
+                const faceLandmarker = await getFaceLandmarker();
                 if (!active) return;
-
-                const { FaceLandmarker, FilesetResolver } = vision;
-
-                debugInfoRef.current.faceMeshStatus = 'loading_wasm';
-                const wasmFileset = await FilesetResolver.forVisionTasks(
-                    `${VISION_CDN}/wasm`
-                );
-                if (!active) return;
-
-                // Init FaceLandmarker (GPU first, automatic CPU fallback if unsupported/WebGL issue)
-                debugInfoRef.current.faceMeshStatus = 'creating_landmarker';
-                console.log('useFaceDistance: Creating FaceLandmarker...');
-                let faceLandmarker: any = null;
-                try {
-                    faceLandmarker = await FaceLandmarker.createFromOptions(wasmFileset, {
-                        baseOptions: {
-                            modelAssetPath: FACE_MODEL_URL,
-                            delegate: 'GPU',
-                        },
-                        outputFaceBlendshapes: false,
-                        runningMode: 'VIDEO',
-                        numFaces: 1,
-                        minFaceDetectionConfidence: 0.15,
-                        minFacePresenceConfidence: 0.15,
-                        minTrackingConfidence: 0.15,
-                    });
-                } catch (gpuErr) {
-                    console.warn('FaceLandmarker GPU delegate failed, falling back to CPU:', gpuErr);
-                    faceLandmarker = await FaceLandmarker.createFromOptions(wasmFileset, {
-                        baseOptions: {
-                            modelAssetPath: FACE_MODEL_URL,
-                            delegate: 'CPU',
-                        },
-                        outputFaceBlendshapes: false,
-                        runningMode: 'VIDEO',
-                        numFaces: 1,
-                        minFaceDetectionConfidence: 0.15,
-                        minFacePresenceConfidence: 0.15,
-                        minTrackingConfidence: 0.15,
-                    });
+                if (faceLandmarker) {
+                    faceLandmarkerRef.current = faceLandmarker;
+                    debugInfoRef.current.faceMeshStatus = 'ready';
+                    debugInfoRef.current.faceMeshActive = true;
+                    // Immediately trigger loop if video is ready
+                    startDetectionLoop();
                 }
-                if (!active) return;
-                faceLandmarkerRef.current = faceLandmarker;
-                debugInfoRef.current.faceMeshStatus = 'ready';
-                debugInfoRef.current.faceMeshActive = true;
-                console.log('useFaceDistance: ✅ FaceLandmarker ready (dedicated face-only pipeline)');
             } catch (error) {
                 console.error('useFaceDistance: Model init failed', error);
                 debugInfoRef.current.faceMeshStatus = 'error: ' + (error as any)?.message;
@@ -215,11 +234,11 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
 
         return () => {
             active = false;
-            if (faceLandmarkerRef.current) {
-                try { faceLandmarkerRef.current.close(); } catch (e) { }
-                faceLandmarkerRef.current = null;
+            // Note: keep cachedFaceLandmarkerInstance alive so next step/component doesn't have to reload
+            if (animFrameRef.current) {
+                cancelAnimationFrame(animFrameRef.current);
+                animFrameRef.current = 0;
             }
-            if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
             if (detectionVideoRef.current) {
                 detectionVideoRef.current.pause();
                 detectionVideoRef.current.srcObject = null;
@@ -396,26 +415,16 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
         return xHat;
     };
 
-    // ─── Adaptive Temporal Landmark Smoothing (Rock-Solid Stability) ───
+    // ─── Adaptive Temporal Landmark Smoothing (Zero-Lag Instant Face Lock) ───
     const smoothFaceLandmarks = (raw: any[]): any[] => {
         const prev = smoothedFaceLandmarksRef.current;
         if (!prev || prev.length !== raw.length) {
-            // First detection (or face re-acquired after loss): snap instantly with zero lag
-            const initial = raw.map(p => ({ ...p }));
-            smoothedFaceLandmarksRef.current = initial;
-            snapFramesRef.current = 5; // burn next 5 frames at alpha=1.0
-            return initial;
+            // Instant snap on acquisition or re-acquisition
+            smoothedFaceLandmarksRef.current = raw.map(p => ({ ...p }));
+            return smoothedFaceLandmarksRef.current;
         }
 
-        // For the first N frames after initial lock-on, bypass filter entirely (instant snap)
-        if (snapFramesRef.current > 0) {
-            snapFramesRef.current--;
-            const instant = raw.map(p => ({ ...p }));
-            smoothedFaceLandmarksRef.current = instant;
-            return instant;
-        }
-
-        // Measure head movement velocity using landmark 1 (nose tip)
+        // Measure head movement velocity using landmark 1 (nose tip) and 152 (chin)
         const nose = raw[1];
         const prevNose = prev[1];
         let movement = 0;
@@ -425,14 +434,19 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
             movement = Math.hypot(dx, dy);
         }
 
-        // Adaptive alpha:
-        // When stationary (movement < 0.002), alpha is 0.26 for rock-solid stability and zero jitter.
-        // When moving quickly (movement > 0.02), alpha ramps to 0.88 for instantaneous response with zero lag.
-        const alpha = Math.min(0.88, Math.max(0.26, 0.26 + movement * 25));
+        // Instant Lock:
+        // Any intentional movement (> 0.001) snaps 1:1 with alpha = 1.0 (zero drag/lag, fixed to face).
+        // Micro-tremor when resting (<= 0.001) uses alpha = 0.92 for 1-frame micro-stabilization.
+        const alpha = movement > 0.001 ? 1.0 : 0.92;
+
+        if (alpha >= 1.0) {
+            smoothedFaceLandmarksRef.current = raw;
+            return raw;
+        }
 
         const smoothed = raw.map((curr, idx) => {
             const p = prev[idx];
-            if (!p) return { ...curr };
+            if (!p) return curr;
             return {
                 x: p.x + (curr.x - p.x) * alpha,
                 y: p.y + (curr.y - p.y) * alpha,
@@ -764,7 +778,7 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
         const timestamp = performance.now();
 
         // FaceLandmarker ONLY — unthrottled dedicated execution with zero competing models
-        if (faceLandmarkerRef.current && timestamp - lastFaceSendRef.current > 10) {
+        if (faceLandmarkerRef.current && timestamp > lastFaceSendRef.current) {
             try {
                 lastFaceSendRef.current = timestamp;
                 sendCountRef.current++;
@@ -773,6 +787,14 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
                 const results = faceLandmarkerRef.current.detectForVideo(video, timestamp);
                 if (results?.faceLandmarks?.length > 0) {
                     processLandmarks(results.faceLandmarks[0], video);
+                } else {
+                    // Face temporarily not found in this frame
+                    // After 150ms of absence, clear stale landmarks so next detected face snaps instantly
+                    if (now - lastUpdateRef.current > 150) {
+                        faceLandmarksRef.current = null;
+                        smoothedFaceLandmarksRef.current = null;
+                        (window as any).__sharedFaceLandmarks = null;
+                    }
                 }
             } catch (e: any) {
                 if (sendCountRef.current < 5) {

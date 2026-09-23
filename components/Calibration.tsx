@@ -48,10 +48,11 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
       const canvas = overlayCanvasRef.current;
       const vid = videoRef.current;
       if (canvas && vid) {
-        const rect = vid.getBoundingClientRect();
-        if (canvas.width !== rect.width || canvas.height !== rect.height) {
-          canvas.width = rect.width;
-          canvas.height = rect.height;
+        const cw = canvas.clientWidth;
+        const ch = canvas.clientHeight;
+        if (cw > 0 && ch > 0 && (canvas.width !== cw || canvas.height !== ch)) {
+          canvas.width = cw;
+          canvas.height = ch;
         }
         const ctx = canvas.getContext('2d');
         if (ctx) {
@@ -79,13 +80,39 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
     const pulseFast = Math.sin(time * 8.0) * 0.25 + 0.75;
     const distScale = Math.max(0.4, Math.min(1.25, 1.5 - (distM * 0.45)));
 
+    // Exact video coordinate mapping for object-cover centering & crop
+    let displayedW = w;
+    let displayedH = h;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    const vid = videoRef.current;
+    if (vid && vid.videoWidth > 0 && vid.videoHeight > 0) {
+      const videoAspect = vid.videoWidth / vid.videoHeight;
+      const canvasAspect = w / h;
+      if (canvasAspect > videoAspect) {
+        displayedW = w;
+        displayedH = w / videoAspect;
+        offsetX = 0;
+        offsetY = (h - displayedH) / 2;
+      } else {
+        displayedH = h;
+        displayedW = h * videoAspect;
+        offsetX = (w - displayedW) / 2;
+        offsetY = 0;
+      }
+    }
+
+    const toX = (nx: number) => offsetX + nx * displayedW;
+    const toY = (ny: number) => offsetY + ny * displayedH;
+
     // 3-Axis Head Pose Attitude (Yaw, Pitch, Roll)
     let yawDeg = 0;
     let pitchDeg = 0;
     let rollDeg = 0;
     if (landmarks[33] && landmarks[263] && landmarks[1]) {
-      const dEyeX = (landmarks[263].x - landmarks[33].x) * w;
-      const dEyeY = (landmarks[263].y - landmarks[33].y) * h;
+      const dEyeX = (toX(landmarks[263].x) - toX(landmarks[33].x));
+      const dEyeY = (toY(landmarks[263].y) - toY(landmarks[33].y));
       rollDeg = Math.round((Math.atan2(dEyeY, dEyeX) * 180) / Math.PI);
 
       const eyeMidX = (landmarks[33].x + landmarks[263].x) / 2;
@@ -103,10 +130,10 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
     let dynamicDistM = distM > 0 ? distM : ((window as any).__covisionCurrentDistance || 0);
     let liveIpdMm = 63.0;
     if (landmarks[468] && landmarks[473]) {
-      const dx = (landmarks[473].x - landmarks[468].x) * w;
-      const dy = (landmarks[473].y - landmarks[468].y) * h;
+      const dx = (toX(landmarks[473].x) - toX(landmarks[468].x));
+      const dy = (toY(landmarks[473].y) - toY(landmarks[468].y));
       const eyeDistPx = Math.hypot(dx, dy);
-      const fl = w * 0.7413;
+      const fl = displayedW * 0.7413;
       if (eyeDistPx > 5 && fl > 0) {
         const estFromGeometry = (fl * 0.063) / eyeDistPx;
         if (dynamicDistM <= 0.05 || !isFinite(dynamicDistM)) {
@@ -120,11 +147,11 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
     }
     if (dynamicDistM <= 0 || !isFinite(dynamicDistM)) dynamicDistM = 1.00;
 
-    // Smooth head pose attitude & distance to eliminate jitter
-    const smoothYaw = Math.round(lastAnglesRef.current.yaw * 0.75 + yawDeg * 0.25);
-    const smoothPitch = Math.round(lastAnglesRef.current.pitch * 0.75 + pitchDeg * 0.25);
-    const smoothRoll = Math.round(lastAnglesRef.current.roll * 0.75 + rollDeg * 0.25);
-    const smoothedDist = lastAnglesRef.current.dist * 0.7 + dynamicDistM * 0.3;
+    // Fast-response head pose attitude & distance (0.4 prev + 0.6 live for instant update)
+    const smoothYaw = Math.round(lastAnglesRef.current.yaw * 0.4 + yawDeg * 0.6);
+    const smoothPitch = Math.round(lastAnglesRef.current.pitch * 0.4 + pitchDeg * 0.6);
+    const smoothRoll = Math.round(lastAnglesRef.current.roll * 0.4 + rollDeg * 0.6);
+    const smoothedDist = lastAnglesRef.current.dist * 0.4 + dynamicDistM * 0.6;
     lastAnglesRef.current = { yaw: smoothYaw, pitch: smoothPitch, roll: smoothRoll, dist: smoothedDist };
 
     const yawStr = (smoothYaw > 0 ? '+' : '') + smoothYaw;
@@ -164,13 +191,13 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
       ctx.strokeStyle = `rgba(28, 150, 197, ${0.16 * pulse})`;
       ctx.lineWidth = 0.5 * distScale;
       ctx.setLineDash([]);
-      ctx.moveTo(validPts[0].x * w, validPts[0].y * h);
+      ctx.moveTo(toX(validPts[0].x), toY(validPts[0].y));
       for (let i = 1; i < validPts.length - 1; i++) {
-        const xc = ((validPts[i].x + validPts[i + 1].x) / 2) * w;
-        const yc = ((validPts[i].y + validPts[i + 1].y) / 2) * h;
-        ctx.quadraticCurveTo(validPts[i].x * w, validPts[i].y * h, xc, yc);
+        const xc = (validPts[i].x + validPts[i + 1].x) / 2;
+        const yc = (validPts[i].y + validPts[i + 1].y) / 2;
+        ctx.quadraticCurveTo(toX(validPts[i].x), toY(validPts[i].y), toX(xc), toY(yc));
       }
-      ctx.lineTo(validPts[validPts.length - 1].x * w, validPts[validPts.length - 1].y * h);
+      ctx.lineTo(toX(validPts[validPts.length - 1].x), toY(validPts[validPts.length - 1].y));
       ctx.stroke();
 
       // 2. High-precision Dotted Line (Dots Line) with luminous #1c96c5 glow
@@ -181,13 +208,13 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
       ctx.setLineDash([0, spacing]); // Dash length 0 + round cap = perfect circular dots
       ctx.shadowBlur = 5 * distScale;
       ctx.shadowColor = '#1c96c5';
-      ctx.moveTo(validPts[0].x * w, validPts[0].y * h);
+      ctx.moveTo(toX(validPts[0].x), toY(validPts[0].y));
       for (let i = 1; i < validPts.length - 1; i++) {
-        const xc = ((validPts[i].x + validPts[i + 1].x) / 2) * w;
-        const yc = ((validPts[i].y + validPts[i + 1].y) / 2) * h;
-        ctx.quadraticCurveTo(validPts[i].x * w, validPts[i].y * h, xc, yc);
+        const xc = (validPts[i].x + validPts[i + 1].x) / 2;
+        const yc = (validPts[i].y + validPts[i + 1].y) / 2;
+        ctx.quadraticCurveTo(toX(validPts[i].x), toY(validPts[i].y), toX(xc), toY(yc));
       }
-      ctx.lineTo(validPts[validPts.length - 1].x * w, validPts[validPts.length - 1].y * h);
+      ctx.lineTo(toX(validPts[validPts.length - 1].x), toY(validPts[validPts.length - 1].y));
       ctx.stroke();
 
       // 3. Highlight luminous micro-nodes at key facial landmark vertices
@@ -198,8 +225,8 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
       ctx.beginPath();
       const nodeR = Math.max(0.9, size * 0.55);
       for (let i = 0; i < validPts.length; i++) {
-        const px = validPts[i].x * w;
-        const py = validPts[i].y * h;
+        const px = toX(validPts[i].x);
+        const py = toY(validPts[i].y);
         ctx.moveTo(px + nodeR, py);
         ctx.arc(px, py, nodeR, 0, Math.PI * 2);
       }
@@ -278,8 +305,8 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
         ctx.setLineDash([0, SP]);
         ctx.shadowBlur = 3;
         ctx.shadowColor = '#1c96c5';
-        ctx.moveTo(p1.x * w, p1.y * h);
-        ctx.lineTo(p2.x * w, p2.y * h);
+        ctx.moveTo(toX(p1.x), toY(p1.y));
+        ctx.lineTo(toX(p2.x), toY(p2.y));
         ctx.stroke();
       }
     }
@@ -340,8 +367,8 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
     drawDottedLineMesh(nasalMidline, cCyanLight, 2.2, 4.5, cDotWhite);
     drawDottedLineMesh(nasalBridgeHoriz1, cLightBlue, 1.8, 5, cCyanLight);
     drawDottedLineMesh(nasalBridgeHoriz2, cLightBlue, 1.8, 5, cCyanLight);
-    drawDottedLineMesh(nasalRightRidge, cLightBlue, 1.9, 5, cCyanLight);
-    drawDottedLineMesh(nasalLeftRidge,  cLightBlue, 1.9, 5, cCyanLight);
+    drawDottedLineMesh(nasalRightRidge,   cLightBlue, 1.9, 5, cCyanLight);
+    drawDottedLineMesh(nasalLeftRidge,    cLightBlue, 1.9, 5, cCyanLight);
     drawDottedLineMesh(nasalTipLoop, cCyanLight, 2.1, 4.5, cDotWhite);
     drawDottedLineMesh(nasalBaseWing, cLightBlue, 1.8, 5, cCyanLight);
     drawDottedLineMesh(philtrumColumella, cLightBlue, 1.8, 5, cCyanLight);
@@ -452,8 +479,8 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
     for (const idx of surfaceDotIndices) {
       const p = landmarks[idx];
       if (p && isFinite(p.x) && isFinite(p.y)) {
-        const px = p.x * w;
-        const py = p.y * h;
+        const px = toX(p.x);
+        const py = toY(p.y);
         ctx.moveTo(px + dotR, py);
         ctx.arc(px, py, dotR, 0, Math.PI * 2);
       }
@@ -467,13 +494,13 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
     const pRightEar = landmarks[454];
 
     if (pChin2 && pLeftEar && pRightEar) {
-      const jawWidth = Math.abs(pRightEar.x - pLeftEar.x);
-      const neckCenterX = (pLeftEar.x + pRightEar.x) / 2;
-      const neckBaseY = pChin2.y;
+      const jawWidth = Math.abs(toX(pRightEar.x) - toX(pLeftEar.x));
+      const neckCenterX = (toX(pLeftEar.x) + toX(pRightEar.x)) / 2;
+      const neckBaseY = toY(pChin2.y);
 
       for (let r = 1; r <= 3; r++) {
-        const ringY = neckBaseY + r * 0.030;
-        if (ringY > 1.02) break;
+        const ringY = neckBaseY + r * (displayedH * 0.030);
+        if (ringY > h + 20) break;
         const halfSpan = (jawWidth * 0.38) * (1.0 + r * 0.08);
         const dip = 9 + r * 2.5;
 
@@ -481,8 +508,8 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
         for (let s = 0; s <= 8; s++) {
           const t = s / 8;
           const px = (neckCenterX - halfSpan) + 2 * halfSpan * t;
-          const py = ringY + (Math.sin(t * Math.PI) * dip / h);
-          ringPts.push({ x: px, y: py });
+          const py = ringY + (Math.sin(t * Math.PI) * dip);
+          ringPts.push({ x: (px - offsetX) / (displayedW || 1), y: (py - offsetY) / (displayedH || 1) });
         }
         drawDottedLineMesh(ringPts, cLightBlue, 1.8, 6, cCyanLight);
       }
@@ -492,16 +519,16 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
     const drawRadiantEye = (centerIdx: number, palpebralIndices: number[]) => {
       const pCenter = landmarks[centerIdx];
       if (!pCenter) return;
-      const cx = pCenter.x * w;
-      const cy = pCenter.y * h;
+      const cx = toX(pCenter.x);
+      const cy = toY(pCenter.y);
 
       const eyePts = palpebralIndices.map(i => landmarks[i]).filter(Boolean);
       if (eyePts.length > 2) {
         ctx.save();
         ctx.beginPath();
-        ctx.moveTo(eyePts[0].x * w, eyePts[0].y * h);
+        ctx.moveTo(toX(eyePts[0].x), toY(eyePts[0].y));
         for (let i = 1; i < eyePts.length; i++) {
-          ctx.lineTo(eyePts[i].x * w, eyePts[i].y * h);
+          ctx.lineTo(toX(eyePts[i].x), toY(eyePts[i].y));
         }
         ctx.closePath();
         ctx.strokeStyle = '#1c96c5';
@@ -536,7 +563,7 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
 
       ctx.beginPath();
       ctx.moveTo(cx - 5, cy); ctx.lineTo(cx + 5, cy);
-      ctx.moveTo(cx, cy - 5); ctx.lineTo(cx, cy + 5);
+      ctx.moveTo(cx, cy - 5); ctx.lineTo(cx + 5, cy);
       ctx.strokeStyle = 'rgba(28, 150, 197, 0.8)';
       ctx.lineWidth = 0.8;
       ctx.stroke();
@@ -552,8 +579,8 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
     const pR = landmarks[468];
     const pL = landmarks[473];
     if (pR && pL) {
-      const rx = pR.x * w, ry = pR.y * h;
-      const lx = pL.x * w, ly = pL.y * h;
+      const rx = toX(pR.x), ry = toY(pR.y);
+      const lx = toX(pL.x), ly = toY(pL.y);
 
       ctx.save();
       ctx.beginPath();
@@ -611,10 +638,10 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
     const pRight2 = landmarks[454];
 
     if (pTop2 && pBottom2 && pLeft2 && pRight2) {
-      const yMin = pTop2.y * h;
-      const yMax = pBottom2.y * h;
-      const xMin = Math.min(pLeft2.x, pRight2.x) * w - 16;
-      const xMax = Math.max(pLeft2.x, pRight2.x) * w + 16;
+      const yMin = toY(pTop2.y);
+      const yMax = toY(pBottom2.y);
+      const xMin = Math.min(toX(pLeft2.x), toX(pRight2.x)) - 16;
+      const xMax = Math.max(toX(pLeft2.x), toX(pRight2.x)) + 16;
 
       const sweepT = (Math.sin(time * 2.4) + 1) / 2;
       const scanY = yMin + sweepT * (yMax - yMin);
@@ -653,10 +680,11 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
       if (p.y > maxY) maxY = p.y;
     }
 
-    const boxLeft = Math.max(12, (1 - maxX) * w - (18 * distScale));
-    const boxRight = Math.min(w - 12, (1 - minX) * w + (18 * distScale));
-    const boxTop = Math.max(12, minY * h - (22 * distScale));
-    const boxBottom = Math.min(h - 12, maxY * h + (18 * distScale));
+    // Aligned to exact displayed video in screen coordinates (accounting for CSS scale-x-[-1])
+    const boxLeft = Math.max(12, (w - toX(maxX)) - (18 * distScale));
+    const boxRight = Math.min(w - 12, (w - toX(minX)) + (18 * distScale));
+    const boxTop = Math.max(12, toY(minY) - (22 * distScale));
+    const boxBottom = Math.min(h - 12, toY(maxY) + (18 * distScale));
     const bracketLen = Math.min(24 * distScale, (boxRight - boxLeft) * 0.20);
 
     ctx.save();
