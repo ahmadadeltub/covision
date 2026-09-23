@@ -1,6 +1,7 @@
 
 import { useState, useRef, useCallback, useEffect, RefObject } from 'react';
 import { DistanceStatus, DistanceReading } from '../types';
+import { getAdaptiveInferenceInterval, isLowPowerDevice } from '../utils/devicePerformance';
 
 interface FaceDistanceReturn {
     videoRef: RefObject<HTMLVideoElement | null>;
@@ -726,6 +727,7 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
     };
 
     const lastFaceSendRef = useRef(0);
+    const lastInferenceDurationRef = useRef(15);
     const lastPoseSendRef = useRef(0);
     const lastHandSendRef = useRef(0);
 
@@ -776,15 +778,19 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
         }
 
         const timestamp = performance.now();
+        const currentInterval = getAdaptiveInferenceInterval(lastInferenceDurationRef.current);
 
-        // FaceLandmarker ONLY — unthrottled dedicated execution with zero competing models
-        if (faceLandmarkerRef.current && timestamp > lastFaceSendRef.current) {
+        // Adaptive FaceLandmarker execution — budget inference time to never starve main thread on Jetson Nano / RPi 5
+        if (faceLandmarkerRef.current && (timestamp - lastFaceSendRef.current) >= currentInterval) {
             try {
                 lastFaceSendRef.current = timestamp;
                 sendCountRef.current++;
                 debugInfoRef.current.sendCount = sendCountRef.current;
 
+                const t0 = performance.now();
                 const results = faceLandmarkerRef.current.detectForVideo(video, timestamp);
+                lastInferenceDurationRef.current = performance.now() - t0;
+
                 if (results?.faceLandmarks?.length > 0) {
                     processLandmarks(results.faceLandmarks[0], video);
                 } else {

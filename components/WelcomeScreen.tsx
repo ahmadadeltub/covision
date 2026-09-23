@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Language } from '../types';
 import { translations } from '../translations';
 import { requestForToken } from '../firebase';
+import { isLowPowerDevice } from '../utils/devicePerformance';
 
 interface Props {
     lang: Language;
@@ -51,33 +52,35 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
         fetchStats();
     }, []);
 
-    // Animated particle network background
+    // Animated particle network background (Optimized for embedded & low-power devices)
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
-        const ctx = canvas.getContext('2d')!;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
         let animId: number;
         let particles: { x: number; y: number; vx: number; vy: number; size: number; hue: number }[] = [];
 
         const resize = () => {
-            canvas.width = canvas.offsetWidth * 2;
-            canvas.height = canvas.offsetHeight * 2;
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
         };
         resize();
         window.addEventListener('resize', resize);
 
-        const count = 50;
+        const count = isLowPowerDevice ? 12 : 24;
         for (let i = 0; i < count; i++) {
             particles.push({
                 x: Math.random() * canvas.width,
                 y: Math.random() * canvas.height,
-                vx: (Math.random() - 0.5) * 0.6,
-                vy: (Math.random() - 0.5) * 0.6,
-                size: Math.random() * 2.5 + 0.8,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4,
+                size: Math.random() * 2.0 + 0.8,
                 hue: 190 + Math.random() * 30,
             });
         }
 
+        const maxDist = isLowPowerDevice ? 120 : 160;
         const animate = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             particles.forEach((p, i) => {
@@ -89,22 +92,19 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                     const dx = p.x - particles[j].x;
                     const dy = p.y - particles[j].y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 200) {
+                    if (dist < maxDist) {
                         ctx.beginPath();
-                        ctx.strokeStyle = `hsla(${p.hue}, 100%, 70%, ${(1 - dist / 200) * 0.15})`;
-                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = `hsla(${p.hue}, 100%, 70%, ${(1 - dist / maxDist) * 0.12})`;
+                        ctx.lineWidth = 0.8;
                         ctx.moveTo(p.x, p.y);
                         ctx.lineTo(particles[j].x, particles[j].y);
                         ctx.stroke();
                     }
                 }
                 ctx.beginPath();
-                ctx.fillStyle = `hsla(${p.hue}, 100%, 70%, 0.6)`;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = `hsla(${p.hue}, 100%, 70%, 0.5)`;
+                ctx.fillStyle = `hsla(${p.hue}, 100%, 75%, 0.7)`;
                 ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.shadowBlur = 0;
             });
             animId = requestAnimationFrame(animate);
         };

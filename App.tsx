@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Language, AppStep, PatientInfo, UserProfile, TestType, CalibrationData, TestResult, AcuityResult, ColorVisionResult, DistanceCompliance } from './types';
 import { translations } from './translations';
 import { useFaceDistance } from './hooks/useFaceDistance';
+import { isLowPowerDevice, RECOMMENDED_PARTICLE_COUNT } from './utils/devicePerformance';
 
 // ─── Original Components (restored) ───
 import BiometricScan from './components/BiometricScan';
@@ -169,13 +170,13 @@ const App: React.FC = () => {
   const initCamera = useCallback(async () => {
     if (streamRef.current) return;
     try {
-      // Explicit 640×480 @ 30fps — ideal for MediaPipe (faster to acquire than 1080p default)
+      // Explicit 640×480 @ 30fps capped — prevents Linux V4L2 USB cameras on Jetson/RPi from allocating 1080p buffers
       const s = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: 'user',
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          frameRate: { ideal: 30 },
+          width: { ideal: 640, max: 640 },
+          height: { ideal: 480, max: 480 },
+          frameRate: { ideal: 30, max: 30 },
         }
       });
       streamRef.current = s;
@@ -224,25 +225,40 @@ const App: React.FC = () => {
     setColorResult(null);
   };
 
-  // ─── Global Particle Background ───
+  // ─── Global Particle Background (Optimized for Edge/Embedded Devices) ───
   const bgCanvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
+    // On low-power hardware (Jetson Nano / Raspberry Pi) or during vision-intensive tests:
+    // completely disable particle physics to dedicate 100% of CPU/GPU to camera & vision model
+    const isActiveVisionStep = [
+      AppStep.BiometricScan,
+      AppStep.Calibration,
+      AppStep.ColorTest,
+      AppStep.Testing
+    ].includes(step);
+
     const canvas = bgCanvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    if (isLowPowerDevice || isActiveVisionStep) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      return;
+    }
+
     let animId: number;
     const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
     resize();
     window.addEventListener('resize', resize);
     const particles: { x: number; y: number; vx: number; vy: number; size: number }[] = [];
-    const count = 60;
+    const count = 18;
     for (let i = 0; i < count; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
         size: Math.random() * 2 + 0.5,
       });
     }
@@ -255,9 +271,9 @@ const App: React.FC = () => {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = p.x - particles[j].x, dy = p.y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 150) {
+          if (dist < 130) {
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(0,200,255,${0.08 * (1 - dist / 150)})`;
+            ctx.strokeStyle = `rgba(0,200,255,${0.08 * (1 - dist / 130)})`;
             ctx.lineWidth = 0.5;
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(particles[j].x, particles[j].y);
@@ -273,7 +289,7 @@ const App: React.FC = () => {
     };
     animate();
     return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); };
-  }, []);
+  }, [step]);
 
   return (
     <div className={`app-wrapper`}
