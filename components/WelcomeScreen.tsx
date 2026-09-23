@@ -118,10 +118,10 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
     }, []);
 
     const features = [
-        { icon: '🔬', label: t.feature_acuity || 'Visual Acuity' },
-        { icon: '🎨', label: t.feature_color || 'Color Vision' },
-        { icon: '🤖', label: t.feature_distance || 'AI Face Analysis' },
-        { icon: '📋', label: t.feature_report || 'PDF Report' },
+        { icon: '🔬', label: t.feature_acuity || 'Visual Acuity Test' },
+        { icon: '🎨', label: t.feature_color || 'Color Vision Test' },
+        { icon: '🤖', label: t.feature_distance || 'AI Analysis' },
+        { icon: '📋', label: t.feature_report || 'Professional Medical Report' },
     ];
 
     return (
@@ -159,7 +159,7 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
             {/* Main content */}
             <div style={{
                 position: 'relative', zIndex: 10,
-                width: '100%', maxWidth: 660,
+                width: '100%', maxWidth: 740,
                 height: '100%',
                 maxHeight: '100%',
                 padding: 'clamp(6px, 1.2vh, 14px) clamp(10px, 3vw, 20px)',
@@ -254,39 +254,64 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(2, 1fr)',
-                    gap: 'clamp(6px, 1vh, 10px)',
+                    gap: 'clamp(8px, 1.3vh, 14px)',
                     width: '100%',
                     flexShrink: 0,
                 }}>
                     {features.map((f, i) => (
                         <div key={i} style={{
-                            padding: 'clamp(6px, 1vh, 10px) clamp(8px, 1.5vw, 14px)',
+                            padding: 'clamp(10px, 1.5vh, 16px) clamp(12px, 2.2vw, 20px)',
+                            minHeight: 'clamp(54px, 7.2vh, 70px)',
                             background: 'var(--bg-card)',
-                            backdropFilter: 'blur(16px)',
-                            WebkitBackdropFilter: 'blur(16px)',
-                            borderRadius: 12,
-                            border: '1px solid var(--border-color)',
+                            backdropFilter: 'blur(20px)',
+                            WebkitBackdropFilter: 'blur(20px)',
+                            borderRadius: 16,
+                            border: '1.5px solid var(--border-color)',
+                            boxShadow: '0 4px 18px rgba(0,0,0,0.06)',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: 8,
-                            transition: 'all 0.25s ease',
+                            gap: 'clamp(10px, 1.6vw, 16px)',
+                            transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
                             opacity: loaded ? 1 : 0,
                             transform: loaded ? 'translateY(0)' : 'translateY(16px)',
                             transitionDelay: `${0.2 + i * 0.06}s`,
                         }}
                             onMouseEnter={e => {
-                                (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(56,189,248,0.3)';
+                                (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(56,189,248,0.45)';
                                 (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)';
-                                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 6px 20px rgba(56,189,248,0.1)';
+                                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 24px rgba(56,189,248,0.18)';
                             }}
                             onMouseLeave={e => {
                                 (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border-color)';
                                 (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)';
-                                (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
+                                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 18px rgba(0,0,0,0.06)';
                             }}
                         >
-                            <span style={{ fontSize: 'clamp(18px, 2.5vh, 26px)', lineHeight: 1, flexShrink: 0 }}>{f.icon}</span>
-                            <span style={{ fontSize: 'clamp(10px, 1.3vh, 13px)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>{f.label}</span>
+                            <div style={{
+                                width: 'clamp(36px, 4.8vh, 48px)',
+                                height: 'clamp(36px, 4.8vh, 48px)',
+                                borderRadius: 12,
+                                background: 'linear-gradient(135deg, rgba(56,189,248,0.15), rgba(99,102,241,0.1))',
+                                border: '1px solid rgba(56,189,248,0.25)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: 'clamp(20px, 2.8vh, 28px)',
+                                flexShrink: 0,
+                                boxShadow: '0 2px 10px rgba(56,189,248,0.1)',
+                            }}>
+                                {f.icon}
+                            </div>
+                            <span style={{
+                                fontSize: 'clamp(12px, 1.6vh, 15px)',
+                                fontWeight: 800,
+                                color: 'var(--text-primary)',
+                                lineHeight: 1.25,
+                                letterSpacing: '-0.01em',
+                                fontFamily: 'Outfit, Inter, sans-serif',
+                            }}>
+                                {f.label}
+                            </span>
                         </div>
                     ))}
                 </div>
