@@ -318,15 +318,15 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
         {/* RIGHT: Ishihara Content */}
         <div className="flex-1 flex flex-col overflow-hidden min-w-0">
           <div className="shrink-0 px-6 py-3">
-            <h3 className="text-base md:text-2xl font-black text-white uppercase tracking-tight leading-none">Ishihara Color Plates</h3>
-            <p className="text-[10px] md:text-xs text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
+            <h3 className="text-base md:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">Ishihara Color Plates</h3>
+            <p className="text-[10px] md:text-xs text-sky-700 dark:text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
               Plate {ishiharaIdx + 1} — BOTH EYES
             </p>
           </div>
 
           {/* Progress */}
           <div className="shrink-0 px-6 pt-2">
-            <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+            <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
               <div className="bg-gradient-to-r from-emerald-500 to-cyan-500 h-full transition-all duration-500 rounded-full"
                 style={{ width: `${ishiharaProgress}%` }} />
             </div>
@@ -334,7 +334,7 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
 
           {/* Ishihara Plate Image */}
           <div className="flex-1 min-h-0 flex items-center justify-center p-4">
-            <div className="w-48 h-48 md:w-72 md:h-72 rounded-full overflow-hidden shadow-2xl bg-[#f5f0e0] border-4 border-white/10 mx-auto">
+            <div className="w-48 h-48 md:w-72 md:h-72 rounded-full overflow-hidden shadow-2xl bg-[#f5f0e0] border-4 border-slate-200 dark:border-white/10 mx-auto">
               <img
                 src={currentIshiharaPlate.imageSrc}
                 alt={`Ishihara Plate ${ishiharaIdx + 1}`}
@@ -351,7 +351,7 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
                 <button
                   key={opt}
                   onClick={() => handleIshiharaAnswer(opt)}
-                  className="py-4 glass border-2 border-white/10 rounded-2xl font-black text-3xl text-white hover:border-cyan-400 hover:bg-cyan-500/20 transition-all active:scale-90"
+                  className="py-4 glass border-2 border-slate-200 dark:border-white/10 rounded-2xl font-black text-3xl text-slate-900 dark:text-white hover:border-cyan-400 hover:bg-cyan-500/20 transition-all active:scale-90"
                 >
                   {opt}
                 </button>
@@ -359,7 +359,7 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
             </div>
             <button
               onClick={() => handleIshiharaAnswer('none')}
-              className="w-full py-3 glass border border-white/5 rounded-full text-xs text-slate-500 font-black uppercase tracking-[0.3em] hover:text-white transition-colors"
+              className="w-full py-3 glass border border-slate-200 dark:border-white/5 rounded-full text-xs text-slate-600 dark:text-slate-400 font-black uppercase tracking-[0.3em] hover:text-slate-900 dark:hover:text-white transition-colors"
             >
               Can&apos;t See
             </button>
@@ -422,15 +422,15 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
 
         {/* Header */}
         <div className="shrink-0 px-6 py-3">
-          <h3 className="text-base md:text-2xl font-black text-white uppercase tracking-tight leading-none">Color Arrangement</h3>
-          <p className="text-[10px] md:text-xs text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
+          <h3 className="text-base md:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">Color Arrangement</h3>
+          <p className="text-[10px] md:text-xs text-sky-700 dark:text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
             Sample {sampleIdx + 1}/{TOTAL_SAMPLES} — BOTH EYES
           </p>
         </div>
 
         {/* Progress */}
         <div className="shrink-0 px-6 pt-2">
-          <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+          <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
             <div className="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full transition-all duration-500 rounded-full"
               style={{ width: `${progressPct}%` }} />
           </div>
@@ -444,7 +444,7 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
               style={{ background: colorHex, transform: 'scale(1.4)' }} />
             {/* Main circle */}
             <div
-              className="relative w-36 h-36 md:w-56 md:h-56 lg:w-64 lg:h-64 rounded-full border-4 border-white/20 shadow-2xl transition-colors duration-500"
+              className="relative w-36 h-36 md:w-56 md:h-56 lg:w-64 lg:h-64 rounded-full border-4 border-slate-200 dark:border-white/20 shadow-2xl transition-colors duration-500"
               style={{
                 background: `radial-gradient(circle at 35% 35%, ${colorHex}ee, ${colorHex}cc, ${colorHex})`,
                 boxShadow: `0 0 60px ${colorHex}50, 0 0 120px ${colorHex}25, inset 0 -8px 25px rgba(0,0,0,0.25), inset 0 8px 25px rgba(255,255,255,0.12)`,
@@ -454,7 +454,7 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
               <div className="absolute top-5 left-8 w-14 h-7 md:w-20 md:h-10 bg-white/25 rounded-full blur-md rotate-[-30deg]" />
               {/* Question mark */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-5xl md:text-6xl font-black text-white/30 select-none drop-shadow-lg">?</span>
+                <span className="text-5xl md:text-6xl font-black text-slate-800/40 dark:text-white/30 select-none drop-shadow-lg">?</span>
               </div>
             </div>
           </div>
@@ -470,7 +470,7 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
                 <button
                   key={colorName}
                   onClick={() => handleSelect(colorName)}
-                  className="group py-4 px-5 glass border-2 border-white/10 rounded-2xl font-black uppercase text-sm tracking-wider hover:border-cyan-400 hover:bg-cyan-500/10 transition-all active:scale-95 flex items-center gap-4 justify-center"
+                  className="group py-4 px-5 glass border-2 border-slate-200 dark:border-white/10 rounded-2xl font-black uppercase text-sm tracking-wider hover:border-cyan-400 hover:bg-cyan-500/10 transition-all active:scale-95 flex items-center gap-4 justify-center"
                 >
                   <div
                     className="w-9 h-9 rounded-full border-2 border-white/25 shrink-0 shadow-lg group-hover:scale-110 transition-transform"
@@ -479,7 +479,7 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
                       boxShadow: `0 0 14px ${hex}40, inset 0 2px 6px rgba(255,255,255,0.15)`,
                     }}
                   />
-                  <span className="text-white text-base">{colorName}</span>
+                  <span className="text-slate-900 dark:text-white text-base">{colorName}</span>
                 </button>
               );
             })}

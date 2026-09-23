@@ -8,6 +8,7 @@ import ContrastTest from './tests/ContrastTest';
 import AstigmatismTest from './tests/AstigmatismTest';
 import AmslerTest from './tests/AmslerTest';
 import DistanceBar from './DistanceBar';
+import FaceMeshCanvas from './FaceMeshCanvas';
 
 interface Props {
   lang: Language;
@@ -15,12 +16,23 @@ interface Props {
   tests: TestType[];
   calibration: CalibrationData;
   stream?: MediaStream | null;
+  faceLandmarksRef?: React.RefObject<any[] | null>;
   distanceM?: number;
   distanceStatus?: 'ok' | 'too_close' | 'too_far' | 'no_face';
   onComplete: (results: TestResult[]) => void;
 }
 
-const TestingEngine: React.FC<Props> = ({ lang, t, tests, calibration, stream, distanceM: propDistanceM = 0, distanceStatus: propDistanceStatus = 'no_face', onComplete }) => {
+const TestingEngine: React.FC<Props> = ({
+  lang,
+  t,
+  tests,
+  calibration,
+  stream,
+  faceLandmarksRef,
+  distanceM: propDistanceM = 0,
+  distanceStatus: propDistanceStatus = 'no_face',
+  onComplete
+}) => {
   const [currentTestIndex, setCurrentTestIndex] = useState(0);
   const [results, setResults] = useState<TestResult[]>([]);
   const [isPaused, setIsPaused] = useState(false);
@@ -34,6 +46,7 @@ const TestingEngine: React.FC<Props> = ({ lang, t, tests, calibration, stream, d
       if (videoRef.current.srcObject !== stream) {
         videoRef.current.srcObject = stream;
       }
+      videoRef.current.play().catch(() => {});
     }
   }, [stream, currentType]);
 
@@ -71,7 +84,7 @@ const TestingEngine: React.FC<Props> = ({ lang, t, tests, calibration, stream, d
 
       {/* Global Mini Camera View (Top Right) */}
       {stream && (
-        <div className="absolute top-2 right-2 md:top-4 md:right-4 z-50 w-16 h-20 md:w-32 md:h-40 rounded-xl overflow-hidden border-2 border-white/20 shadow-2xl bg-black/50 backdrop-blur-sm pointer-events-none">
+        <div className="absolute top-2 right-2 md:top-4 md:right-4 z-50 w-24 h-32 sm:w-28 sm:h-36 md:w-36 md:h-48 rounded-2xl overflow-hidden border-2 border-[#1c96c5]/40 shadow-[0_0_25px_rgba(28,150,197,0.3)] bg-black/60 backdrop-blur-md pointer-events-none transition-all duration-300">
           <video
             ref={videoRef}
             autoPlay
@@ -79,7 +92,14 @@ const TestingEngine: React.FC<Props> = ({ lang, t, tests, calibration, stream, d
             muted
             className="w-full h-full object-cover scale-x-[-1]"
           />
-          <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/60 text-[8px] md:text-[10px] text-white font-bold tracking-wider uppercase">
+          <FaceMeshCanvas
+            videoRef={videoRef}
+            landmarksRef={faceLandmarksRef}
+            color="#1c96c5"
+            className="absolute inset-0 w-full h-full pointer-events-none"
+          />
+          <div className="absolute bottom-1.5 right-1.5 px-2 py-0.5 rounded-md bg-black/75 border border-[#1c96c5]/40 text-[9px] md:text-[10px] text-[#1c96c5] font-black tracking-widest uppercase shadow-sm flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#1c96c5] animate-ping inline-block" />
             Live
           </div>
         </div>

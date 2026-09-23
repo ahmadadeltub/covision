@@ -6,10 +6,12 @@ import { PLATES } from '../utils/ishiharaPlates';
 
 import DistanceBar from './DistanceBar';
 import { useVoiceCommand } from '../hooks/useVoiceCommand';
+import FaceMeshCanvas from './FaceMeshCanvas';
 
 interface Props {
     lang: Language;
     stream?: MediaStream | null;
+    faceLandmarksRef?: React.RefObject<any[] | null>;
     distanceM?: number;
     distanceStatus?: DistanceStatus;
     onComplete: (result: ColorVisionResult) => void;
@@ -28,7 +30,7 @@ function generateDeck(count: number) {
     return deck;
 }
 
-const ColorVisionTest: React.FC<Props> = ({ lang, stream, distanceM: propDistanceM = 0, distanceStatus: propDistanceStatus = 'no_face', onComplete }) => {
+const ColorVisionTest: React.FC<Props> = ({ lang, stream, faceLandmarksRef, distanceM: propDistanceM = 0, distanceStatus: propDistanceStatus = 'no_face', onComplete }) => {
     const t = translations[lang];
     const [step, setStep] = useState<TestStep>('intro');
     const [currentPlateIndex, setCurrentPlateIndex] = useState(0);
@@ -247,13 +249,13 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, distanceM: propDistanc
 
             {/* ─── LEFT: Camera Feed Panel ─── */}
             <div className="shrink-0 flex flex-col gap-3 items-center" style={{ width: 220 }}>
-                <div className="w-full aspect-[3/4] rounded-2xl overflow-hidden bg-black border-2 border-cyan-500/20 shadow-[0_0_30px_rgba(0,200,255,0.1)] relative">
+                <div className="w-full aspect-[3/4] rounded-2xl overflow-hidden bg-black border-2 border-[#1c96c5]/40 shadow-[0_0_30px_rgba(28,150,197,0.2)] relative">
                     <video ref={cameraRef} autoPlay muted playsInline className="w-full h-full object-cover scale-x-[-1] brightness-110" />
-                    {/* AI detection canvas overlay */}
-                    <canvas ref={coverCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
-                    <div className="absolute top-2 left-2 glass px-2 py-0.5 rounded-full border border-cyan-500/30 flex items-center gap-1">
-                        <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></div>
-                        <span className="text-[8px] font-bold text-cyan-400 uppercase tracking-widest">LIVE</span>
+                    {/* Modern Dotted Face Mesh Overlay */}
+                    <FaceMeshCanvas videoRef={cameraRef} landmarksRef={faceLandmarksRef} color="#1c96c5" className="absolute inset-0 w-full h-full pointer-events-none" />
+                    <div className="absolute top-2 left-2 glass px-2 py-0.5 rounded-full border border-[#1c96c5]/30 flex items-center gap-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#1c96c5] animate-pulse"></div>
+                        <span className="text-[8px] font-bold text-[#1c96c5] uppercase tracking-widest">LIVE</span>
                     </div>
                     {/* Eye cover status badge */}
                     {isTesting && (

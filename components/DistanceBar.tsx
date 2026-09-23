@@ -79,7 +79,7 @@ const DistanceBar: React.FC<Props> = ({
         <div className="w-full shrink-0 relative transition-all duration-300" style={{ zIndex: 50 }}>
             {/* Instrument-Grade Optical Telemetry Pod */}
             <div
-                className="w-full px-4 py-2.5 rounded-2xl md:rounded-3xl border backdrop-blur-xl transition-all duration-500 shadow-xl flex flex-col md:flex-row items-center gap-3 md:gap-4 relative overflow-hidden"
+                className="distance-telemetry-pod w-full px-4 py-2.5 rounded-2xl md:rounded-3xl border backdrop-blur-xl transition-all duration-500 shadow-xl flex flex-col md:flex-row items-center gap-3 md:gap-4 relative overflow-hidden"
                 style={{
                     backgroundColor: 'rgba(15, 23, 42, 0.82)',
                     borderColor: `${themeColor}45`,
@@ -165,7 +165,7 @@ const DistanceBar: React.FC<Props> = ({
 
                         {/* Target Center Reference Wire (1.00m) */}
                         <div
-                            className="absolute top-0 h-full w-[2px] bg-white z-10 pointer-events-none shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+                            className="caliper-center-wire absolute top-0 h-full w-[2px] bg-white z-10 pointer-events-none shadow-[0_0_8px_rgba(255,255,255,0.8)]"
                             style={{ left: `${targetPct}%`, transform: 'translateX(-50%)' }}
                         />
 

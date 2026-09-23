@@ -49,7 +49,14 @@ const DEV_DISTANCE = 0.5;
 const App: React.FC = () => {
   // ─── Global State ───
   const [lang] = useState<Language>('en');
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    try {
+      const saved = localStorage.getItem('covision_theme');
+      return (saved === 'dark' || saved === 'light') ? saved : 'light';
+    } catch {
+      return 'light';
+    }
+  });
   const [step, setStep] = useState<AppStep>(AppStep.Welcome);
 
   // ─── Camera ───
@@ -106,6 +113,11 @@ const App: React.FC = () => {
   // ─── Theme & Mobile Detection ───
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+    try {
+      localStorage.setItem('covision_theme', theme);
+    } catch {
+      // ignore storage errors
+    }
     
     const checkMobile = () => {
       const isMob = window.innerWidth <= 768;
@@ -456,6 +468,7 @@ const App: React.FC = () => {
             tests={selectedTests}
             calibration={calibration}
             stream={stream}
+            faceLandmarksRef={faceLandmarksRef}
             distanceM={distanceM}
             distanceStatus={distanceStatus as 'ok' | 'too_close' | 'too_far' | 'no_face'}
             onComplete={(results) => {
@@ -473,6 +486,7 @@ const App: React.FC = () => {
           <ColorVisionTest
             lang={lang}
             stream={stream}
+            faceLandmarksRef={faceLandmarksRef}
             distanceM={distanceM}
             distanceStatus={distanceStatus}
             onComplete={(result) => {

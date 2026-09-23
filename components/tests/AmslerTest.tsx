@@ -207,23 +207,23 @@ const AmslerTest: React.FC<Props> = ({ t, stream, onFinish }) => {
 
       {/* ─── LEFT: Info Panel (hidden on mobile) ─── */}
       <div className="hidden md:flex shrink-0 flex-col gap-3 items-center" style={{ width: 220 }}>
-        <div className="w-full glass rounded-2xl border border-white/5 p-3 space-y-2">
+        <div className="w-full glass rounded-2xl border border-slate-200 dark:border-white/5 p-3 space-y-2">
           <div className="text-center">
             <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{currentVariant.label}</div>
           </div>
-          <div className="h-px bg-white/5"></div>
+          <div className="h-px bg-slate-200 dark:bg-white/5"></div>
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-slate-500 uppercase font-bold">Grid</span>
-            <span className="text-sm font-black text-white">{trialIdx + 1}/{TOTAL_TRIALS}</span>
+            <span className="text-sm font-black text-slate-900 dark:text-white">{trialIdx + 1}/{TOTAL_TRIALS}</span>
           </div>
           <div className="flex items-center justify-center pt-1">
-            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
+            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-100 text-sky-700 dark:bg-cyan-500/20 dark:text-cyan-400 border border-sky-300 dark:border-cyan-500/40">
               BOTH EYES
             </span>
           </div>
         </div>
         <div className="text-center px-2">
-          <div className="text-[10px] font-bold text-cyan-400/80 flex items-center gap-1 justify-center">
+          <div className="text-[10px] font-bold text-sky-700 dark:text-cyan-400/80 flex items-center gap-1 justify-center">
             <span>Tap "Perfect" or "Wavy" below</span>
           </div>
         </div>
@@ -234,14 +234,14 @@ const AmslerTest: React.FC<Props> = ({ t, stream, onFinish }) => {
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
 
         <div className="shrink-0 px-6 py-3">
-          <h3 className="text-base md:text-2xl font-black text-white uppercase tracking-tight leading-none">{t.amsler_grid}</h3>
-          <p className="text-[10px] md:text-xs text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
+          <h3 className="text-base md:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">{t.amsler_grid}</h3>
+          <p className="text-[10px] md:text-xs text-sky-700 dark:text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
             Grid {trialIdx + 1}/{TOTAL_TRIALS} — Focus on center dot
           </p>
         </div>
 
         <div className="shrink-0 px-6 pt-2">
-          <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+          <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
             <div className="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full transition-all duration-500 rounded-full"
               style={{ width: `${progressPct}%` }} />
           </div>

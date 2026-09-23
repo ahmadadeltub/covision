@@ -184,22 +184,22 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
 
   // ─── Testing Phase UI ───
   return (
-    <div className="w-full h-full flex flex-row gap-4 animate-in fade-in duration-500 overflow-x-hidden overflow-y-auto relative">
+    <div className="w-full h-full flex flex-col md:flex-row gap-3 md:gap-4 animate-in fade-in duration-500 overflow-x-hidden overflow-y-auto relative">
 
       {/* ─── LEFT: Info Panel ─── */}
-      <div className="shrink-0 flex flex-col gap-3 items-center" style={{ width: 300 }}>
+      <div className="w-full md:w-[260px] lg:w-[300px] shrink-0 flex flex-col gap-2 md:gap-3 items-center">
         <div className="w-full glass rounded-2xl border border-white/5 p-3 space-y-2">
           <div className="text-center">
             <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Snellen</div>
-            <div className="text-lg font-black text-white">{currentTrial?.label}</div>
+            <div className="text-lg font-black text-slate-900 dark:text-white">{currentTrial?.label}</div>
           </div>
-          <div className="h-px bg-white/5"></div>
+          <div className="h-px bg-slate-200 dark:bg-white/5"></div>
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-slate-500 uppercase font-bold">Level</span>
-            <span className="text-sm font-black text-white">{levelIdx + 1}/{TOTAL_SAMPLES}</span>
+            <span className="text-sm font-black text-slate-900 dark:text-white">{levelIdx + 1}/{TOTAL_SAMPLES}</span>
           </div>
           <div className="flex items-center justify-center pt-1 gap-2">
-            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
+            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-100 text-sky-700 dark:bg-cyan-500/20 dark:text-cyan-400 border border-sky-300 dark:border-cyan-500/40">
               BOTH EYES
             </span>
             <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider"
@@ -209,24 +209,26 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
           </div>
         </div>
         <div className="text-center px-2">
-          <div className="text-[10px] font-bold text-cyan-400/80 flex items-center gap-1 justify-center">
+          <div className="text-[10px] font-bold text-sky-700 dark:text-cyan-400/80 flex items-center gap-1 justify-center">
             <span>Select the letter below</span>
           </div>
         </div>
-        <AIBotBubble botState={botState} isEyeUncovered={false} coverEye={undefined} isListening={isListening} transcript={transcript} />
+        <div className="hidden md:block w-full">
+          <AIBotBubble botState={botState} isEyeUncovered={false} coverEye={undefined} isListening={isListening} transcript={transcript} />
+        </div>
       </div>
 
       {/* ─── RIGHT: Test Content ─── */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
 
-        <div className="shrink-0 px-6 py-3">
-          <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight leading-none">Snellen Visual Acuity</h3>
-          <p className="text-xs text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
+        <div className="shrink-0 px-3 md:px-6 py-2 md:py-3">
+          <h3 className="text-lg md:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">Snellen Visual Acuity</h3>
+          <p className="text-xs text-sky-700 dark:text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
             {currentTrial?.label} — BOTH EYES
           </p>
         </div>
 
-        <div className="shrink-0 px-6 pt-2">
+        <div className="shrink-0 px-3 md:px-6 pt-1 md:pt-2">
           <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
             <div className="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full transition-all duration-500 rounded-full"
               style={{ width: `${progressPct}%` }} />
@@ -234,8 +236,8 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
         </div>
 
         {/* Letter Display */}
-        <div className="flex-1 min-h-0 flex items-center justify-center p-4">
-          <div className="bg-white rounded-[2rem] md:rounded-[3rem] flex items-center justify-center shadow-2xl border-4 border-white/10 px-8 md:px-16"
+        <div className="flex-1 min-h-0 flex items-center justify-center p-3 md:p-4">
+          <div className="bg-white rounded-2xl md:rounded-[3rem] flex items-center justify-center shadow-2xl border-4 border-white/10 px-6 md:px-16"
             style={{ minWidth: `${(currentTrial?.sizePx || 0) + 80}px`, minHeight: `${(currentTrial?.sizePx || 0) + 60}px`, maxWidth: '90%', maxHeight: '100%' }}>
             <span
               key={`both-${levelIdx}`}
@@ -247,35 +249,35 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
         </div>
 
         {/* Choice Buttons */}
-        <div className="shrink-0 p-4 pt-0 space-y-2">
-          <div className="grid grid-cols-3 gap-3 max-w-2xl mx-auto">
+        <div className="shrink-0 p-2 md:p-4 pt-0 space-y-2">
+          <div className="grid grid-cols-3 gap-2 md:gap-3 max-w-2xl mx-auto">
             {choiceLetters.map((letter, i) => (
               <button
                 key={`${letter}-${i}`}
                 onClick={() => handleSelect(letter)}
-                className={`py-4 md:py-5 glass border-2 rounded-2xl md:rounded-3xl text-3xl md:text-4xl lg:text-5xl font-black transition-all active:scale-95
+                className={`py-3 md:py-5 glass border-2 rounded-xl md:rounded-3xl text-2xl md:text-4xl lg:text-5xl font-black transition-all active:scale-95
                   ${activeButton === letter
                     ? 'border-cyan-400 bg-cyan-500/40 shadow-[0_0_50px_rgba(0,243,255,0.6)] scale-105'
                     : 'border-white/10 hover:border-cyan-400 hover:bg-cyan-500/20'}`}
                 style={{ fontFamily: "'Courier New', Courier, monospace" }}>
-                <span className="text-white drop-shadow-lg">{letter}</span>
+                <span className="text-slate-900 dark:text-white">{letter}</span>
               </button>
             ))}
           </div>
-          <div className="max-w-2xl mx-auto mt-3">
+          <div className="max-w-2xl mx-auto mt-2 md:mt-3">
             <button
               onClick={() => handleSelect('__CANT_SEE__')}
-              className={`w-full py-3 glass border-2 rounded-2xl text-base font-black uppercase tracking-widest transition-all active:scale-95
+              className={`w-full py-2.5 md:py-3 glass border-2 rounded-xl md:rounded-2xl text-sm md:text-base font-black uppercase tracking-wider md:tracking-widest transition-all active:scale-95
                 ${activeButton === '__CANT_SEE__'
-                  ? 'border-red-400 bg-red-500/40 shadow-[0_0_30px_rgba(239,68,68,0.5)] scale-105'
-                  : 'border-white/10 hover:border-red-400 hover:bg-red-500/20 text-slate-400 hover:text-red-300'}`}>
+                  ? 'border-red-400 bg-red-500/40 shadow-[0_0_30px_rgba(239,68,68,0.5)] scale-105 text-red-700 dark:text-red-300'
+                  : 'border-slate-200 dark:border-white/10 hover:border-red-400 hover:bg-red-500/10 text-slate-700 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-300'}`}>
               <span className="flex items-center justify-center gap-2">
                 <span>🚫</span>
                 <span>Can&apos;t See</span>
               </span>
             </button>
           </div>
-          <div className="text-center mt-2 text-xs text-slate-500 uppercase tracking-widest opacity-60 flex items-center justify-center gap-2">
+          <div className="text-center mt-1 md:mt-2 text-[10px] md:text-xs text-slate-500 uppercase tracking-widest opacity-60 flex items-center justify-center gap-2">
             <span>Voice: Say the letter or &quot;can&apos;t see&quot;</span>
             {isListening && <span className="text-emerald-400 font-bold animate-pulse">🎤 Listening</span>}
           </div>

@@ -219,23 +219,23 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
       }}>
         {/* Test Info Panel */}
         <div style={{
-          width: '100%', background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(12px)',
-          borderRadius: 24, border: '1px solid rgba(255,255,255,0.05)', padding: 12, display: 'flex', flexDirection: 'column', gap: 8
+          width: '100%', background: 'var(--bg-card)', backdropFilter: 'blur(12px)',
+          borderRadius: 24, border: '1px solid var(--border-color)', padding: 12, display: 'flex', flexDirection: 'column', gap: 8
         }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.15em' }}>{currentTrial.type} Chart</div>
-            <div style={{ fontSize: 18, fontWeight: 900, color: '#fff' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>{currentTrial.type} Chart</div>
+            <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--text-primary)' }}>
               {currentTrial.label} · {currentTrial.sizePx}px
             </div>
           </div>
-          <div style={{ height: 1, background: 'rgba(255,255,255,0.05)' }}></div>
+          <div style={{ height: 1, background: 'var(--border-color)' }}></div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 10, color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Trial</span>
-            <span style={{ fontSize: 14, fontWeight: 900, color: '#fff' }}>{currentIndex + 1}/{totalTrials}</span>
+            <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Trial</span>
+            <span style={{ fontSize: 14, fontWeight: 900, color: 'var(--text-primary)' }}>{currentIndex + 1}/{totalTrials}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 10, color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Type</span>
-            <span style={{ fontSize: 14, fontWeight: 900, color: '#fff' }}>{currentTrial.type === 'E' ? 'Tumbling E' : 'Landolt C'}</span>
+            <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Type</span>
+            <span style={{ fontSize: 14, fontWeight: 900, color: 'var(--text-primary)' }}>{currentTrial.type === 'E' ? 'Tumbling E' : 'Landolt C'}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 4, gap: 8 }}>
             <span style={{
@@ -254,7 +254,7 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
         </div>
 
         <div style={{ textAlign: 'center', padding: '0 8px' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(34, 211, 238, 0.8)', display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center' }}>
             <span>Select the direction</span>
           </div>
         </div>
@@ -282,43 +282,54 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
 
         {/* Header Bar */}
         <div style={{ flexShrink: 0, padding: '12px 24px' }}>
-          <h3 style={{ fontSize: 'clamp(16px, 4vw, 24px)', fontWeight: 900, color: '#fff', textTransform: 'uppercase', margin: 0 }}>{t.visual_acuity}</h3>
-          <p style={{ fontSize: 12, color: '#22d3ee', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>
+          <h3 style={{ fontSize: 'clamp(16px, 4vw, 24px)', fontWeight: 900, color: 'var(--text-primary)', textTransform: 'uppercase', margin: 0 }}>{t.visual_acuity}</h3>
+          <p style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>
             Trial {currentIndex + 1}/{totalTrials} · {currentTrial.label}
           </p>
         </div>
 
         {/* Progress Bar */}
         <div style={{ flexShrink: 0, padding: '4px 24px' }}>
-          <div style={{ width: '100%', background: '#1e293b', height: 6, borderRadius: 999, overflow: 'hidden' }}>
+          <div style={{ width: '100%', background: 'var(--progress-bg)', height: 6, borderRadius: 999, overflow: 'hidden' }}>
             <div style={{
-              background: 'linear-gradient(90deg, #06b6d4, #6366f1)', height: '100%',
+              background: 'linear-gradient(90deg, #0284c7, #6366f1)', height: '100%',
               transition: 'all 0.5s ease-out', borderRadius: 999, width: `${progressPct}%`
             }} />
           </div>
         </div>
 
-        {/* Optotype Display — centered */}
+        {/* Optotype Display — High-Contrast Clinical Card */}
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, overflow: 'hidden' }}>
-          <div style={{
-            width: currentTrial.sizePx, height: currentTrial.sizePx,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s'
-          }}>
-            {/* Rotated Optotype */}
-            {currentTrial.type === 'E' ? (
-              <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', color: '#fff', fill: 'currentColor', filter: 'drop-shadow(0 0 20px rgba(255,255,255,0.4))', transform: `rotate(${rotation}deg)` }}>
-                <rect x="0" y="0" width="100" height="20" />
-                <rect x="0" y="40" width="100" height="20" />
-                <rect x="0" y="80" width="100" height="20" />
-                <rect x="0" y="0" width="20" height="100" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', filter: 'drop-shadow(0 0 20px rgba(255,255,255,0.4))', transform: `rotate(${rotation}deg)` }}>
-                <circle cx="50" cy="50" r="50" fill="white" />
-                <circle cx="50" cy="50" r="30" fill="black" />
-                <rect x="50" y="40" width="55" height="20" fill="black" />
-              </svg>
-            )}
+          <div className="rounded-[2.5rem] md:rounded-[3.5rem] flex items-center justify-center shadow-2xl border-4"
+            style={{
+              background: '#ffffff',
+              borderColor: 'rgba(0,0,0,0.08)',
+              padding: 'clamp(16px, 3vh, 36px) clamp(24px, 4vw, 48px)',
+              minWidth: `${Math.min(currentTrial.sizePx + 60, 420)}px`,
+              minHeight: `${Math.min(currentTrial.sizePx + 40, 360)}px`,
+              maxWidth: '92%',
+              maxHeight: '92%',
+            }}>
+            <div style={{
+              width: currentTrial.sizePx, height: currentTrial.sizePx,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s'
+            }}>
+              {/* Rotated Optotype — Always Clinical High-Contrast Black */}
+              {currentTrial.type === 'E' ? (
+                <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', color: '#000000', fill: '#000000', transform: `rotate(${rotation}deg)` }}>
+                  <rect x="0" y="0" width="100" height="20" />
+                  <rect x="0" y="40" width="100" height="20" />
+                  <rect x="0" y="80" width="100" height="20" />
+                  <rect x="0" y="0" width="20" height="100" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', transform: `rotate(${rotation}deg)` }}>
+                  <circle cx="50" cy="50" r="50" fill="#000000" />
+                  <circle cx="50" cy="50" r="30" fill="#ffffff" />
+                  <rect x="50" y="40" width="55" height="20" fill="#ffffff" />
+                </svg>
+              )}
+            </div>
           </div>
         </div>
 
@@ -332,14 +343,14 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
                 key={dir}
                 onClick={() => handleSelect(dir)}
                 style={{
-                  padding: '12px 0', background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)',
-                  border: `2px solid ${activeButton === dir ? '#22d3ee' : 'rgba(255,255,255,0.1)'}`,
+                  padding: '12px 0', background: 'var(--bg-card)', backdropFilter: 'blur(10px)',
+                  border: `2px solid ${activeButton === dir ? 'var(--accent)' : 'var(--border-color)'}`,
                   borderRadius: 24, fontSize: 32, transition: 'all 0.2s', cursor: 'pointer',
-                  boxShadow: activeButton === dir ? '0 0 40px rgba(34, 211, 238, 0.4)' : 'none',
+                  boxShadow: activeButton === dir ? '0 0 30px rgba(2, 132, 199, 0.35)' : 'none',
                   transform: activeButton === dir ? 'scale(1.05)' : 'scale(1)'
                 }}
               >
-                <span style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))' }}>
+                <span style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.15))' }}>
                   {dir === 'up' && '⬆️'}
                   {dir === 'down' && '⬇️'}
                   {dir === 'left' && '⬅️'}
@@ -353,15 +364,15 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
             <button
               onClick={() => handleSelect('?')}
               style={{
-                padding: '8px 24px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: 999, fontSize: 10, color: '#94a3b8', fontWeight: 900, textTransform: 'uppercase',
+                padding: '8px 24px', background: 'var(--bg-card)', border: '1px solid var(--border-color)',
+                borderRadius: 999, fontSize: 10, color: 'var(--text-muted)', fontWeight: 900, textTransform: 'uppercase',
                 letterSpacing: '0.2em', cursor: 'pointer', transition: 'all 0.2s'
               }}
             >
               Can't See
             </button>
           </div>
-          <div style={{ textAlign: 'center', marginTop: 8, fontSize: 10, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.6, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <div style={{ textAlign: 'center', marginTop: 8, fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
             <span>Voice: Say "Up", "Down", "Left", "Right" or "can't see"</span>
             {isListening && <span style={{ color: '#10b981', fontWeight: 'bold' }}>🎤 Listening</span>}
           </div>

@@ -27,8 +27,8 @@ const TestSelector: React.FC<Props> = ({ lang, t, onComplete }) => {
   ];
 
   return (
-    <div className="w-full h-full flex items-center justify-center p-2 md:p-4 overflow-hidden bg-slate-950/20">
-      <div className="glass w-full max-w-7xl h-full max-h-[95vh] rounded-[3rem] md:rounded-[5rem] shadow-[0_0_150px_rgba(0,0,0,0.8)] border border-white/10 flex flex-col relative overflow-hidden bg-slate-900/60 p-4 md:p-8 animate-in fade-in zoom-in-95 duration-700">
+    <div className="w-full min-h-full flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+      <div className="glass w-full max-w-7xl min-h-0 md:h-full md:max-h-[95vh] rounded-3xl md:rounded-[4rem] shadow-2xl border flex flex-col relative overflow-y-auto md:overflow-hidden p-3 sm:p-6 md:p-8 animate-in fade-in zoom-in-95 duration-700">
         
         {/* Decorative Background Elements */}
         <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
@@ -38,64 +38,68 @@ const TestSelector: React.FC<Props> = ({ lang, t, onComplete }) => {
         </div>
 
         {/* Header Section */}
-        <div className="relative z-10 text-center mb-4 md:mb-6 shrink-0">
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase tracking-tighter leading-none drop-shadow-2xl">
+        <div className="relative z-10 text-center mb-3 md:mb-6 shrink-0">
+          <h2 className="text-2xl sm:text-4xl md:text-6xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none drop-shadow-sm">
             {t.test_selection}
           </h2>
+          <p className="text-[10px] md:text-xs text-sky-600 dark:text-cyan-400 uppercase tracking-widest font-black mt-1">
+            Choose Screening Modules
+          </p>
         </div>
 
-        {/* Selection Grid - Using flex and proportions to prevent scrolling */}
-        <div className="relative z-10 flex-1 flex flex-col justify-center px-2 mb-4 overflow-hidden">
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 max-w-6xl mx-auto h-full max-h-full items-stretch">
+        {/* Selection Grid */}
+        <div className="relative z-10 flex-1 flex flex-col justify-center px-1 md:px-2 mb-3 md:mb-4 overflow-visible md:overflow-hidden">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 md:gap-6 max-w-6xl mx-auto w-full items-stretch">
             {testOptions.map(opt => (
               <button
                 key={opt.type}
                 onClick={() => toggle(opt.type)}
-                className={`group relative flex flex-col items-center justify-center p-4 md:p-6 rounded-[2.5rem] md:rounded-[3rem] border-2 transition-all duration-500 transform hover:scale-[1.02] active:scale-95 ${
+                className={`group relative flex flex-col items-center justify-center p-3 sm:p-5 md:p-6 rounded-2xl md:rounded-[2.5rem] border-2 transition-all duration-300 transform hover:scale-[1.02] active:scale-95 ${
                   selected.includes(opt.type) 
-                  ? 'border-cyan-400 bg-cyan-500/20 shadow-[0_0_60px_rgba(0,243,255,0.3)]' 
-                  : 'border-white/5 bg-black/40 hover:border-white/20 hover:bg-white/5 shadow-xl'
+                  ? 'border-sky-500 bg-sky-50/80 dark:bg-cyan-500/20 shadow-lg dark:shadow-[0_0_50px_rgba(0,243,255,0.25)]' 
+                  : 'border-slate-200 dark:border-white/5 bg-white dark:bg-black/40 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm'
                 }`}
               >
                 {/* Status Indicator */}
-                <div className={`absolute top-4 right-6 flex items-center gap-2 px-3 py-1 rounded-full border transition-all ${
-                  selected.includes(opt.type) ? 'border-cyan-400 bg-cyan-400/20 opacity-100' : 'border-white/10 bg-white/5 opacity-40'
+                <div className={`absolute top-2.5 right-3 md:top-4 md:right-6 flex items-center gap-1.5 px-2.5 py-0.5 md:px-3 md:py-1 rounded-full border transition-all ${
+                  selected.includes(opt.type)
+                    ? 'border-sky-500 bg-sky-100 text-sky-700 dark:border-cyan-400 dark:bg-cyan-400/20 dark:text-white'
+                    : 'border-slate-200 bg-slate-100 text-slate-500 dark:border-white/10 dark:bg-white/5'
                 }`}>
-                  <div className={`w-1.5 h-1.5 rounded-full ${selected.includes(opt.type) ? 'bg-cyan-400 shadow-[0_0_8px_#00f3ff] animate-pulse' : 'bg-slate-500'}`}></div>
-                  <span className={`text-[8px] font-black uppercase tracking-widest ${selected.includes(opt.type) ? 'text-white' : 'text-slate-500'}`}>
+                  <div className={`w-1.5 h-1.5 rounded-full ${selected.includes(opt.type) ? 'bg-sky-500 dark:bg-cyan-400 animate-pulse' : 'bg-slate-400'}`}></div>
+                  <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest">
                     {selected.includes(opt.type) ? 'Active' : 'Standby'}
                   </span>
                 </div>
 
-                {/* Icon - Significantly enlarged */}
-                <span className={`text-7xl md:text-9xl lg:text-[10rem] mb-2 md:mb-4 transition-all duration-500 leading-none ${selected.includes(opt.type) ? 'scale-110 drop-shadow-[0_0_30px_rgba(255,255,255,0.5)]' : 'grayscale opacity-30'}`}>
+                {/* Icon */}
+                <span className={`text-4xl sm:text-6xl md:text-8xl lg:text-9xl mb-2 md:mb-4 transition-all duration-300 leading-none ${selected.includes(opt.type) ? 'scale-105' : 'grayscale opacity-40'}`}>
                   {opt.icon}
                 </span>
 
                 {/* Label */}
-                <span className={`text-sm md:text-xl lg:text-2xl font-black uppercase tracking-widest text-center transition-colors duration-500 ${selected.includes(opt.type) ? 'text-white' : 'text-slate-500'}`}>
+                <span className={`text-xs sm:text-sm md:text-lg lg:text-xl font-black uppercase tracking-wider text-center transition-colors duration-300 ${
+                  selected.includes(opt.type) ? 'text-slate-900 dark:text-white' : 'text-slate-500'
+                }`}>
                   {opt.label}
                 </span>
-
-                {/* Hover Glow */}
-                <div className="absolute inset-0 rounded-[inherit] bg-cyan-400/0 group-hover:bg-cyan-400/5 transition-colors duration-500"></div>
               </button>
             ))}
           </div>
         </div>
 
         {/* Footer Action Area */}
-        <div className="relative z-10 w-full max-w-4xl mx-auto shrink-0">
+        <div className="relative z-10 w-full max-w-4xl mx-auto shrink-0 pt-1">
           <button
             disabled={selected.length === 0}
             onClick={() => onComplete(selected)}
-            className="group w-full py-5 md:py-10 bg-white text-slate-950 rounded-[2rem] md:rounded-[3.5rem] font-black text-base md:text-5xl uppercase tracking-widest md:tracking-[0.4em] hover:bg-cyan-400 hover:shadow-[0_0_100px_rgba(0,243,255,0.7)] disabled:opacity-20 disabled:grayscale transition-all transform hover:scale-[1.01] active:scale-95 relative overflow-hidden shadow-2xl"
+            className="group w-full py-3.5 sm:py-5 md:py-7 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white rounded-2xl md:rounded-[2.5rem] font-black text-sm sm:text-lg md:text-2xl uppercase tracking-wider md:tracking-[0.25em] disabled:opacity-30 disabled:grayscale transition-all transform hover:scale-[1.01] active:scale-95 relative overflow-hidden shadow-xl hover:shadow-2xl flex items-center justify-center gap-3 cursor-pointer"
           >
-            <div className="relative z-10 flex items-center justify-center gap-6">
-              <span>Initialize System</span>
-              <span className="bg-slate-950 text-white px-6 py-1 rounded-2xl text-lg md:text-3xl font-mono">{selected.length}</span>
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-300/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+            <span className="relative z-10">Initialize System</span>
+            <span className="relative z-10 bg-white/20 backdrop-blur-md text-white px-3 py-0.5 md:px-5 md:py-1 rounded-xl text-xs sm:text-sm md:text-xl font-mono">
+              {selected.length}
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
           </button>
         </div>
       </div>

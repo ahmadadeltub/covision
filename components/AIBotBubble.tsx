@@ -82,7 +82,7 @@ const AIBotBubble: React.FC<Props> = ({ botState, isEyeUncovered = false, coverE
           >
             <div className="flex items-start gap-3">
               <span className="text-4xl shrink-0">{displayMsg.emoji}</span>
-              <p className="text-base font-bold leading-relaxed" style={{ color: displayMsg.color || '#e2e8f0' }}>
+              <p className="text-base font-bold leading-relaxed" style={{ color: isEyeUncovered ? '#ffffff' : (displayMsg.color && displayMsg.color !== '#06b6d4' ? displayMsg.color : 'var(--text-primary)') }}>
                 {displayMsg.text}
               </p>
             </div>
@@ -176,14 +176,14 @@ const AIBotBubble: React.FC<Props> = ({ botState, isEyeUncovered = false, coverE
                 {pct}%
               </span>
             </div>
-            <span className="text-base font-bold text-slate-400">
+            <span className="text-base font-bold text-slate-600 dark:text-slate-400">
               {correct}/{total}
             </span>
             {streak >= 2 && (
-              <span className="text-base font-bold text-amber-400">🔥{streak}</span>
+              <span className="text-base font-bold text-amber-500 dark:text-amber-400">🔥{streak}</span>
             )}
           </div>
-          <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden">
+          <div className="w-full h-3 bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
             <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: ringColor }} />
           </div>
         </div>
@@ -194,20 +194,20 @@ const AIBotBubble: React.FC<Props> = ({ botState, isEyeUncovered = false, coverE
         <div className="w-full glass rounded-2xl border-2 border-red-500/40 px-5 py-4 animate-pulse">
           <div className="flex items-center gap-2.5 mb-3">
             <span className="text-2xl">👁️</span>
-            <span className="text-sm font-black text-red-400 uppercase tracking-wider">Eye Cover Required</span>
+            <span className="text-sm font-black text-red-600 dark:text-red-400 uppercase tracking-wider">Eye Cover Required</span>
           </div>
           <div className="space-y-2">
             <div className="flex items-center gap-2.5">
               <span className="text-lg">🤚</span>
-              <span className="text-sm text-slate-300">Cover your <span className="font-black text-white">{coverEye.toUpperCase()}</span> eye</span>
+              <span className="text-sm text-slate-800 dark:text-slate-300">Cover your <span className="font-black text-slate-950 dark:text-white">{coverEye.toUpperCase()}</span> eye</span>
             </div>
             <div className="flex items-center gap-2.5">
               <span className="text-lg">⚡</span>
-              <span className="text-sm text-slate-300">Don't press on the eyelid</span>
+              <span className="text-sm text-slate-800 dark:text-slate-300">Don't press on the eyelid</span>
             </div>
             <div className="flex items-center gap-2.5">
               <span className="text-lg">✅</span>
-              <span className="text-sm text-slate-300">Test resumes automatically</span>
+              <span className="text-sm text-slate-800 dark:text-slate-300">Test resumes automatically</span>
             </div>
           </div>
         </div>

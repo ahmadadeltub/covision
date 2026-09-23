@@ -157,53 +157,53 @@ const ResultsDashboard: React.FC<Props> = ({ lang, t, results, onReset }) => {
   };
 
   return (
-    <div ref={dashboardRef} className="w-full max-w-7xl h-full max-h-[92vh] flex flex-col glass rounded-[3rem] md:rounded-[5rem] shadow-[0_0_150px_rgba(0,0,0,0.8)] border border-white/10 overflow-hidden bg-slate-900/60 p-4 md:p-8 animate-in fade-in zoom-in-95 duration-700">
+    <div ref={dashboardRef} className="w-full max-w-7xl h-auto md:h-full max-h-none md:max-h-[92vh] flex flex-col glass rounded-2xl sm:rounded-3xl md:rounded-[4rem] shadow-xl md:shadow-[0_0_150px_rgba(0,0,0,0.8)] border border-white/10 overflow-y-auto md:overflow-hidden bg-slate-900/60 p-3 sm:p-6 md:p-8 animate-in fade-in zoom-in-95 duration-700">
 
       {/* Top Section: Header & Summary */}
-      <div className="shrink-0 flex flex-col md:flex-row justify-between items-center gap-6 mb-6">
-        <div className="text-center md:text-left rtl:md:text-right">
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase tracking-tighter leading-none drop-shadow-2xl">
+      <div className="shrink-0 flex flex-col sm:flex-row justify-between items-center gap-4 md:gap-6 mb-4 md:mb-6">
+        <div className="text-center sm:text-left rtl:sm:text-right">
+          <h2 className="text-3xl sm:text-4xl md:text-6xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none drop-shadow-sm">
             {t.results_title}
           </h2>
-          <div className="mt-2 flex items-center justify-center md:justify-start gap-4">
-            <div className="h-1 w-8 bg-cyan-500 rounded-full"></div>
-            <p className="text-cyan-400 font-black uppercase tracking-[0.4em] text-[10px] md:text-xs">System Analysis Finalized</p>
+          <div className="mt-2 flex items-center justify-center sm:justify-start gap-4">
+            <div className="h-1 w-8 bg-sky-500 rounded-full"></div>
+            <p className="text-sky-700 dark:text-cyan-400 font-black uppercase tracking-[0.3em] md:tracking-[0.4em] text-[10px] md:text-xs">System Analysis Finalized</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-6 bg-white/5 border border-white/10 px-8 py-4 rounded-[2.5rem] backdrop-blur-3xl shadow-2xl">
+        <div className="flex items-center gap-4 sm:gap-6 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 px-5 py-3 sm:px-8 sm:py-4 rounded-2xl md:rounded-[2.5rem] backdrop-blur-3xl shadow-xl">
           <div className="text-right rtl:text-left">
             <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{t.reliability_score}</div>
-            <div className="text-4xl md:text-6xl font-black text-white leading-none">{(overallConfidence * 100).toFixed(0)}%</div>
+            <div className="text-3xl sm:text-4xl md:text-6xl font-black text-slate-900 dark:text-white leading-none">{(overallConfidence * 100).toFixed(0)}%</div>
           </div>
-          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-[0_0_30px_rgba(0,243,255,0.4)] ${overallConfidence > 0.8 ? 'bg-emerald-500' : 'bg-amber-500'}`}>
+          <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shadow-[0_0_30px_rgba(0,243,255,0.4)] ${overallConfidence > 0.8 ? 'bg-emerald-500' : 'bg-amber-500'}`}>
             {overallConfidence > 0.8 ? '✅' : '⚠️'}
           </div>
         </div>
       </div>
 
       {/* Middle Section: Results & AI Insights */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-6 overflow-hidden min-h-0">
+      <div className="flex-1 flex flex-col lg:flex-row gap-4 md:gap-6 md:overflow-hidden min-h-0">
 
         {/* Results Scrollable Area */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar px-2 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-1 md:px-2 space-y-3 md:space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             {results.map((res, i) => {
               const status = getRiskStatus(res);
               return (
-                <div key={i} className="group p-6 md:p-8 rounded-[2.5rem] bg-black/40 border-2 border-white/5 flex items-center justify-between gap-6 transition-all hover:border-cyan-400 hover:bg-cyan-500/10 shadow-xl">
+                <div key={i} className="group p-4 sm:p-6 md:p-8 rounded-2xl md:rounded-[2.5rem] bg-slate-100/80 dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 flex items-center justify-between gap-4 md:gap-6 transition-all hover:border-sky-400 dark:hover:border-cyan-400 hover:bg-sky-50 dark:hover:bg-cyan-500/10 shadow-xl">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h4 className="text-xl md:text-2xl font-black text-white truncate uppercase tracking-tight">{res.testName}</h4>
-                      <span className={`px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${status === 'OPTIMAL' || status === 'PASS' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                    <div className="flex items-center gap-2 sm:gap-3 mb-1.5 sm:mb-2 flex-wrap">
+                      <h4 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 dark:text-white truncate uppercase tracking-tight">{res.testName}</h4>
+                      <span className={`px-3 sm:px-4 py-0.5 sm:py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${status === 'OPTIMAL' || status === 'PASS' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20'
                         }`}>
                         {status}
                       </span>
                     </div>
-                    <p className="text-xs md:text-sm text-slate-400 leading-snug font-medium italic">"{res.findings}"</p>
+                    <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 leading-snug font-medium italic">"{res.findings}"</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="text-4xl md:text-6xl font-black text-cyan-400 drop-shadow-[0_0_15px_rgba(0,243,255,0.4)]">{res.score}/{res.total}</div>
+                    <div className="text-3xl sm:text-4xl md:text-6xl font-black text-sky-600 dark:text-cyan-400 drop-shadow-sm">{res.score}/{res.total}</div>
                   </div>
                 </div>
               );
@@ -212,15 +212,15 @@ const ResultsDashboard: React.FC<Props> = ({ lang, t, results, onReset }) => {
         </div>
 
         {/* AI Insight Box - Fixed height to ensure layout stability */}
-        <div className="w-full lg:w-[450px] shrink-0 bg-cyan-950/20 border-2 border-cyan-500/20 p-8 rounded-[3.5rem] flex flex-col relative overflow-hidden shadow-inner">
+        <div className="w-full lg:w-[400px] xl:w-[450px] shrink-0 bg-sky-50/80 dark:bg-cyan-950/20 border-2 border-sky-200 dark:border-cyan-500/20 p-4 sm:p-6 md:p-8 rounded-2xl md:rounded-[3.5rem] flex flex-col relative overflow-hidden shadow-inner">
           <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 blur-[50px] pointer-events-none"></div>
 
-          <div className="flex items-center gap-4 mb-6 shrink-0">
-            <span className="w-12 h-12 rounded-2xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-2xl border border-cyan-500/30">🧠</span>
-            <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-wider">{t.ai_insights}</h3>
+          <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6 shrink-0">
+            <span className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-sky-100 dark:bg-cyan-500/20 flex items-center justify-center text-sky-600 dark:text-cyan-400 text-xl sm:text-2xl border border-sky-200 dark:border-cyan-500/30">🧠</span>
+            <h3 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-wider">{t.ai_insights}</h3>
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 text-slate-200 text-lg md:text-xl font-medium leading-relaxed italic opacity-90">
+          <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 text-slate-800 dark:text-slate-200 text-sm sm:text-base md:text-lg font-medium leading-relaxed italic">
             {loadingAi ? (
               <div className="space-y-4 py-4">
                 <div className="h-4 bg-white/5 rounded-full w-full animate-pulse"></div>
@@ -237,28 +237,28 @@ const ResultsDashboard: React.FC<Props> = ({ lang, t, results, onReset }) => {
       </div>
 
       {/* Bottom Section: Actions */}
-      <div className="shrink-0 pt-6 flex flex-col md:flex-row gap-4 max-w-5xl mx-auto w-full">
+      <div className="shrink-0 pt-4 md:pt-6 flex flex-col sm:flex-row gap-3 md:gap-4 max-w-5xl mx-auto w-full">
         <button
           onClick={() => window.print()}
-          className="flex-1 py-5 md:py-10 bg-gradient-to-r from-cyan-600 to-indigo-700 text-white rounded-[2rem] md:rounded-[3.5rem] font-black uppercase text-sm md:text-3xl tracking-widest md:tracking-[0.4em] hover:shadow-[0_0_60px_rgba(0,243,255,0.4)] transition-all border border-white/10 active:scale-95"
+          className="flex-1 py-3.5 sm:py-4 md:py-6 bg-gradient-to-r from-sky-600 to-indigo-600 text-white rounded-2xl md:rounded-[2.5rem] font-black uppercase text-xs sm:text-sm md:text-lg tracking-wider md:tracking-[0.2em] hover:shadow-[0_0_40px_rgba(2,132,199,0.4)] transition-all border border-white/10 active:scale-95 flex items-center justify-center gap-2"
         >
           {t.download_report}
         </button>
         <button
           onClick={() => { setShowEmailModal(true); setEmailStatus('idle'); }}
-          className="flex-1 py-5 md:py-10 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-[2rem] md:rounded-[3.5rem] font-black uppercase text-sm md:text-3xl tracking-widest md:tracking-[0.4em] hover:shadow-[0_0_60px_rgba(16,185,129,0.4)] transition-all border border-white/10 active:scale-95"
+          className="flex-1 py-3.5 sm:py-4 md:py-6 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-2xl md:rounded-[2.5rem] font-black uppercase text-xs sm:text-sm md:text-lg tracking-wider md:tracking-[0.2em] hover:shadow-[0_0_40px_rgba(16,185,129,0.4)] transition-all border border-white/10 active:scale-95 flex items-center justify-center gap-2"
         >
           ✉️ {t.send_email}
         </button>
         <button
           onClick={onReset}
-          className="flex-1 py-5 md:py-10 bg-gradient-to-r from-emerald-600 to-cyan-700 text-white rounded-[2rem] md:rounded-[3.5rem] font-black uppercase text-sm md:text-3xl tracking-widest md:tracking-[0.4em] hover:shadow-[0_0_60px_rgba(16,185,129,0.4)] transition-all border border-white/10 active:scale-95"
+          className="flex-1 py-3.5 sm:py-4 md:py-6 bg-gradient-to-r from-violet-600 to-indigo-700 text-white rounded-2xl md:rounded-[2.5rem] font-black uppercase text-xs sm:text-sm md:text-lg tracking-wider md:tracking-[0.2em] hover:shadow-[0_0_40px_rgba(139,92,246,0.4)] transition-all border border-white/10 active:scale-95 flex items-center justify-center gap-2"
         >
           📋 View Full Report
         </button>
       </div>
 
-      <div className="shrink-0 mt-4 text-center opacity-40">
+      <div className="shrink-0 mt-3 md:mt-4 text-center opacity-40">
         <p className="text-[8px] md:text-[10px] text-slate-500 font-black uppercase tracking-[0.5em] italic">
           {t.disclaimer_text}
         </p>
@@ -267,35 +267,35 @@ const ResultsDashboard: React.FC<Props> = ({ lang, t, results, onReset }) => {
       {/* ─── Email Modal ─── */}
       {showEmailModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => !emailSending && setShowEmailModal(false)}>
-          <div className="relative w-full max-w-md mx-4 rounded-3xl border border-white/10 bg-slate-900/95 backdrop-blur-xl shadow-2xl p-8 space-y-6 animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
-            <button onClick={() => !emailSending && setShowEmailModal(false)} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/10 transition-colors">✕</button>
+          <div className="relative w-full max-w-md mx-4 rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/95 backdrop-blur-xl shadow-2xl p-6 sm:p-8 space-y-5 animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
+            <button onClick={() => !emailSending && setShowEmailModal(false)} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">✕</button>
 
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-3xl border border-emerald-500/30">✉️</div>
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center text-2xl sm:text-3xl border border-emerald-300 dark:border-emerald-500/30">✉️</div>
               <div>
-                <h3 className="text-xl font-black text-white uppercase tracking-wider">Send Results</h3>
-                <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">PDF via Email</p>
+                <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider">Send Results</h3>
+                <p className="text-[10px] sm:text-xs text-slate-500 font-bold uppercase tracking-widest">PDF via Email</p>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Recipient Email</label>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black text-slate-700 dark:text-slate-500 uppercase tracking-widest">Recipient Email</label>
               <input
                 type="email"
                 value={emailAddress}
                 onChange={e => setEmailAddress(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleSendEmailWithPDF()}
                 placeholder="Enter email address"
-                className="w-full px-5 py-4 rounded-2xl bg-white/5 border-2 border-white/10 text-white text-lg font-bold placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 transition-colors"
+                className="w-full px-4 py-3 sm:px-5 sm:py-3.5 rounded-2xl bg-slate-100 dark:bg-white/5 border-2 border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-base md:text-lg font-bold placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 transition-colors"
                 autoFocus
                 disabled={emailSending}
               />
             </div>
 
-            <div className="flex items-start gap-3 p-3 rounded-xl bg-cyan-500/5 border border-cyan-500/10">
-              <span className="text-cyan-400 text-sm mt-0.5">ℹ️</span>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                The results will be generated as a <span className="text-cyan-400 font-bold">PDF</span> and shared via your device's email client. On supported devices, the PDF will be attached automatically.
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-sky-50 dark:bg-cyan-500/5 border border-sky-200 dark:border-cyan-500/10">
+              <span className="text-sky-600 dark:text-cyan-400 text-sm mt-0.5">ℹ️</span>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                The results will be generated as a <span className="text-sky-700 dark:text-cyan-400 font-bold">PDF</span> and shared via your device's email client. On supported devices, the PDF will be attached automatically.
               </p>
             </div>
 
@@ -312,13 +312,13 @@ const ResultsDashboard: React.FC<Props> = ({ lang, t, results, onReset }) => {
               </div>
             )}
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 pt-1">
               <button onClick={() => setShowEmailModal(false)} disabled={emailSending} className="flex-1 py-3 rounded-2xl border border-white/10 text-slate-500 font-black text-sm uppercase tracking-wider hover:border-white/20 transition-all disabled:opacity-30">
                 Cancel
               </button>
-              <button onClick={handleSendEmailWithPDF} disabled={emailSending || !emailAddress.trim()} className="flex-1 py-3 rounded-2xl bg-emerald-500 text-black font-black text-sm uppercase tracking-wider hover:bg-emerald-400 transition-all disabled:opacity-30 disabled:hover:bg-emerald-500 shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2">
+              <button onClick={handleSendEmailWithPDF} disabled={emailSending || !emailAddress.trim()} className="flex-1 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm uppercase tracking-wider transition-all disabled:opacity-30 shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2">
                 {emailSending ? (
-                  <><span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" /> Generating...</>
+                  <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Generating...</>
                 ) : (
                   <>📤 Send PDF</>
                 )}

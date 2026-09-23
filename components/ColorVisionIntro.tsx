@@ -84,7 +84,7 @@ const ColorVisionIntro: React.FC<Props> = ({ lang, onStart }) => {
                     <p style={{ fontSize: 14, fontWeight: 900, color: 'var(--accent-color)', textTransform: 'uppercase', letterSpacing: 2 }}>
                         Starting In
                     </p>
-                    <p style={{ fontSize: 48, fontWeight: 900, color: 'white', lineHeight: 1 }}>
+                    <p style={{ fontSize: 48, fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1 }}>
                         {countdown}
                     </p>
                 </div>
