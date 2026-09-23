@@ -271,7 +271,7 @@ const BiometricScan: React.FC<Props> = ({
       dotColor: string,
       dotSize: number, // diameter of dots
       dotSpacing: number, // distance between dots
-      accentColor = '#ffffff'
+      accentColor = '#1c96c5'
     ) => {
       const validPts = pts.filter((p): p is { x: number; y: number } => !!p && isFinite(p.x) && isFinite(p.y));
       if (validPts.length < 2) return;
@@ -283,7 +283,7 @@ const BiometricScan: React.FC<Props> = ({
 
       // 1. Ultra-subtle ethereal hairline guide trace connecting the points
       ctx.beginPath();
-      ctx.strokeStyle = `rgba(56, 189, 248, ${0.14 * pulse})`;
+      ctx.strokeStyle = `rgba(28, 150, 197, ${0.16 * pulse})`;
       ctx.lineWidth = 0.5 * distScale;
       ctx.setLineDash([]);
       ctx.moveTo(validPts[0].x * w, validPts[0].y * h);
@@ -295,14 +295,14 @@ const BiometricScan: React.FC<Props> = ({
       ctx.lineTo(validPts[validPts.length - 1].x * w, validPts[validPts.length - 1].y * h);
       ctx.stroke();
 
-      // 2. High-precision Dotted Line (Dots Line) with luminous light blue glow
+      // 2. High-precision Dotted Line (Dots Line) with luminous #1c96c5 glow
       ctx.beginPath();
       ctx.strokeStyle = dotColor;
       ctx.lineWidth = size;
       ctx.lineCap = 'round';
       ctx.setLineDash([0, spacing]); // Dash length 0 + round cap = perfect circular dots
       ctx.shadowBlur = 5 * distScale;
-      ctx.shadowColor = '#38bdf8';
+      ctx.shadowColor = '#1c96c5';
       ctx.moveTo(validPts[0].x * w, validPts[0].y * h);
       for (let i = 1; i < validPts.length - 1; i++) {
         const xc = ((validPts[i].x + validPts[i + 1].x) / 2) * w;
@@ -316,7 +316,7 @@ const BiometricScan: React.FC<Props> = ({
       ctx.setLineDash([]);
       ctx.fillStyle = accentColor;
       ctx.shadowBlur = 6 * distScale;
-      ctx.shadowColor = '#7dd3fc';
+      ctx.shadowColor = '#1c96c5';
       ctx.beginPath();
       const nodeR = Math.max(0.9, size * 0.55);
       for (let i = 0; i < validPts.length; i++) {
@@ -330,10 +330,10 @@ const BiometricScan: React.FC<Props> = ({
       ctx.restore();
     };
 
-    // Modern Light Blue Biometric Palette
-    const cLightBlue = `rgba(56, 189, 248, ${0.92 * pulse})`; // Sky-400 light blue
-    const cCyanLight = `rgba(125, 211, 252, ${0.95 * pulse})`; // Sky-300 bright light blue
-    const cDotWhite = '#ffffff';
+    // Modern Biometric Palette (#1c96c5)
+    const cLightBlue = `rgba(28, 150, 197, ${0.92 * pulse})`; // #1c96c5 line stroke
+    const cCyanLight = '#1c96c5'; // #1c96c5 dot & line
+    const cDotWhite = '#1c96c5'; // #1c96c5 accent dot
 
     // ── 1. Forehead Matrix (3 Horizontal Arcs + 3 Vertical Ribs) ──
     const foreheadTop = [21, 54, 103, 67, 109, 10, 338, 297, 332, 284, 251].map(i => landmarks[i]);
@@ -449,7 +449,7 @@ const BiometricScan: React.FC<Props> = ({
     ctx.save();
     ctx.fillStyle = cCyanLight;
     ctx.shadowBlur = 6 * distScale;
-    ctx.shadowColor = '#38bdf8';
+    ctx.shadowColor = '#1c96c5';
     ctx.beginPath();
     const dotR = 1.35 * distScale;
     for (const idx of surfaceDotIndices) {
@@ -509,15 +509,15 @@ const BiometricScan: React.FC<Props> = ({
           ctx.lineTo(eyePts[i].x * w, eyePts[i].y * h);
         }
         ctx.closePath();
-        ctx.strokeStyle = '#38bdf8';
+        ctx.strokeStyle = '#1c96c5';
         ctx.lineWidth = 1.8 * distScale;
         ctx.lineCap = 'round';
         ctx.setLineDash([0, 6 * distScale]);
         ctx.shadowBlur = 6 * distScale;
-        ctx.shadowColor = '#38bdf8';
+        ctx.shadowColor = '#1c96c5';
         ctx.stroke();
 
-        ctx.fillStyle = `rgba(56, 189, 248, ${0.08 * pulse})`;
+        ctx.fillStyle = `rgba(28, 150, 197, ${0.08 * pulse})`;
         ctx.fill();
         ctx.restore();
       }
@@ -530,10 +530,10 @@ const BiometricScan: React.FC<Props> = ({
       // Outer limbal ring
       ctx.beginPath();
       ctx.arc(cx, cy, rOuter, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(56, 189, 248, ${0.85 * pulse})`;
+      ctx.strokeStyle = `rgba(28, 150, 197, ${0.85 * pulse})`;
       ctx.lineWidth = 1.0 * distScale;
       ctx.shadowBlur = 8 * distScale;
-      ctx.shadowColor = '#38bdf8';
+      ctx.shadowColor = '#1c96c5';
       ctx.stroke();
 
       // Inner glowing core beacon
@@ -541,14 +541,14 @@ const BiometricScan: React.FC<Props> = ({
       ctx.arc(cx, cy, rInner, 0, Math.PI * 2);
       ctx.fillStyle = '#ffffff';
       ctx.shadowBlur = 10 * distScale;
-      ctx.shadowColor = '#38bdf8';
+      ctx.shadowColor = '#1c96c5';
       ctx.fill();
 
       // Fine crosshair
       ctx.beginPath();
       ctx.moveTo(cx - 5 * distScale, cy); ctx.lineTo(cx + 5 * distScale, cy);
       ctx.moveTo(cx, cy - 5 * distScale); ctx.lineTo(cx + 5 * distScale, cy);
-      ctx.strokeStyle = 'rgba(125, 211, 252, 0.8)';
+      ctx.strokeStyle = 'rgba(28, 150, 197, 0.8)';
       ctx.lineWidth = 0.8 * distScale;
       ctx.stroke();
       ctx.restore();
@@ -570,11 +570,11 @@ const BiometricScan: React.FC<Props> = ({
       ctx.beginPath();
       ctx.moveTo(rx, ry);
       ctx.lineTo(lx, ly);
-      ctx.strokeStyle = '#38bdf8';
+      ctx.strokeStyle = '#1c96c5';
       ctx.lineWidth = 1.0 * distScale;
       ctx.setLineDash([2 * distScale, 3 * distScale]);
       ctx.shadowBlur = 6 * distScale;
-      ctx.shadowColor = '#38bdf8';
+      ctx.shadowColor = '#1c96c5';
       ctx.stroke();
 
       const capH = 5 * distScale;
@@ -601,10 +601,10 @@ const BiometricScan: React.FC<Props> = ({
       ctx.beginPath();
       ctx.roundRect(midX - ipdBoxW / 2, midY - ipdBoxH / 2, ipdBoxW, ipdBoxH, 5);
       ctx.fill();
-      ctx.strokeStyle = '#38bdf8';
+      ctx.strokeStyle = '#1c96c5';
       ctx.lineWidth = 1.0;
       ctx.shadowBlur = 6 * distScale;
-      ctx.shadowColor = '#38bdf8';
+      ctx.shadowColor = '#1c96c5';
       ctx.stroke();
       ctx.shadowBlur = 0;
 
@@ -632,9 +632,9 @@ const BiometricScan: React.FC<Props> = ({
 
       const gradH = 16 * distScale;
       const grad = ctx.createLinearGradient(0, scanY - gradH, 0, scanY + gradH);
-      grad.addColorStop(0, 'rgba(56, 189, 248, 0)');
-      grad.addColorStop(0.5, `rgba(56, 189, 248, ${0.18 * pulseFast})`);
-      grad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+      grad.addColorStop(0, 'rgba(28, 150, 197, 0)');
+      grad.addColorStop(0.5, `rgba(28, 150, 197, ${0.18 * pulseFast})`);
+      grad.addColorStop(1, 'rgba(28, 150, 197, 0)');
 
       ctx.fillStyle = grad;
       ctx.fillRect(xMin, scanY - gradH, xMax - xMin, gradH * 2);
@@ -645,7 +645,7 @@ const BiometricScan: React.FC<Props> = ({
       ctx.strokeStyle = `rgba(255, 255, 255, ${0.90 * pulseFast})`;
       ctx.lineWidth = 0.9 * distScale;
       ctx.shadowBlur = 8 * distScale;
-      ctx.shadowColor = '#38bdf8';
+      ctx.shadowColor = '#1c96c5';
       ctx.stroke();
       ctx.shadowBlur = 0;
     }
@@ -673,11 +673,11 @@ const BiometricScan: React.FC<Props> = ({
     ctx.save();
     ctx.lineCap = 'square';
     ctx.lineWidth = 1.2 * distScale;
-    ctx.strokeStyle = '#38bdf8';
+    ctx.strokeStyle = '#1c96c5';
     ctx.shadowBlur = 8 * distScale;
-    ctx.shadowColor = '#38bdf8';
+    ctx.shadowColor = '#1c96c5';
 
-    // Corner Frame Brackets (Thin & Crisp Light Blue)
+    // Corner Frame Brackets (Thin & Crisp #1c96c5)
     // Top-Left
     ctx.beginPath();
     ctx.moveTo(boxLeft, boxTop + bracketLen); ctx.lineTo(boxLeft, boxTop); ctx.lineTo(boxLeft + bracketLen, boxTop);
@@ -700,7 +700,7 @@ const BiometricScan: React.FC<Props> = ({
     // Corner Micro-Telemetry Tags
     const microFont = `${Math.max(8, Math.round(9 * distScale))}px ui-monospace, SFMono-Regular, Menlo, monospace`;
     ctx.font = microFont;
-    ctx.fillStyle = '#38bdf8';
+    ctx.fillStyle = '#1c96c5';
     ctx.fillText(`[NEURAL MESH]`, boxLeft, boxTop - 4);
     ctx.fillText(`[ACTIVE]`, boxRight - ctx.measureText(`[ACTIVE]`).width, boxTop - 4);
 
@@ -721,28 +721,28 @@ const BiometricScan: React.FC<Props> = ({
     ctx.beginPath();
     ctx.moveTo(headCenterX, headPillY + headPillH);
     ctx.lineTo(headCenterX, boxTop);
-    ctx.strokeStyle = '#38bdf8';
+    ctx.strokeStyle = '#1c96c5';
     ctx.lineWidth = 1.0 * distScale;
     ctx.setLineDash([3 * distScale, 3 * distScale]);
     ctx.shadowBlur = 4 * distScale;
-    ctx.shadowColor = '#38bdf8';
+    ctx.shadowColor = '#1c96c5';
     ctx.stroke();
     ctx.restore();
 
-    // Attitude Pod (Refined Light Blue Modern)
+    // Attitude Pod (Refined #1c96c5 Modern)
     ctx.fillStyle = 'rgba(4, 8, 28, 0.90)';
     ctx.beginPath();
     ctx.roundRect(headPillX, headPillY, headPillW, headPillH, 6);
     ctx.fill();
-    ctx.strokeStyle = '#38bdf8';
+    ctx.strokeStyle = '#1c96c5';
     ctx.lineWidth = 1.0 * distScale;
     ctx.shadowBlur = 6 * distScale;
-    ctx.shadowColor = '#38bdf8';
+    ctx.shadowColor = '#1c96c5';
     ctx.stroke();
     ctx.shadowBlur = 0;
 
     // Indicator Pip
-    ctx.fillStyle = '#38bdf8';
+    ctx.fillStyle = '#1c96c5';
     ctx.beginPath();
     ctx.arc(headPillX + 10 * distScale, headPillY + headPillH / 2, 2.8 * distScale, 0, Math.PI * 2);
     ctx.fill();
@@ -762,10 +762,10 @@ const BiometricScan: React.FC<Props> = ({
     ctx.beginPath();
     ctx.roundRect(bottomPillX, bottomPillY, bottomPillW, bottomPillH, 8);
     ctx.fill();
-    ctx.strokeStyle = '#38bdf8';
+    ctx.strokeStyle = '#1c96c5';
     ctx.lineWidth = 1.0;
     ctx.shadowBlur = 6 * distScale;
-    ctx.shadowColor = '#38bdf8';
+    ctx.shadowColor = '#1c96c5';
     ctx.stroke();
     ctx.shadowBlur = 0;
 
