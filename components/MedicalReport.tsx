@@ -947,55 +947,55 @@ const MedicalReport: React.FC<Props> = ({
     return (
         <div className="w-full h-full flex flex-col items-center overflow-y-auto p-3 sm:p-6" dir="ltr">
             {/* ─── ACTION BAR (NO-PRINT) ─── */}
-            <div className="no-print w-full max-w-4xl flex flex-wrap gap-2.5 justify-center mb-6 z-20">
+            <div className="no-print w-full max-w-5xl flex flex-wrap gap-2.5 sm:gap-3 justify-center mb-5 z-20">
                 <button
                     onClick={handleExportPDF}
-                    className="px-5 py-2.5 bg-cyan-600 text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-cyan-500 transition-all shadow-md shadow-cyan-600/20 flex items-center gap-2"
+                    className="px-5 sm:px-6 py-3 sm:py-3.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-md shadow-cyan-600/25 flex items-center gap-2 min-h-[46px] sm:min-h-[52px] cursor-pointer active:scale-95"
                 >
-                    <span>📄</span> {t.export_pdf}
+                    <span className="text-base sm:text-lg">📄</span> {t.export_pdf}
                 </button>
                 <button
                     onClick={() => window.print()}
-                    className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-slate-50 transition-all shadow-sm flex items-center gap-2"
+                    className="px-5 sm:px-6 py-3 sm:py-3.5 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-white/10 text-slate-800 dark:text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm flex items-center gap-2 min-h-[46px] sm:min-h-[52px] cursor-pointer active:scale-95"
                 >
-                    <span>🖨️</span> {t.print_report}
+                    <span className="text-base sm:text-lg">🖨️</span> {t.print_report}
                 </button>
                 <button
                     onClick={() => {
                         setShowEmailModal(true);
                         setEmailStatus('idle');
                     }}
-                    className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-emerald-500 transition-all shadow-md shadow-emerald-600/20 flex items-center gap-2"
+                    className="px-5 sm:px-6 py-3 sm:py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-md shadow-emerald-600/25 flex items-center gap-2 min-h-[46px] sm:min-h-[52px] cursor-pointer active:scale-95"
                 >
-                    <span>✉️</span> {t.send_email}
+                    <span className="text-base sm:text-lg">✉️</span> {t.send_email}
                 </button>
                 <button
                     onClick={handleShareWhatsApp}
                     disabled={whatsappSending}
-                    className="px-5 py-2.5 bg-green-600 text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-green-500 transition-all shadow-md shadow-green-600/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    className="px-5 sm:px-6 py-3 sm:py-3.5 bg-green-600 hover:bg-green-500 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-md shadow-green-600/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-h-[46px] sm:min-h-[52px] cursor-pointer active:scale-95"
                 >
                     {whatsappSending ? (
                         <>
-                            <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             Attaching PDF...
                         </>
                     ) : (
                         <>
-                            <span>💬</span> {t.send_whatsapp || 'WhatsApp'}
+                            <span className="text-base sm:text-lg">💬</span> {t.send_whatsapp || 'WhatsApp'}
                         </>
                     )}
                 </button>
                 <button
                     onClick={() => setShowResearchMode(!showResearchMode)}
-                    className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-xl font-bold text-xs uppercase tracking-wider hover:border-purple-500 hover:text-purple-600 transition-all shadow-sm flex items-center gap-2"
+                    className="px-5 sm:px-6 py-3 sm:py-3.5 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-white/10 text-slate-800 dark:text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider hover:border-purple-500 hover:text-purple-600 transition-all shadow-sm flex items-center gap-2 min-h-[46px] sm:min-h-[52px] cursor-pointer active:scale-95"
                 >
-                    <span>🔬</span> {t.research_mode}
+                    <span className="text-base sm:text-lg">🔬</span> {t.research_mode}
                 </button>
                 <button
                     onClick={onReset}
-                    className="px-5 py-2.5 bg-slate-800 text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-slate-700 transition-all shadow-sm flex items-center gap-2"
+                    className="px-5 sm:px-6 py-3 sm:py-3.5 bg-slate-900 dark:bg-slate-800 text-white border-2 border-slate-700 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider hover:bg-slate-800 transition-all shadow-md flex items-center gap-2 min-h-[46px] sm:min-h-[52px] cursor-pointer active:scale-95"
                 >
-                    <span>🔄</span> {t.new_screening}
+                    <span className="text-base sm:text-lg">🔄</span> {t.new_screening}
                 </button>
             </div>
 

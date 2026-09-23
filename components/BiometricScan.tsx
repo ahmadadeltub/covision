@@ -1473,13 +1473,13 @@ Return strictly JSON matching this structure:
             <div className="flex gap-2 sm:gap-3 w-full">
               <button
                 onClick={resetScan}
-                className="flex-1 py-2 sm:py-3 bg-slate-800/80 border border-white/10 text-white rounded-xl md:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider hover:bg-slate-700 transition-all shadow-md"
+                className="flex-1 py-3 sm:py-3.5 bg-slate-800/80 border border-white/10 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm md:text-base uppercase tracking-wider hover:bg-slate-700 transition-all shadow-md min-h-[50px] sm:min-h-[58px] flex items-center justify-center cursor-pointer"
               >
                 {t.back}
               </button>
               <button
                 onClick={handleNext}
-                className="flex-[2] py-2 sm:py-3 bg-gradient-to-r from-sky-600 to-indigo-600 text-white rounded-xl md:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider hover:from-sky-500 hover:to-indigo-500 transition-all shadow-md"
+                className="flex-[2] py-3 sm:py-3.5 bg-gradient-to-r from-sky-600 to-indigo-600 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm md:text-base uppercase tracking-wider hover:from-sky-500 hover:to-indigo-500 transition-all shadow-md min-h-[50px] sm:min-h-[58px] flex items-center justify-center cursor-pointer"
               >
                 {t.next}
               </button>
@@ -1491,7 +1491,7 @@ Return strictly JSON matching this structure:
               <button
                 disabled={!canAuthorize}
                 onClick={runScan}
-                className={`w-full py-2.5 sm:py-3.5 md:py-4 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm md:text-lg uppercase tracking-wider md:tracking-[0.2em] transition-all shadow-xl group relative overflow-hidden
+                className={`w-full py-3.5 sm:py-4 md:py-4.5 min-h-[54px] sm:min-h-[64px] rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm md:text-base lg:text-lg uppercase tracking-wider md:tracking-[0.2em] transition-all shadow-xl group relative overflow-hidden flex items-center justify-center
                   ${canAuthorize 
                     ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-black hover:scale-[1.01] hover:shadow-[0_0_50px_rgba(16,185,129,0.5)] cursor-pointer' 
                     : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'}`}
@@ -1500,7 +1500,7 @@ Return strictly JSON matching this structure:
                 {canAuthorize && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-300/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>}
               </button>
             ) : (
-              <div className="w-full p-2.5 sm:p-4 glass rounded-xl sm:rounded-2xl text-center border-2 border-cyan-500/20 flex items-center justify-center gap-4 bg-black/40 shadow-inner">
+              <div className="w-full p-3 sm:p-4 glass rounded-xl sm:rounded-2xl text-center border-2 border-cyan-500/20 flex items-center justify-center gap-4 bg-black/40 shadow-inner min-h-[54px] sm:min-h-[64px]">
                 <div className="flex gap-2 sm:gap-3">
                   <div className="w-2.5 sm:w-3.5 h-2.5 sm:h-3.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.3s] shadow-[0_0_12px_#00f3ff]"></div>
                   <div className="w-2.5 sm:w-3.5 h-2.5 sm:h-3.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.15s] shadow-[0_0_12px_#00f3ff]"></div>

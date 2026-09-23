@@ -340,37 +340,44 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                     }}
                     style={{
                         width: '100%', flexShrink: 0, position: 'relative',
-                        padding: 'clamp(10px, 1.8vh, 16px) 16px',
-                        fontSize: 'clamp(14px, 2vh, 18px)',
-                        fontWeight: 800,
+                        padding: 'clamp(12px, 2vh, 18px) 20px',
+                        minHeight: 'clamp(54px, 7vh, 66px)',
+                        fontSize: 'clamp(15px, 2.2vh, 20px)',
+                        fontWeight: 900,
                         letterSpacing: '0.08em',
                         textTransform: 'uppercase',
                         color: '#fff',
-                        background: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
+                        background: 'linear-gradient(135deg, #0284c7 0%, #0ea5e9 45%, #6366f1 100%)',
                         border: 'none',
-                        borderRadius: 14,
+                        borderRadius: 16,
                         cursor: 'pointer',
                         transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                        boxShadow: '0 4px 20px rgba(14,165,233,0.35)',
+                        boxShadow: '0 6px 24px rgba(14,165,233,0.4)',
                         overflow: 'hidden',
                         fontFamily: 'Outfit, Inter, sans-serif',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                     }}
                     onMouseEnter={e => {
                         (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)';
-                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 28px rgba(14,165,233,0.45)';
+                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 32px rgba(14,165,233,0.55)';
                     }}
                     onMouseLeave={e => {
                         (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
-                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 20px rgba(14,165,233,0.35)';
+                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 24px rgba(14,165,233,0.4)';
                     }}
                 >
                     <div style={{
                         position: 'absolute', inset: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)',
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
                         transform: 'translateX(-100%)',
                         animation: 'shimmer 2.5s ease-in-out infinite',
                     }} />
-                    <span style={{ position: 'relative', zIndex: 1 }}>🚀 {t.begin_screening}</span>
+                    <span style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ fontSize: 'clamp(18px, 2.6vh, 24px)' }}>🚀</span>
+                        <span>{t.begin_screening}</span>
+                    </span>
                 </button>
 
                 {/* Live Stats + Credits inline row */}

@@ -38,53 +38,74 @@ const TestSelector: React.FC<Props> = ({ lang, t, onComplete }) => {
         </div>
 
         {/* Header Section */}
-        <div className="relative z-10 text-center mb-1 sm:mb-2 shrink-0">
+        <div className="relative z-10 text-center mb-1 shrink-0">
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none drop-shadow-sm">
             {t.test_selection}
           </h2>
-          <p className="text-[9px] md:text-xs text-sky-600 dark:text-cyan-400 uppercase tracking-widest font-black mt-1">
-            Choose Screening Modules
-          </p>
+          <div className="flex items-center justify-center gap-3 mt-1">
+            <p className="text-[9px] sm:text-xs text-sky-600 dark:text-cyan-400 uppercase tracking-widest font-black">
+              Choose Screening Modules
+            </p>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setSelected([TestType.Acuity, TestType.Color, TestType.Snellen, TestType.Contrast, TestType.Astigmatism, TestType.Amsler])}
+                className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-sky-500/10 text-sky-500 hover:bg-sky-500/20 dark:text-cyan-400 border border-sky-400/30 transition-colors"
+              >
+                Select All
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelected([])}
+                className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-white/20 transition-colors"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Selection Grid */}
         <div className="relative z-10 flex-1 min-h-0 flex flex-col justify-center px-1 md:px-2 my-1 overflow-hidden">
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 max-w-5xl mx-auto w-full items-stretch h-full max-h-full">
-            {testOptions.map(opt => (
-              <button
-                key={opt.type}
-                onClick={() => toggle(opt.type)}
-                className={`group relative flex flex-col items-center justify-center p-2 sm:p-3 md:p-4 rounded-xl md:rounded-2xl border-2 transition-all duration-300 transform hover:scale-[1.02] active:scale-95 ${
-                  selected.includes(opt.type) 
-                  ? 'border-sky-500 bg-sky-50/80 dark:bg-cyan-500/20 shadow-md dark:shadow-[0_0_30px_rgba(0,243,255,0.25)]' 
-                  : 'border-slate-200 dark:border-white/5 bg-white dark:bg-black/40 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm'
-                }`}
-              >
-                {/* Status Indicator */}
-                <div className={`absolute top-2 right-2 md:top-3 md:right-3 flex items-center gap-1 px-2 py-0.5 rounded-full border transition-all ${
-                  selected.includes(opt.type)
-                    ? 'border-sky-500 bg-sky-100 text-sky-700 dark:border-cyan-400 dark:bg-cyan-400/20 dark:text-white'
-                    : 'border-slate-200 bg-slate-100 text-slate-500 dark:border-white/10 dark:bg-white/5'
-                }`}>
-                  <div className={`w-1.5 h-1.5 rounded-full ${selected.includes(opt.type) ? 'bg-sky-500 dark:bg-cyan-400 animate-pulse' : 'bg-slate-400'}`}></div>
-                  <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest">
-                    {selected.includes(opt.type) ? 'Active' : 'Standby'}
+            {testOptions.map(opt => {
+              const isSelected = selected.includes(opt.type);
+              return (
+                <button
+                  key={opt.type}
+                  onClick={() => toggle(opt.type)}
+                  className={`group relative flex flex-col items-center justify-center p-2.5 sm:p-3.5 md:p-5 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 transform hover:scale-[1.02] active:scale-95 cursor-pointer ${
+                    isSelected 
+                    ? 'border-sky-500 bg-sky-50/90 dark:bg-cyan-500/20 shadow-md dark:shadow-[0_0_30px_rgba(0,243,255,0.25)]' 
+                    : 'border-slate-200 dark:border-white/5 bg-white dark:bg-black/40 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm'
+                  }`}
+                >
+                  {/* Status Indicator */}
+                  <div className={`absolute top-2 right-2 md:top-3 md:right-3 flex items-center gap-1 px-2.5 py-0.5 rounded-full border transition-all ${
+                    isSelected
+                      ? 'border-sky-500 bg-sky-100 text-sky-700 dark:border-cyan-400 dark:bg-cyan-400/20 dark:text-white'
+                      : 'border-slate-200 bg-slate-100 text-slate-500 dark:border-white/10 dark:bg-white/5'
+                  }`}>
+                    <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-sky-500 dark:bg-cyan-400 animate-pulse' : 'bg-slate-400'}`}></div>
+                    <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest">
+                      {isSelected ? 'Active' : 'Standby'}
+                    </span>
+                  </div>
+
+                  {/* Icon */}
+                  <span className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-1 sm:mb-2 transition-all duration-300 leading-none ${isSelected ? 'scale-105' : 'grayscale opacity-40'}`}>
+                    {opt.icon}
                   </span>
-                </div>
 
-                {/* Icon */}
-                <span className={`text-2xl sm:text-4xl md:text-5xl lg:text-6xl mb-1 md:mb-2 transition-all duration-300 leading-none ${selected.includes(opt.type) ? 'scale-105' : 'grayscale opacity-40'}`}>
-                  {opt.icon}
-                </span>
-
-                {/* Label */}
-                <span className={`text-[11px] sm:text-xs md:text-sm lg:text-base font-black uppercase tracking-wider text-center transition-colors duration-300 leading-tight ${
-                  selected.includes(opt.type) ? 'text-slate-900 dark:text-white' : 'text-slate-500'
-                }`}>
-                  {opt.label}
-                </span>
-              </button>
-            ))}
+                  {/* Label */}
+                  <span className={`text-xs sm:text-sm md:text-base lg:text-lg font-black uppercase tracking-wider text-center transition-colors duration-300 leading-tight ${
+                    isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-500'
+                  }`}>
+                    {opt.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -93,11 +114,11 @@ const TestSelector: React.FC<Props> = ({ lang, t, onComplete }) => {
           <button
             disabled={selected.length === 0}
             onClick={() => onComplete(selected)}
-            className="group w-full py-2.5 sm:py-3.5 md:py-4 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white rounded-xl md:rounded-2xl font-black text-xs sm:text-sm md:text-base uppercase tracking-wider md:tracking-[0.2em] disabled:opacity-30 disabled:grayscale transition-all transform hover:scale-[1.01] active:scale-95 relative overflow-hidden shadow-xl hover:shadow-2xl flex items-center justify-center gap-2 sm:gap-3 cursor-pointer"
+            className="group w-full py-3.5 sm:py-4 md:py-4.5 min-h-[56px] sm:min-h-[64px] bg-gradient-to-r from-sky-600 via-sky-500 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white rounded-xl sm:rounded-2xl font-black text-sm sm:text-base md:text-lg uppercase tracking-wider md:tracking-[0.18em] disabled:opacity-30 disabled:grayscale transition-all transform hover:scale-[1.01] active:scale-95 relative overflow-hidden shadow-xl hover:shadow-2xl flex items-center justify-center gap-3 cursor-pointer"
           >
-            <span className="relative z-10">Initialize System</span>
-            <span className="relative z-10 bg-white/20 backdrop-blur-md text-white px-2.5 py-0.5 md:px-4 md:py-1 rounded-lg text-xs sm:text-sm md:text-base font-mono">
-              {selected.length}
+            <span className="relative z-10">INITIALIZE SYSTEM</span>
+            <span className="relative z-10 bg-white/20 backdrop-blur-md text-white px-3 py-0.5 rounded-lg text-xs sm:text-sm font-mono font-black border border-white/30">
+              {selected.length} / 6
             </span>
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
           </button>

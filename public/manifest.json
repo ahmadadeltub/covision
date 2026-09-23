@@ -1,0 +1,19 @@
+{
+  "name": "CoVision: AI Clinical Vision Screening Kiosk",
+  "short_name": "CoVision",
+  "description": "An Edge-AI Cognitive Platform for Standardized Digital Vision Screening",
+  "start_url": "/",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#040d1a",
+  "theme_color": "#0ea5e9",
+  "icons": [
+    {
+      "src": "/plates/ishihara12.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

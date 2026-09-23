@@ -1047,7 +1047,7 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
         <div className="relative z-10 w-full max-w-4xl mx-auto flex flex-row items-center justify-between gap-2.5 sm:gap-3 shrink-0 mt-1">
           <button
             onClick={handleFinish}
-            className="py-2.5 sm:py-3 px-3.5 sm:px-5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 hover:text-black dark:hover:text-white border border-slate-300 dark:border-slate-700 shadow-sm shrink-0"
+            className="py-3 sm:py-3.5 px-4 sm:px-6 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 hover:text-black dark:hover:text-white border border-slate-300 dark:border-slate-700 shadow-sm shrink-0 min-h-[48px] sm:min-h-[56px] flex items-center justify-center cursor-pointer"
           >
             Skip 1m (Testing)
           </button>
@@ -1055,7 +1055,7 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
           <button
             onClick={handleFinish}
             disabled={!canProceed}
-            className={`group flex-1 py-2.5 sm:py-3 rounded-xl md:rounded-2xl font-black text-xs sm:text-sm md:text-base uppercase tracking-wider md:tracking-[0.2em] transition-all transform hover:scale-[1.01] active:scale-95 relative overflow-hidden shadow-xl ${canProceed
+            className={`group flex-1 py-3 sm:py-3.5 md:py-4 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm md:text-base uppercase tracking-wider md:tracking-[0.18em] transition-all transform hover:scale-[1.01] active:scale-95 relative overflow-hidden shadow-xl min-h-[48px] sm:min-h-[56px] flex items-center justify-center ${canProceed
               ? 'bg-gradient-to-r from-sky-600 to-indigo-600 text-white hover:from-sky-500 hover:to-indigo-500 hover:shadow-[0_0_30px_rgba(2,132,199,0.5)] cursor-pointer'
               : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
               }`}

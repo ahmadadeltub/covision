@@ -64,10 +64,11 @@ const ProfileForm: React.FC<Props> = ({ lang, t, initialData, onComplete }) => {
             {(['male', 'female'] as const).map(g => (
               <button
                 key={g}
+                type="button"
                 onClick={() => setGender(g)}
-                className={`flex-1 py-2 sm:py-2.5 px-3 rounded-xl border-2 transition-all font-black text-xs sm:text-sm uppercase tracking-wider ${gender === g ? 'border-sky-500 bg-sky-50 text-sky-700 dark:border-cyan-500 dark:bg-cyan-500/15 dark:text-cyan-400 shadow-sm' : 'border-slate-200 bg-white text-slate-600 dark:border-white/5 dark:bg-black/40 dark:text-slate-400 hover:border-slate-300'}`}
+                className={`flex-1 py-3 sm:py-3.5 px-3 rounded-xl sm:rounded-2xl border-2 transition-all font-black text-xs sm:text-base uppercase tracking-wider min-h-[48px] sm:min-h-[54px] flex items-center justify-center gap-2 cursor-pointer ${gender === g ? 'border-sky-500 bg-sky-50 text-sky-700 dark:border-cyan-500 dark:bg-cyan-500/20 dark:text-cyan-400 shadow-md' : 'border-slate-200 bg-white text-slate-600 dark:border-white/5 dark:bg-black/40 dark:text-slate-400 hover:border-slate-300'}`}
               >
-                {g === 'male' ? '♂ Male' : '♀ Female'}
+                <span>{g === 'male' ? '♂ Male' : '♀ Female'}</span>
               </button>
             ))}
           </div>
@@ -80,17 +81,18 @@ const ProfileForm: React.FC<Props> = ({ lang, t, initialData, onComplete }) => {
             {(['none', 'always'] as const).map(g => (
               <button
                 key={g}
+                type="button"
                 onClick={() => setGlasses(g as any)}
-                className={`flex-1 py-2 sm:py-2.5 px-3 rounded-xl border-2 transition-all font-black text-xs sm:text-sm uppercase tracking-wider ${glasses === g ? 'border-sky-500 bg-sky-50 text-sky-700 dark:border-cyan-500 dark:bg-cyan-500/15 dark:text-cyan-400 shadow-sm' : 'border-slate-200 bg-white text-slate-600 dark:border-white/5 dark:bg-black/40 dark:text-slate-400 hover:border-slate-300'}`}
+                className={`flex-1 py-3 sm:py-3.5 px-3 rounded-xl sm:rounded-2xl border-2 transition-all font-black text-xs sm:text-base uppercase tracking-wider min-h-[48px] sm:min-h-[54px] flex items-center justify-center gap-2 cursor-pointer ${glasses === g ? 'border-sky-500 bg-sky-50 text-sky-700 dark:border-cyan-500 dark:bg-cyan-500/20 dark:text-cyan-400 shadow-md' : 'border-slate-200 bg-white text-slate-600 dark:border-white/5 dark:bg-black/40 dark:text-slate-400 hover:border-slate-300'}`}
               >
-                {g === 'none' ? '👁 None' : '👓 Glasses'}
+                <span>{g === 'none' ? '👁 None' : '👓 Glasses'}</span>
               </button>
             ))}
           </div>
         </div>
 
         {/* Family History */}
-        <div className="col-span-1 md:col-span-2 flex items-center gap-3 p-2.5 sm:p-3 bg-sky-50/70 dark:bg-cyan-950/20 rounded-xl sm:rounded-2xl border border-sky-200 dark:border-cyan-500/20 hover:bg-sky-100/70 transition-colors group cursor-pointer" onClick={() => setFamily(!family)}>
+        <div className="col-span-1 md:col-span-2 flex items-center gap-3 p-3 sm:p-3.5 bg-sky-50/70 dark:bg-cyan-950/20 rounded-xl sm:rounded-2xl border border-sky-200 dark:border-cyan-500/20 hover:bg-sky-100/70 transition-colors group cursor-pointer" onClick={() => setFamily(!family)}>
           <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-lg border-2 flex items-center justify-center transition-all shrink-0 ${family ? 'bg-sky-600 border-sky-600 text-white dark:bg-cyan-500 dark:border-cyan-500 dark:text-slate-950' : 'bg-white border-slate-300 dark:bg-transparent dark:border-white/20'}`}>
             {family && <span className="font-black text-xs">✓</span>}
           </div>
@@ -105,7 +107,7 @@ const ProfileForm: React.FC<Props> = ({ lang, t, initialData, onComplete }) => {
         onClick={() => {
           onComplete({ age, gender, deviceType: device, glassesUsage: glasses, symptoms: [], familyHistory: family });
         }}
-        className="w-full mt-2 sm:mt-3 py-2.5 sm:py-3.5 md:py-4 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white rounded-xl md:rounded-2xl font-black uppercase text-xs sm:text-sm md:text-base tracking-wider md:tracking-[0.2em] transition-all transform hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden shadow-xl hover:shadow-2xl cursor-pointer shrink-0"
+        className="w-full mt-2 sm:mt-3 py-3.5 sm:py-4 md:py-4.5 min-h-[56px] sm:min-h-[64px] bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white rounded-xl sm:rounded-2xl font-black uppercase text-sm sm:text-base md:text-lg tracking-wider md:tracking-[0.18em] transition-all transform hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden shadow-xl hover:shadow-2xl cursor-pointer shrink-0 flex items-center justify-center"
       >
         <span className="relative z-10">CONTINUE →</span>
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>

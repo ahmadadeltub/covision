@@ -59,6 +59,77 @@ const App: React.FC = () => {
     }
   });
   const [step, setStep] = useState<AppStep>(AppStep.Welcome);
+  const [isKiosk, setIsKiosk] = useState<boolean>(false);
+  const wakeLockRef = useRef<any>(null);
+
+  const requestWakeLock = useCallback(async () => {
+    try {
+      if ('wakeLock' in navigator) {
+        wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
+        wakeLockRef.current.addEventListener('release', () => {
+          wakeLockRef.current = null;
+        });
+      }
+    } catch (err) {
+      console.warn('Wake Lock error:', err);
+    }
+  }, []);
+
+  const toggleKioskMode = useCallback(async () => {
+    try {
+      if (!document.fullscreenElement) {
+        const elem = document.documentElement as any;
+        if (elem.requestFullscreen) {
+          await elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+          await elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+          await elem.msRequestFullscreen();
+        }
+        setIsKiosk(true);
+        await requestWakeLock();
+      } else {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if ((document as any).webkitExitFullscreen) {
+          await (document as any).webkitExitFullscreen();
+        }
+        setIsKiosk(false);
+      }
+    } catch (err) {
+      console.warn('Kiosk fullscreen toggle error:', err);
+    }
+  }, [requestWakeLock]);
+
+  // Keep fullscreen state in sync & listen for visibility change for wake lock
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const active = !!document.fullscreenElement;
+      setIsKiosk(active);
+      if (active) {
+        requestWakeLock();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && document.fullscreenElement) {
+        requestWakeLock();
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (wakeLockRef.current) {
+        wakeLockRef.current.release().catch(() => {});
+      }
+    };
+  }, [requestWakeLock]);
 
   // ─── Camera ───
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -364,7 +435,21 @@ const App: React.FC = () => {
         </div>
 
         {/* Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Kiosk Mode Button */}
+          <button
+            onClick={toggleKioskMode}
+            className={`px-3 py-1.5 rounded-full border text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
+              isKiosk
+                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-400/50 shadow-[0_0_16px_rgba(16,185,129,0.35)]'
+                : 'bg-sky-500/10 text-sky-500 dark:text-sky-400 border-sky-400/30 hover:bg-sky-500/20'
+            }`}
+            title="Toggle Fullscreen Kiosk Mode (F11)"
+          >
+            <span className={`w-2 h-2 rounded-full ${isKiosk ? 'bg-emerald-400 animate-pulse' : 'bg-sky-400'}`} />
+            <span>{isKiosk ? 'KIOSK: ON' : '⛶ KIOSK MODE'}</span>
+          </button>
+
           {/* Theme toggle */}
           <button
             onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
@@ -379,6 +464,7 @@ const App: React.FC = () => {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'all 0.2s',
             }}
+            title="Toggle Light / Dark Mode"
           >
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
