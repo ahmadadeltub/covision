@@ -1500,18 +1500,19 @@ Return strictly JSON matching this structure:
                 </div>
               </div>
 
-              <div className="flex gap-2 sm:gap-3 w-full">
+              <div className="flex gap-2.5 sm:gap-3.5 w-full">
                 <button
                   onClick={resetScan}
-                  className="flex-1 py-3 sm:py-3.5 bg-slate-800/80 border border-white/10 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm md:text-base uppercase tracking-wider hover:bg-slate-700 transition-all shadow-md min-h-[50px] sm:min-h-[58px] flex items-center justify-center cursor-pointer"
+                  className="flex-1 py-4 sm:py-5 bg-slate-800/80 border-2 border-white/10 text-white rounded-2xl md:rounded-3xl font-black text-sm sm:text-lg md:text-xl uppercase tracking-wider hover:bg-slate-700 transition-all shadow-md min-h-[64px] sm:min-h-[76px] md:min-h-[82px] flex items-center justify-center cursor-pointer"
                 >
                   {t.back}
                 </button>
                 <button
                   onClick={handleNext}
-                  className="flex-[2] py-3 sm:py-3.5 bg-gradient-to-r from-sky-600 to-indigo-600 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm md:text-base uppercase tracking-wider hover:from-sky-500 hover:to-indigo-500 transition-all shadow-md min-h-[50px] sm:min-h-[58px] flex items-center justify-center cursor-pointer"
+                  className="flex-[2] py-4 sm:py-5 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 text-slate-950 border-2 border-emerald-300 rounded-2xl md:rounded-3xl font-black text-sm sm:text-xl md:text-2xl uppercase tracking-wider md:tracking-[0.18em] hover:scale-[1.01] active:scale-95 transition-all shadow-[0_0_35px_rgba(16,185,129,0.45)] min-h-[64px] sm:min-h-[76px] md:min-h-[82px] flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  {t.next}
+                  <span>{t.next}</span>
+                  <span className="text-xl sm:text-2xl">→</span>
                 </button>
               </div>
             </div>

@@ -236,24 +236,28 @@ const ResultsDashboard: React.FC<Props> = ({ lang, t, results, onReset }) => {
       </div>
 
       {/* Bottom Section: Actions */}
-      <div className="shrink-0 pt-2 md:pt-3 flex flex-col sm:flex-row gap-2 md:gap-3 max-w-5xl mx-auto w-full">
+      <div className="shrink-0 pt-2 md:pt-3 flex flex-col sm:flex-row gap-2.5 md:gap-3.5 max-w-5xl mx-auto w-full">
         <button
           onClick={() => window.print()}
-          className="flex-1 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-sky-600 to-indigo-600 text-white rounded-xl md:rounded-2xl font-black uppercase text-xs sm:text-sm tracking-wider md:tracking-[0.15em] hover:shadow-[0_0_30px_rgba(2,132,199,0.4)] transition-all border border-white/10 active:scale-95 flex items-center justify-center gap-1.5"
+          className="flex-1 py-3 sm:py-3.5 md:py-4 bg-gradient-to-r from-sky-600 to-indigo-600 text-white rounded-xl md:rounded-2xl font-black uppercase text-xs sm:text-base tracking-wider md:tracking-[0.15em] hover:shadow-[0_0_30px_rgba(2,132,199,0.4)] transition-all border border-white/10 active:scale-95 flex items-center justify-center gap-2 min-h-[54px] sm:min-h-[62px] md:min-h-[68px] cursor-pointer"
         >
-          {t.download_report}
+          <span>🖨️</span>
+          <span>{t.download_report}</span>
         </button>
         <button
           onClick={() => { setShowEmailModal(true); setEmailStatus('idle'); }}
-          className="flex-1 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-xl md:rounded-2xl font-black uppercase text-xs sm:text-sm tracking-wider md:tracking-[0.15em] hover:shadow-[0_0_30px_rgba(16,185,129,0.4)] transition-all border border-white/10 active:scale-95 flex items-center justify-center gap-1.5"
+          className="flex-1 py-3 sm:py-3.5 md:py-4 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-xl md:rounded-2xl font-black uppercase text-xs sm:text-base tracking-wider md:tracking-[0.15em] hover:shadow-[0_0_30px_rgba(16,185,129,0.4)] transition-all border border-white/10 active:scale-95 flex items-center justify-center gap-2 min-h-[54px] sm:min-h-[62px] md:min-h-[68px] cursor-pointer"
         >
-          ✉️ {t.send_email}
+          <span>✉️</span>
+          <span>{t.send_email}</span>
         </button>
         <button
           onClick={onReset}
-          className="flex-1 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-violet-600 to-indigo-700 text-white rounded-xl md:rounded-2xl font-black uppercase text-xs sm:text-sm tracking-wider md:tracking-[0.15em] hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] transition-all border border-white/10 active:scale-95 flex items-center justify-center gap-1.5"
+          className="flex-1 py-3 sm:py-3.5 md:py-4 bg-gradient-to-r from-violet-600 to-indigo-700 text-white rounded-xl md:rounded-2xl font-black uppercase text-xs sm:text-base tracking-wider md:tracking-[0.15em] hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] transition-all border border-white/10 active:scale-95 flex items-center justify-center gap-2 min-h-[54px] sm:min-h-[62px] md:min-h-[68px] cursor-pointer"
         >
-          📋 View Full Report
+          <span>📋</span>
+          <span>View Full Report</span>
+          <span>→</span>
         </button>
       </div>
 

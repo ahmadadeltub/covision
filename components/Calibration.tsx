@@ -1047,7 +1047,7 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
         <div className="relative z-10 w-full max-w-4xl mx-auto flex flex-row items-center justify-between gap-2.5 sm:gap-3 shrink-0 mt-1">
           <button
             onClick={handleFinish}
-            className="py-3 sm:py-3.5 px-4 sm:px-6 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 hover:text-black dark:hover:text-white border border-slate-300 dark:border-slate-700 shadow-sm shrink-0 min-h-[48px] sm:min-h-[56px] flex items-center justify-center cursor-pointer"
+            className="py-3.5 sm:py-4 px-4 sm:px-6 rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider transition-all bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 hover:text-black dark:hover:text-white border-2 border-slate-300 dark:border-slate-700 shadow-md shrink-0 min-h-[64px] sm:min-h-[76px] md:min-h-[82px] flex items-center justify-center cursor-pointer"
           >
             Skip 1m (Testing)
           </button>
@@ -1055,13 +1055,16 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
           <button
             onClick={handleFinish}
             disabled={!canProceed}
-            className={`group flex-1 py-3 sm:py-3.5 md:py-4 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm md:text-base uppercase tracking-wider md:tracking-[0.18em] transition-all transform hover:scale-[1.01] active:scale-95 relative overflow-hidden shadow-xl min-h-[48px] sm:min-h-[56px] flex items-center justify-center ${canProceed
-              ? 'bg-gradient-to-r from-sky-600 to-indigo-600 text-white hover:from-sky-500 hover:to-indigo-500 hover:shadow-[0_0_30px_rgba(2,132,199,0.5)] cursor-pointer'
-              : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
+            className={`group flex-1 py-4 sm:py-5 rounded-2xl font-black text-sm sm:text-xl md:text-2xl uppercase tracking-wider md:tracking-[0.2em] transition-all transform hover:scale-[1.01] active:scale-95 relative overflow-hidden shadow-2xl min-h-[64px] sm:min-h-[76px] md:min-h-[82px] flex items-center justify-center border-2 ${canProceed
+              ? 'bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 text-slate-950 border-emerald-300 shadow-[0_0_40px_rgba(16,185,129,0.5)] cursor-pointer'
+              : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border-white/5 cursor-not-allowed opacity-50'
               }`}
           >
-            <span className="relative z-10">{t.next}</span>
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-sky-300/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              <span>{t.next}</span>
+              <span className="text-xl sm:text-2xl">→</span>
+            </span>
+            {canProceed && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>}
           </button>
         </div>
       </div>

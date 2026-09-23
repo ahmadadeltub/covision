@@ -107,10 +107,13 @@ const ProfileForm: React.FC<Props> = ({ lang, t, initialData, onComplete }) => {
         onClick={() => {
           onComplete({ age, gender, deviceType: device, glassesUsage: glasses, symptoms: [], familyHistory: family });
         }}
-        className="w-full mt-2 sm:mt-3 py-3.5 sm:py-4 md:py-4.5 min-h-[56px] sm:min-h-[64px] bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white rounded-xl sm:rounded-2xl font-black uppercase text-sm sm:text-base md:text-lg tracking-wider md:tracking-[0.18em] transition-all transform hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden shadow-xl hover:shadow-2xl cursor-pointer shrink-0 flex items-center justify-center"
+        className="w-full mt-2 sm:mt-3 py-4 sm:py-5 min-h-[66px] sm:min-h-[78px] md:min-h-[86px] bg-gradient-to-r from-sky-600 via-indigo-600 to-sky-600 hover:from-sky-500 hover:to-indigo-500 text-white rounded-2xl md:rounded-3xl font-black uppercase text-base sm:text-xl md:text-2xl tracking-wider md:tracking-[0.2em] transition-all transform hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden shadow-2xl border-2 border-sky-400/40 hover:shadow-[0_0_40px_rgba(2,132,199,0.5)] cursor-pointer shrink-0 flex items-center justify-center gap-2.5"
       >
-        <span className="relative z-10">CONTINUE →</span>
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+        <span className="relative z-10 flex items-center justify-center gap-2">
+          <span>CONTINUE</span>
+          <span className="text-xl sm:text-2xl">→</span>
+        </span>
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
       </button>
     </div>
   );

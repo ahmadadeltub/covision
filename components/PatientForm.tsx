@@ -116,12 +116,24 @@ const PatientForm: React.FC<Props> = ({ lang, onComplete }) => {
                         disabled={!isValid}
                         style={{
                             width: '100%',
-                            marginTop: 8,
+                            marginTop: 12,
+                            minHeight: 68,
+                            padding: '16px 24px',
+                            fontSize: '18px',
+                            fontWeight: 900,
+                            letterSpacing: '0.08em',
+                            textTransform: 'uppercase',
+                            borderRadius: 16,
                             opacity: isValid ? 1 : 0.4,
                             cursor: isValid ? 'pointer' : 'not-allowed',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 8,
                         }}
                     >
-                        {t.next} →
+                        <span>{t.next}</span>
+                        <span style={{ fontSize: 20 }}>→</span>
                     </button>
                 </form>
             </div>

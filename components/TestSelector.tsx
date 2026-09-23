@@ -114,13 +114,16 @@ const TestSelector: React.FC<Props> = ({ lang, t, onComplete }) => {
           <button
             disabled={selected.length === 0}
             onClick={() => onComplete(selected)}
-            className="group w-full py-3.5 sm:py-4 md:py-4.5 min-h-[56px] sm:min-h-[64px] bg-gradient-to-r from-sky-600 via-sky-500 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white rounded-xl sm:rounded-2xl font-black text-sm sm:text-base md:text-lg uppercase tracking-wider md:tracking-[0.18em] disabled:opacity-30 disabled:grayscale transition-all transform hover:scale-[1.01] active:scale-95 relative overflow-hidden shadow-xl hover:shadow-2xl flex items-center justify-center gap-3 cursor-pointer"
+            className="group w-full py-4 sm:py-5 min-h-[66px] sm:min-h-[78px] md:min-h-[86px] bg-gradient-to-r from-sky-600 via-sky-500 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white rounded-2xl md:rounded-3xl font-black text-base sm:text-xl md:text-2xl uppercase tracking-wider md:tracking-[0.2em] disabled:opacity-30 disabled:grayscale transition-all transform hover:scale-[1.01] active:scale-95 relative overflow-hidden shadow-2xl border-2 border-sky-400/40 hover:shadow-[0_0_40px_rgba(2,132,199,0.5)] flex items-center justify-center gap-3 sm:gap-4 cursor-pointer"
           >
-            <span className="relative z-10">INITIALIZE SYSTEM</span>
-            <span className="relative z-10 bg-white/20 backdrop-blur-md text-white px-3 py-0.5 rounded-lg text-xs sm:text-sm font-mono font-black border border-white/30">
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              <span>INITIALIZE SYSTEM</span>
+              <span className="text-xl sm:text-2xl">→</span>
+            </span>
+            <span className="relative z-10 bg-white/20 backdrop-blur-md text-white px-3 sm:px-4 py-0.5 sm:py-1 rounded-xl text-xs sm:text-base font-mono font-black border border-white/30">
               {selected.length} / 6
             </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
           </button>
         </div>
       </div>

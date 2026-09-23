@@ -340,19 +340,19 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                     }}
                     style={{
                         width: '100%', flexShrink: 0, position: 'relative',
-                        padding: 'clamp(12px, 2vh, 18px) 20px',
-                        minHeight: 'clamp(54px, 7vh, 66px)',
-                        fontSize: 'clamp(15px, 2.2vh, 20px)',
+                        padding: 'clamp(14px, 2.2vh, 20px) 24px',
+                        minHeight: 'clamp(64px, 8.5vh, 78px)',
+                        fontSize: 'clamp(16px, 2.4vh, 22px)',
                         fontWeight: 900,
                         letterSpacing: '0.08em',
                         textTransform: 'uppercase',
                         color: '#fff',
                         background: 'linear-gradient(135deg, #0284c7 0%, #0ea5e9 45%, #6366f1 100%)',
                         border: 'none',
-                        borderRadius: 16,
+                        borderRadius: 20,
                         cursor: 'pointer',
                         transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                        boxShadow: '0 6px 24px rgba(14,165,233,0.4)',
+                        boxShadow: '0 8px 30px rgba(14,165,233,0.45)',
                         overflow: 'hidden',
                         fontFamily: 'Outfit, Inter, sans-serif',
                         display: 'flex',
@@ -361,11 +361,11 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                     }}
                     onMouseEnter={e => {
                         (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)';
-                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 32px rgba(14,165,233,0.55)';
+                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 10px 36px rgba(14,165,233,0.6)';
                     }}
                     onMouseLeave={e => {
                         (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
-                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 24px rgba(14,165,233,0.4)';
+                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 30px rgba(14,165,233,0.45)';
                     }}
                 >
                     <div style={{
