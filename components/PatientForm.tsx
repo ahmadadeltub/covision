@@ -91,16 +91,20 @@ const PatientForm: React.FC<Props> = ({ lang, onComplete }) => {
                                     onClick={() => setGender(g)}
                                     style={{
                                         flex: 1,
-                                        padding: '14px 20px',
+                                        minHeight: 58,
+                                        padding: '16px 20px',
                                         borderRadius: 'var(--radius-sm)',
                                         border: `2px solid ${gender === g ? 'var(--accent)' : 'var(--border-color)'}`,
                                         background: gender === g ? 'var(--accent-bg)' : 'var(--bg-secondary)',
                                         color: gender === g ? 'var(--accent)' : 'var(--text-secondary)',
-                                        fontWeight: 700,
-                                        fontSize: 16,
+                                        fontWeight: 800,
+                                        fontSize: 17,
                                         cursor: 'pointer',
                                         transition: 'all 0.2s',
                                         fontFamily: 'inherit',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
                                     }}
                                 >
                                     {g === 'male' ? '♂ ' : '♀ '}{t[g]}

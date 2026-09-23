@@ -343,6 +343,7 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
                 key={dir}
                 onClick={() => handleSelect(dir)}
                 style={{
+                  minHeight: 'clamp(64px, 8.5vh, 84px)',
                   padding: 'clamp(10px, 2vh, 16px) 0', background: 'var(--bg-card)', backdropFilter: 'blur(10px)',
                   border: `2px solid ${activeButton === dir ? 'var(--accent)' : 'var(--border-color)'}`,
                   borderRadius: 20, transition: 'all 0.2s', cursor: 'pointer',
@@ -365,8 +366,9 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
             <button
               onClick={() => handleSelect('?')}
               style={{
-                padding: '7px 24px', background: 'var(--bg-card)', border: '1.5px solid var(--border-color)',
-                borderRadius: 999, fontSize: 11, color: 'var(--text-muted)', fontWeight: 900, textTransform: 'uppercase',
+                minHeight: 44,
+                padding: '10px 28px', background: 'var(--bg-card)', border: '1.5px solid var(--border-color)',
+                borderRadius: 999, fontSize: 13, color: 'var(--text-muted)', fontWeight: 900, textTransform: 'uppercase',
                 letterSpacing: '0.15em', cursor: 'pointer', transition: 'all 0.2s'
               }}
             >

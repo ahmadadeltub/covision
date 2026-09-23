@@ -50,14 +50,14 @@ const TestSelector: React.FC<Props> = ({ lang, t, onComplete }) => {
               <button
                 type="button"
                 onClick={() => setSelected([TestType.Acuity, TestType.Color, TestType.Snellen, TestType.Contrast, TestType.Astigmatism, TestType.Amsler])}
-                className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-sky-500/10 text-sky-500 hover:bg-sky-500/20 dark:text-cyan-400 border border-sky-400/30 transition-colors"
+                className="text-[10px] sm:text-xs font-black uppercase tracking-wider px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-[36px] flex items-center justify-center rounded-lg bg-sky-500/10 text-sky-500 hover:bg-sky-500/20 dark:text-cyan-400 border border-sky-400/30 transition-colors cursor-pointer"
               >
                 Select All
               </button>
               <button
                 type="button"
                 onClick={() => setSelected([])}
-                className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-white/20 transition-colors"
+                className="text-[10px] sm:text-xs font-black uppercase tracking-wider px-3 py-1 sm:py-1.5 min-h-[32px] sm:min-h-[36px] flex items-center justify-center rounded-lg bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-white/20 transition-colors cursor-pointer"
               >
                 Clear
               </button>

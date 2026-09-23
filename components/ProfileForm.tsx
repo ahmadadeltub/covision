@@ -66,7 +66,7 @@ const ProfileForm: React.FC<Props> = ({ lang, t, initialData, onComplete }) => {
                 key={g}
                 type="button"
                 onClick={() => setGender(g)}
-                className={`flex-1 py-3 sm:py-3.5 px-3 rounded-xl sm:rounded-2xl border-2 transition-all font-black text-xs sm:text-base uppercase tracking-wider min-h-[48px] sm:min-h-[54px] flex items-center justify-center gap-2 cursor-pointer ${gender === g ? 'border-sky-500 bg-sky-50 text-sky-700 dark:border-cyan-500 dark:bg-cyan-500/20 dark:text-cyan-400 shadow-md' : 'border-slate-200 bg-white text-slate-600 dark:border-white/5 dark:bg-black/40 dark:text-slate-400 hover:border-slate-300'}`}
+                className={`flex-1 py-3.5 sm:py-4 px-3 rounded-xl sm:rounded-2xl border-2 transition-all font-black text-sm sm:text-lg uppercase tracking-wider min-h-[58px] sm:min-h-[66px] flex items-center justify-center gap-2 cursor-pointer ${gender === g ? 'border-sky-500 bg-sky-50 text-sky-700 dark:border-cyan-500 dark:bg-cyan-500/20 dark:text-cyan-400 shadow-md' : 'border-slate-200 bg-white text-slate-600 dark:border-white/5 dark:bg-black/40 dark:text-slate-400 hover:border-slate-300'}`}
               >
                 <span>{g === 'male' ? '♂ Male' : '♀ Female'}</span>
               </button>
@@ -83,7 +83,7 @@ const ProfileForm: React.FC<Props> = ({ lang, t, initialData, onComplete }) => {
                 key={g}
                 type="button"
                 onClick={() => setGlasses(g as any)}
-                className={`flex-1 py-3 sm:py-3.5 px-3 rounded-xl sm:rounded-2xl border-2 transition-all font-black text-xs sm:text-base uppercase tracking-wider min-h-[48px] sm:min-h-[54px] flex items-center justify-center gap-2 cursor-pointer ${glasses === g ? 'border-sky-500 bg-sky-50 text-sky-700 dark:border-cyan-500 dark:bg-cyan-500/20 dark:text-cyan-400 shadow-md' : 'border-slate-200 bg-white text-slate-600 dark:border-white/5 dark:bg-black/40 dark:text-slate-400 hover:border-slate-300'}`}
+                className={`flex-1 py-3.5 sm:py-4 px-3 rounded-xl sm:rounded-2xl border-2 transition-all font-black text-sm sm:text-lg uppercase tracking-wider min-h-[58px] sm:min-h-[66px] flex items-center justify-center gap-2 cursor-pointer ${glasses === g ? 'border-sky-500 bg-sky-50 text-sky-700 dark:border-cyan-500 dark:bg-cyan-500/20 dark:text-cyan-400 shadow-md' : 'border-slate-200 bg-white text-slate-600 dark:border-white/5 dark:bg-black/40 dark:text-slate-400 hover:border-slate-300'}`}
               >
                 <span>{g === 'none' ? '👁 None' : '👓 Glasses'}</span>
               </button>

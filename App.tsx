@@ -439,7 +439,7 @@ const App: React.FC = () => {
           {/* Kiosk Mode Button */}
           <button
             onClick={toggleKioskMode}
-            className={`px-3 py-1.5 rounded-full border text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer ${
+            className={`px-3.5 py-2 rounded-full border text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 shadow-sm active:scale-95 cursor-pointer min-h-[38px] sm:min-h-[42px] ${
               isKiosk
                 ? 'bg-emerald-500/20 text-emerald-400 border-emerald-400/50 shadow-[0_0_16px_rgba(16,185,129,0.35)]'
                 : 'bg-sky-500/10 text-sky-500 dark:text-sky-400 border-sky-400/30 hover:bg-sky-500/20'
@@ -454,12 +454,12 @@ const App: React.FC = () => {
           <button
             onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
             style={{
-              width: 32, height: 32,
+              width: 38, height: 38,
               borderRadius: '50%',
               border: '1.5px solid var(--border-color)',
               background: 'var(--bg-secondary)',
               color: 'var(--text-primary)',
-              fontSize: 15,
+              fontSize: 16,
               cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'all 0.2s',

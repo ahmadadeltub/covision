@@ -950,29 +950,29 @@ const MedicalReport: React.FC<Props> = ({
             <div className="no-print w-full max-w-5xl flex flex-wrap gap-2.5 sm:gap-3 justify-center mb-5 z-20">
                 <button
                     onClick={handleExportPDF}
-                    className="px-5 sm:px-6 py-3 sm:py-3.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-md shadow-cyan-600/25 flex items-center gap-2 min-h-[46px] sm:min-h-[52px] cursor-pointer active:scale-95"
+                    className="px-5 sm:px-6 py-3.5 sm:py-4 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider transition-all shadow-md shadow-cyan-600/25 flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
                 >
-                    <span className="text-base sm:text-lg">📄</span> {t.export_pdf}
+                    <span className="text-base sm:text-xl">📄</span> {t.export_pdf}
                 </button>
                 <button
                     onClick={() => window.print()}
-                    className="px-5 sm:px-6 py-3 sm:py-3.5 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-white/10 text-slate-800 dark:text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm flex items-center gap-2 min-h-[46px] sm:min-h-[52px] cursor-pointer active:scale-95"
+                    className="px-5 sm:px-6 py-3.5 sm:py-4 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-white/10 text-slate-800 dark:text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
                 >
-                    <span className="text-base sm:text-lg">🖨️</span> {t.print_report}
+                    <span className="text-base sm:text-xl">🖨️</span> {t.print_report}
                 </button>
                 <button
                     onClick={() => {
                         setShowEmailModal(true);
                         setEmailStatus('idle');
                     }}
-                    className="px-5 sm:px-6 py-3 sm:py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-md shadow-emerald-600/25 flex items-center gap-2 min-h-[46px] sm:min-h-[52px] cursor-pointer active:scale-95"
+                    className="px-5 sm:px-6 py-3.5 sm:py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider transition-all shadow-md shadow-emerald-600/25 flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
                 >
-                    <span className="text-base sm:text-lg">✉️</span> {t.send_email}
+                    <span className="text-base sm:text-xl">✉️</span> {t.send_email}
                 </button>
                 <button
                     onClick={handleShareWhatsApp}
                     disabled={whatsappSending}
-                    className="px-5 sm:px-6 py-3 sm:py-3.5 bg-green-600 hover:bg-green-500 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-md shadow-green-600/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-h-[46px] sm:min-h-[52px] cursor-pointer active:scale-95"
+                    className="px-5 sm:px-6 py-3.5 sm:py-4 bg-green-600 hover:bg-green-500 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider transition-all shadow-md shadow-green-600/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
                 >
                     {whatsappSending ? (
                         <>
@@ -981,21 +981,21 @@ const MedicalReport: React.FC<Props> = ({
                         </>
                     ) : (
                         <>
-                            <span className="text-base sm:text-lg">💬</span> {t.send_whatsapp || 'WhatsApp'}
+                            <span className="text-base sm:text-xl">💬</span> {t.send_whatsapp || 'WhatsApp'}
                         </>
                     )}
                 </button>
                 <button
                     onClick={() => setShowResearchMode(!showResearchMode)}
-                    className="px-5 sm:px-6 py-3 sm:py-3.5 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-white/10 text-slate-800 dark:text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider hover:border-purple-500 hover:text-purple-600 transition-all shadow-sm flex items-center gap-2 min-h-[46px] sm:min-h-[52px] cursor-pointer active:scale-95"
+                    className="px-5 sm:px-6 py-3.5 sm:py-4 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-white/10 text-slate-800 dark:text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider hover:border-purple-500 hover:text-purple-600 transition-all shadow-sm flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
                 >
-                    <span className="text-base sm:text-lg">🔬</span> {t.research_mode}
+                    <span className="text-base sm:text-xl">🔬</span> {t.research_mode}
                 </button>
                 <button
                     onClick={onReset}
-                    className="px-5 sm:px-6 py-3 sm:py-3.5 bg-slate-900 dark:bg-slate-800 text-white border-2 border-slate-700 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider hover:bg-slate-800 transition-all shadow-md flex items-center gap-2 min-h-[46px] sm:min-h-[52px] cursor-pointer active:scale-95"
+                    className="px-5 sm:px-6 py-3.5 sm:py-4 bg-slate-900 dark:bg-slate-800 text-white border-2 border-slate-700 rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider hover:bg-slate-800 transition-all shadow-md flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
                 >
-                    <span className="text-base sm:text-lg">🔄</span> {t.new_screening}
+                    <span className="text-base sm:text-xl">🔄</span> {t.new_screening}
                 </button>
             </div>
 

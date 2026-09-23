@@ -286,7 +286,7 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
               <button
                 key={l}
                 onClick={() => handleSelect(l)}
-                className={`py-3 sm:py-4 md:py-5 min-h-[56px] sm:min-h-[64px] md:min-h-[74px] glass border-2 rounded-xl sm:rounded-2xl font-black text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-slate-900 dark:text-white transition-all active:scale-90 flex items-center justify-center
+                className={`py-3.5 sm:py-4.5 md:py-5 min-h-[64px] sm:min-h-[74px] md:min-h-[84px] glass border-2 rounded-xl sm:rounded-2xl font-black text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-slate-900 dark:text-white transition-all active:scale-90 flex items-center justify-center
                   ${activeButton === l
                     ? 'border-cyan-400 bg-cyan-500/40 shadow-[0_0_50px_rgba(0,243,255,0.6)]'
                     : 'border-slate-200 dark:border-white/10 hover:border-cyan-400 hover:bg-cyan-500/20'}
@@ -298,7 +298,7 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
           </div>
           <button
             onClick={handleCantSee}
-            className="w-full max-w-4xl mx-auto block py-3 sm:py-3.5 glass border border-slate-200 dark:border-white/5 rounded-full text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-black uppercase tracking-[0.3em] hover:text-slate-900 dark:hover:text-white transition-colors min-h-[44px] sm:min-h-[48px]"
+            className="w-full max-w-4xl mx-auto block py-3.5 sm:py-4 glass border border-slate-200 dark:border-white/5 rounded-full text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-black uppercase tracking-[0.3em] hover:text-slate-900 dark:hover:text-white transition-colors min-h-[52px] sm:min-h-[58px]"
           >
             I cannot see any letter ✗
           </button>

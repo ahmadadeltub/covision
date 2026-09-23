@@ -359,7 +359,7 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
             </div>
             <button
               onClick={() => handleIshiharaAnswer('none')}
-              className="w-full max-w-xl mx-auto block py-3.5 sm:py-4 glass border border-slate-200 dark:border-white/5 rounded-full text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-black uppercase tracking-[0.3em] hover:text-slate-900 dark:hover:text-white transition-colors min-h-[46px] sm:min-h-[52px]"
+              className="w-full max-w-xl mx-auto block py-3.5 sm:py-4 glass border border-slate-200 dark:border-white/5 rounded-full text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-black uppercase tracking-[0.3em] hover:text-slate-900 dark:hover:text-white transition-colors min-h-[52px] sm:min-h-[58px]"
             >
               Can&apos;t See
             </button>
@@ -470,7 +470,7 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
                 <button
                   key={colorName}
                   onClick={() => handleSelect(colorName)}
-                  className="group py-3.5 sm:py-4.5 md:py-5 px-4 sm:px-6 glass border-2 border-slate-200 dark:border-white/10 rounded-2xl font-black uppercase tracking-wider hover:border-cyan-400 hover:bg-cyan-500/10 transition-all active:scale-95 flex items-center gap-3 sm:gap-4 justify-center min-h-[60px] sm:min-h-[72px] md:min-h-[82px]"
+                  className="group py-3.5 sm:py-4.5 md:py-5 px-4 sm:px-6 glass border-2 border-slate-200 dark:border-white/10 rounded-2xl font-black uppercase tracking-wider hover:border-cyan-400 hover:bg-cyan-500/10 transition-all active:scale-95 flex items-center gap-3 sm:gap-4 justify-center min-h-[64px] sm:min-h-[76px] md:min-h-[86px]"
                 >
                   <div
                     className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full border-2 border-white/25 shrink-0 shadow-lg group-hover:scale-110 transition-transform"

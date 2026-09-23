@@ -384,7 +384,7 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, faceLandmarksRef, dist
                                         <button
                                             key={opt}
                                             onClick={() => handleAnswer(opt)}
-                                            className="py-3 sm:py-4 md:py-5 glass border-2 border-white/20 hover:border-cyan-400 bg-white/5 hover:bg-cyan-500/25 rounded-2xl md:rounded-3xl font-black text-2xl sm:text-3xl md:text-5xl text-white transition-all transform hover:scale-[1.02] active:scale-95 shadow-xl flex items-center justify-center min-h-[56px] sm:min-h-[68px]"
+                                            className="py-3.5 sm:py-4.5 md:py-5 glass border-2 border-white/20 hover:border-cyan-400 bg-white/5 hover:bg-cyan-500/25 rounded-2xl md:rounded-3xl font-black text-2xl sm:text-3xl md:text-5xl text-white transition-all transform hover:scale-[1.02] active:scale-95 shadow-xl flex items-center justify-center min-h-[66px] sm:min-h-[78px] md:min-h-[86px]"
                                         >
                                             {opt}
                                         </button>
@@ -392,7 +392,7 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, faceLandmarksRef, dist
                                 </div>
                                 <button
                                     onClick={() => handleAnswer('none')}
-                                    className="w-full py-2.5 sm:py-3.5 glass border-2 border-white/10 hover:border-red-400/50 hover:bg-red-500/10 rounded-xl sm:rounded-2xl text-xs sm:text-sm md:text-base text-slate-300 hover:text-white font-black uppercase tracking-[0.25em] transition-all shadow-md active:scale-95"
+                                    className="w-full py-3.5 sm:py-4 glass border-2 border-white/10 hover:border-red-400/50 hover:bg-red-500/10 rounded-xl sm:rounded-2xl text-xs sm:text-sm md:text-base text-slate-300 hover:text-white font-black uppercase tracking-[0.25em] transition-all shadow-md active:scale-95 min-h-[48px] sm:min-h-[54px] flex items-center justify-center"
                                 >
                                     {t.cant_see}
                                 </button>

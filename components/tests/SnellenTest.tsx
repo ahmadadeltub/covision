@@ -267,7 +267,7 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
           <div className="max-w-2xl mx-auto mt-2">
             <button
               onClick={() => handleSelect('__CANT_SEE__')}
-              className={`w-full py-3 sm:py-3.5 glass border-2 rounded-xl md:rounded-2xl text-sm md:text-base font-black uppercase tracking-wider md:tracking-widest transition-all active:scale-95
+              className={`w-full py-3.5 sm:py-4 min-h-[52px] sm:min-h-[58px] glass border-2 rounded-xl md:rounded-2xl text-sm md:text-base font-black uppercase tracking-wider md:tracking-widest transition-all active:scale-95 flex items-center justify-center
                 ${activeButton === '__CANT_SEE__'
                   ? 'border-red-400 bg-red-500/40 shadow-[0_0_30px_rgba(239,68,68,0.5)] scale-105 text-red-700 dark:text-red-300'
                   : 'border-slate-200 dark:border-white/10 hover:border-red-400 hover:bg-red-500/10 text-slate-700 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-300'}`}>
