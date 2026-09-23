@@ -1347,115 +1347,203 @@ Return strictly JSON matching this structure:
           </div>
         </div>
 
-        {/* ─── Futuristic AI Camera Frame & Reticle Container ─── */}
-        <div 
-          ref={containerRef} 
-          className={`relative aspect-[16/10] sm:aspect-video flex-1 min-h-0 max-h-[46vh] sm:max-h-[50vh] w-full max-w-3xl mx-auto rounded-2xl md:rounded-3xl overflow-hidden bg-black transition-all duration-500 ${
-            scanning
-              ? 'border-2 border-cyan-400 shadow-[0_0_40px_rgba(0,243,255,0.45),inset_0_0_25px_rgba(0,243,255,0.2)]'
-              : canAuthorize
-                ? 'border-2 border-emerald-400/90 shadow-[0_0_35px_rgba(16,185,129,0.35),inset_0_0_25px_rgba(16,185,129,0.15)]'
-                : 'border-2 border-cyan-500/70 shadow-[0_0_25px_rgba(6,182,212,0.3),inset_0_0_20px_rgba(6,182,212,0.15)]'
-          }`}
-        >
-          {/* Live Video Feed */}
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover scale-x-[-1] brightness-125 contrast-[1.1]"
-          />
+        {/* ─── Center: Camera Frame Perfectly Centered Horizontally & Vertically ─── */}
+        <div className="w-full flex-1 min-h-0 flex items-center justify-center my-auto py-1">
+          <div 
+            ref={containerRef} 
+            className={`relative aspect-[16/10] sm:aspect-video w-full max-w-3xl max-h-[46vh] sm:max-h-[50vh] mx-auto rounded-2xl md:rounded-3xl overflow-hidden bg-black transition-all duration-500 ${
+              scanning
+                ? 'border-2 border-cyan-400 shadow-[0_0_40px_rgba(0,243,255,0.45),inset_0_0_25px_rgba(0,243,255,0.2)]'
+                : canAuthorize
+                  ? 'border-2 border-emerald-400/90 shadow-[0_0_35px_rgba(16,185,129,0.35),inset_0_0_25px_rgba(16,185,129,0.15)]'
+                  : 'border-2 border-cyan-500/70 shadow-[0_0_25px_rgba(6,182,212,0.3),inset_0_0_20px_rgba(6,182,212,0.15)]'
+            }`}
+          >
+            {/* Live Video Feed */}
+            <video
+              ref={videoRef}
+              autoPlay
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover scale-x-[-1] brightness-125 contrast-[1.1]"
+            />
 
-          {/* AI Face Mesh Canvas Overlay */}
-          <canvas
-            ref={overlayCanvasRef}
-            className="absolute inset-0 w-full h-full z-20 pointer-events-none"
-          />
-          <canvas ref={canvasRef} className="hidden" />
+            {/* AI Face Mesh Canvas Overlay */}
+            <canvas
+              ref={overlayCanvasRef}
+              className="absolute inset-0 w-full h-full z-20 pointer-events-none"
+            />
+            <canvas ref={canvasRef} className="hidden" />
 
-          {/* ── AI Frame Border Accents & Precision Corner Reticles ── */}
-          {/* Top-Left Corner Bracket */}
-          <div className={`absolute top-0 left-0 w-8 h-8 sm:w-12 sm:h-12 border-t-[3.5px] border-l-[3.5px] rounded-tl-2xl z-30 pointer-events-none transition-all duration-300 ${
-            canAuthorize ? 'border-emerald-400 shadow-[0_0_15px_#10b981]' : 'border-cyan-400 shadow-[0_0_15px_#00f3ff]'
-          }`}>
-            <span className="absolute top-1.5 left-1.5 text-[9px] font-mono leading-none text-cyan-300/80 font-bold">+</span>
+            {/* ── AI Frame Border Accents & Precision Corner Reticles ── */}
+            {/* Top-Left Corner Bracket */}
+            <div className={`absolute top-0 left-0 w-8 h-8 sm:w-12 sm:h-12 border-t-[3.5px] border-l-[3.5px] rounded-tl-2xl z-30 pointer-events-none transition-all duration-300 ${
+              canAuthorize ? 'border-emerald-400 shadow-[0_0_15px_#10b981]' : 'border-cyan-400 shadow-[0_0_15px_#00f3ff]'
+            }`}>
+              <span className="absolute top-1.5 left-1.5 text-[9px] font-mono leading-none text-cyan-300/80 font-bold">+</span>
+            </div>
+
+            {/* Top-Right Corner Bracket */}
+            <div className={`absolute top-0 right-0 w-8 h-8 sm:w-12 sm:h-12 border-t-[3.5px] border-r-[3.5px] rounded-tr-2xl z-30 pointer-events-none transition-all duration-300 ${
+              canAuthorize ? 'border-emerald-400 shadow-[0_0_15px_#10b981]' : 'border-cyan-400 shadow-[0_0_15px_#00f3ff]'
+            }`}>
+              <span className="absolute top-1.5 right-1.5 text-[9px] font-mono leading-none text-cyan-300/80 font-bold">+</span>
+            </div>
+
+            {/* Bottom-Left Corner Bracket */}
+            <div className={`absolute bottom-0 left-0 w-8 h-8 sm:w-12 sm:h-12 border-b-[3.5px] border-l-[3.5px] rounded-bl-2xl z-30 pointer-events-none transition-all duration-300 ${
+              canAuthorize ? 'border-emerald-400 shadow-[0_0_15px_#10b981]' : 'border-cyan-400 shadow-[0_0_15px_#00f3ff]'
+            }`}>
+              <span className="absolute bottom-1.5 left-1.5 text-[9px] font-mono leading-none text-cyan-300/80 font-bold">+</span>
+            </div>
+
+            {/* Bottom-Right Corner Bracket */}
+            <div className={`absolute bottom-0 right-0 w-8 h-8 sm:w-12 sm:h-12 border-b-[3.5px] border-r-[3.5px] rounded-br-2xl z-30 pointer-events-none transition-all duration-300 ${
+              canAuthorize ? 'border-emerald-400 shadow-[0_0_15px_#10b981]' : 'border-cyan-400 shadow-[0_0_15px_#00f3ff]'
+            }`}>
+              <span className="absolute bottom-1.5 right-1.5 text-[9px] font-mono leading-none text-cyan-300/80 font-bold">+</span>
+            </div>
+
+            {/* Center Edge Optical Alignment Notches */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-10 sm:w-16 h-1 bg-cyan-400/80 rounded-b shadow-[0_0_10px_#00f3ff] z-30 pointer-events-none" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 sm:w-16 h-1 bg-cyan-400/80 rounded-t shadow-[0_0_10px_#00f3ff] z-30 pointer-events-none" />
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 h-10 sm:h-16 w-1 bg-cyan-400/80 rounded-r shadow-[0_0_10px_#00f3ff] z-30 pointer-events-none" />
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 h-10 sm:h-16 w-1 bg-cyan-400/80 rounded-l shadow-[0_0_10px_#00f3ff] z-30 pointer-events-none" />
+
+            {/* HUD Top-Left Overlay Pill */}
+            <div className="absolute top-2 sm:top-2.5 left-2.5 sm:left-3 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-black/70 backdrop-blur-md border border-cyan-500/30 text-cyan-300 font-mono text-[9px] sm:text-[10px] font-bold tracking-wider flex items-center gap-1.5 z-30 pointer-events-none shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_6px_#00f3ff]" />
+              <span>[ ⛶ AI OPTICAL RETICLE · LIVE ]</span>
+            </div>
+
+            {/* HUD Top-Right Overlay Pill */}
+            <div className="absolute top-2 sm:top-2.5 right-2.5 sm:right-3 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-black/70 backdrop-blur-md border border-cyan-500/30 text-cyan-300 font-mono text-[9px] sm:text-[10px] font-bold tracking-wider z-30 pointer-events-none shadow-sm">
+              <span>[ 468-PTS NEURAL MESH ]</span>
+            </div>
+
+            {/* Laser Scanning Beam Sweep Animation */}
+            {scanning && !complete && (
+              <div className="absolute inset-x-0 h-4 bg-gradient-to-b from-cyan-400/0 via-cyan-400/40 to-cyan-400/0 shadow-[0_0_40px_#00f3ff] z-30 pointer-events-none animate-[scan_1.6s_ease-in-out_infinite]" />
+            )}
+
+            {/* Loading Indicator while FaceMesh initializes */}
+            {!scanning && !complete && cameraReady && !faceLandmarksRef?.current && (
+              <div className="absolute top-10 left-0 right-0 flex justify-center z-25 pointer-events-none">
+                <div className="px-3.5 py-1.5 bg-black/70 backdrop-blur-md rounded-full border border-cyan-500/40 text-cyan-300 text-xs font-bold uppercase tracking-widest animate-pulse flex items-center gap-2">
+                  <div className="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
+                  {debugInfo?.faceMeshStatus === 'wasm_ready' || debugInfo?.faceMeshStatus === 'ready'
+                    ? 'Detecting Face Landmarks...'
+                    : debugInfo?.faceMeshStatus?.includes?.('loading') || debugInfo?.faceMeshStatus === 'creating_landmarker'
+                      ? 'Loading AI Face Mesh...'
+                      : debugInfo?.faceMeshStatus?.startsWith?.('error') || debugInfo?.faceMeshStatus === 'wasm_init_failed'
+                        ? 'Face Mesh Error — Fallback Active'
+                        : 'Detecting Face Landmarks...'}
+                </div>
+              </div>
+            )}
+
+            {/* Non-Obstructive Bottom Status Prompt Docked to Bottom Edge */}
+            {!scanning && !complete && canAuthorize && (
+              <div className="absolute inset-x-0 bottom-2.5 sm:bottom-3 flex justify-center pointer-events-none z-30 px-3">
+                <div className="px-4 py-1.5 sm:px-6 sm:py-2 bg-slate-900/90 backdrop-blur-md rounded-full border border-emerald-400/80 text-emerald-300 font-black uppercase tracking-wider text-[11px] sm:text-xs md:text-sm shadow-[0_0_25px_rgba(16,185,129,0.35)] flex items-center gap-2 animate-pulse">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#10b981]" />
+                  <span>{isFaceDetected ? 'Face Locked · Ready to Authorize Scan' : (manualOverride ? 'Manual Override Active' : 'Ready to Scan')}</span>
+                </div>
+              </div>
+            )}
+
+            {!scanning && !complete && !canAuthorize && (
+              <div className="absolute inset-x-0 bottom-2.5 sm:bottom-3 flex justify-center pointer-events-none z-30 px-3">
+                <div className="px-4 py-1.5 sm:px-5 sm:py-1.5 bg-black/75 backdrop-blur-md rounded-full border border-white/10 text-cyan-300 font-bold uppercase tracking-wider text-[10px] sm:text-xs shadow-md animate-pulse">
+                  {cameraReady ? 'Looking for Face — Center Face in Reticle' : 'Connecting Camera...'}
+                </div>
+              </div>
+            )}
           </div>
+        </div>
 
-          {/* Top-Right Corner Bracket */}
-          <div className={`absolute top-0 right-0 w-8 h-8 sm:w-12 sm:h-12 border-t-[3.5px] border-r-[3.5px] rounded-tr-2xl z-30 pointer-events-none transition-all duration-300 ${
-            canAuthorize ? 'border-emerald-400 shadow-[0_0_15px_#10b981]' : 'border-cyan-400 shadow-[0_0_15px_#00f3ff]'
-          }`}>
-            <span className="absolute top-1.5 right-1.5 text-[9px] font-mono leading-none text-cyan-300/80 font-bold">+</span>
-          </div>
-
-          {/* Bottom-Left Corner Bracket */}
-          <div className={`absolute bottom-0 left-0 w-8 h-8 sm:w-12 sm:h-12 border-b-[3.5px] border-l-[3.5px] rounded-bl-2xl z-30 pointer-events-none transition-all duration-300 ${
-            canAuthorize ? 'border-emerald-400 shadow-[0_0_15px_#10b981]' : 'border-cyan-400 shadow-[0_0_15px_#00f3ff]'
-          }`}>
-            <span className="absolute bottom-1.5 left-1.5 text-[9px] font-mono leading-none text-cyan-300/80 font-bold">+</span>
-          </div>
-
-          {/* Bottom-Right Corner Bracket */}
-          <div className={`absolute bottom-0 right-0 w-8 h-8 sm:w-12 sm:h-12 border-b-[3.5px] border-r-[3.5px] rounded-br-2xl z-30 pointer-events-none transition-all duration-300 ${
-            canAuthorize ? 'border-emerald-400 shadow-[0_0_15px_#10b981]' : 'border-cyan-400 shadow-[0_0_15px_#00f3ff]'
-          }`}>
-            <span className="absolute bottom-1.5 right-1.5 text-[9px] font-mono leading-none text-cyan-300/80 font-bold">+</span>
-          </div>
-
-          {/* Center Edge Optical Alignment Notches */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-10 sm:w-16 h-1 bg-cyan-400/80 rounded-b shadow-[0_0_10px_#00f3ff] z-30 pointer-events-none" />
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 sm:w-16 h-1 bg-cyan-400/80 rounded-t shadow-[0_0_10px_#00f3ff] z-30 pointer-events-none" />
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 h-10 sm:h-16 w-1 bg-cyan-400/80 rounded-r shadow-[0_0_10px_#00f3ff] z-30 pointer-events-none" />
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 h-10 sm:h-16 w-1 bg-cyan-400/80 rounded-l shadow-[0_0_10px_#00f3ff] z-30 pointer-events-none" />
-
-          {/* HUD Top-Left Overlay Pill */}
-          <div className="absolute top-2 sm:top-2.5 left-2.5 sm:left-3 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-black/70 backdrop-blur-md border border-cyan-500/30 text-cyan-300 font-mono text-[9px] sm:text-[10px] font-bold tracking-wider flex items-center gap-1.5 z-30 pointer-events-none shadow-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_6px_#00f3ff]" />
-            <span>[ ⛶ AI OPTICAL RETICLE · LIVE ]</span>
-          </div>
-
-          {/* HUD Top-Right Overlay Pill */}
-          <div className="absolute top-2 sm:top-2.5 right-2.5 sm:right-3 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-black/70 backdrop-blur-md border border-cyan-500/30 text-cyan-300 font-mono text-[9px] sm:text-[10px] font-bold tracking-wider z-30 pointer-events-none shadow-sm">
-            <span>[ 468-PTS NEURAL MESH ]</span>
-          </div>
-
-          {/* Laser Scanning Beam Sweep Animation */}
-          {scanning && !complete && (
-            <div className="absolute inset-x-0 h-4 bg-gradient-to-b from-cyan-400/0 via-cyan-400/40 to-cyan-400/0 shadow-[0_0_40px_#00f3ff] z-30 pointer-events-none animate-[scan_1.6s_ease-in-out_infinite]" />
-          )}
-
-          {/* Loading Indicator while FaceMesh initializes */}
-          {!scanning && !complete && cameraReady && !faceLandmarksRef?.current && (
-            <div className="absolute top-10 left-0 right-0 flex justify-center z-25 pointer-events-none">
-              <div className="px-3.5 py-1.5 bg-black/70 backdrop-blur-md rounded-full border border-cyan-500/40 text-cyan-300 text-xs font-bold uppercase tracking-widest animate-pulse flex items-center gap-2">
-                <div className="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
-                {debugInfo?.faceMeshStatus === 'wasm_ready' || debugInfo?.faceMeshStatus === 'ready'
-                  ? 'Detecting Face Landmarks...'
-                  : debugInfo?.faceMeshStatus?.includes?.('loading') || debugInfo?.faceMeshStatus === 'creating_landmarker'
-                    ? 'Loading AI Face Mesh...'
-                    : debugInfo?.faceMeshStatus?.startsWith?.('error') || debugInfo?.faceMeshStatus === 'wasm_init_failed'
-                      ? 'Face Mesh Error — Fallback Active'
-                      : 'Detecting Face Landmarks...'}
+        {/* ─── Bottom Section: Authorize Button or Results ─── */}
+        <div className="w-full shrink-0 z-10 pt-1">
+          {aiError && (
+            <div className="mb-1 p-2 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300 text-xs flex items-start gap-2">
+              <span className="text-sm">🧠</span>
+              <div>
+                <p className="font-bold text-[10px] uppercase tracking-wider text-amber-400">On-Device Analysis Active</p>
+                <p className="text-amber-300/80 text-[10px]">{aiError}</p>
               </div>
             </div>
           )}
+          {complete && biometricData ? (
+            <div className="space-y-2 animate-in fade-in slide-in-from-bottom-6 duration-500">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 w-full">
+                <div className="glass p-2 sm:p-3 rounded-xl md:rounded-2xl border-b-4 border-cyan-500 bg-black/50 shadow-xl text-center flex flex-col justify-center min-h-[60px] md:min-h-[75px]">
+                  <div className="text-[8px] sm:text-[9px] font-black text-cyan-400 uppercase tracking-widest mb-0.5">Optical Age</div>
+                  <div className="text-xl sm:text-2xl md:text-3xl font-black text-white">{biometricData.age?.value ?? '??'}<span className="text-[10px] text-slate-500 ml-1">YRS</span></div>
+                </div>
+                <div className="glass p-2 sm:p-3 rounded-xl md:rounded-2xl border-b-4 border-purple-500 bg-black/50 shadow-xl text-center flex flex-col justify-center min-h-[60px] md:min-h-[75px]">
+                  <div className="text-[8px] sm:text-[9px] font-black text-purple-400 uppercase tracking-widest mb-0.5">Emotional State</div>
+                  <div className="text-xs sm:text-sm md:text-base font-black text-white uppercase break-words leading-tight">
+                    {biometricData.mood?.value ?? 'STABLE'}
+                  </div>
+                </div>
+                <div className="glass p-2 sm:p-3 rounded-xl md:rounded-2xl border-b-4 border-emerald-500 bg-black/50 shadow-xl text-center flex flex-col justify-center min-h-[60px] md:min-h-[75px]">
+                  <div className="text-[8px] sm:text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-0.5">Gender</div>
+                  <div className="text-xs sm:text-sm md:text-base font-black text-white uppercase break-words leading-tight">
+                    {biometricData.gender?.value ?? 'N/A'}
+                  </div>
+                </div>
+                <div className="glass p-2 sm:p-3 rounded-xl md:rounded-2xl border-b-4 border-orange-500 bg-black/50 shadow-xl text-center flex flex-col justify-center min-h-[60px] md:min-h-[75px]">
+                  <div className="text-[8px] sm:text-[9px] font-black text-orange-400 uppercase tracking-widest mb-0.5">Corrective Lens</div>
+                  <div className="text-xs sm:text-sm md:text-base font-black text-white uppercase break-words leading-tight">
+                    {biometricData.glasses?.value ? 'DETECTED' : 'NONE'}
+                  </div>
+                </div>
+              </div>
 
-          {/* Non-Obstructive Bottom Status Prompt Docked to Bottom Edge */}
-          {!scanning && !complete && canAuthorize && (
-            <div className="absolute inset-x-0 bottom-2.5 sm:bottom-3 flex justify-center pointer-events-none z-30 px-3">
-              <div className="px-4 py-1.5 sm:px-6 sm:py-2 bg-slate-900/90 backdrop-blur-md rounded-full border border-emerald-400/80 text-emerald-300 font-black uppercase tracking-wider text-[11px] sm:text-xs md:text-sm shadow-[0_0_25px_rgba(16,185,129,0.35)] flex items-center gap-2 animate-pulse">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#10b981]" />
-                <span>{isFaceDetected ? 'Face Locked · Ready to Authorize Scan' : (manualOverride ? 'Manual Override Active' : 'Ready to Scan')}</span>
+              <div className="flex gap-2 sm:gap-3 w-full">
+                <button
+                  onClick={resetScan}
+                  className="flex-1 py-3 sm:py-3.5 bg-slate-800/80 border border-white/10 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm md:text-base uppercase tracking-wider hover:bg-slate-700 transition-all shadow-md min-h-[50px] sm:min-h-[58px] flex items-center justify-center cursor-pointer"
+                >
+                  {t.back}
+                </button>
+                <button
+                  onClick={handleNext}
+                  className="flex-[2] py-3 sm:py-3.5 bg-gradient-to-r from-sky-600 to-indigo-600 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm md:text-base uppercase tracking-wider hover:from-sky-500 hover:to-indigo-500 transition-all shadow-md min-h-[50px] sm:min-h-[58px] flex items-center justify-center cursor-pointer"
+                >
+                  {t.next}
+                </button>
               </div>
             </div>
-          )}
-
-          {!scanning && !complete && !canAuthorize && (
-            <div className="absolute inset-x-0 bottom-2.5 sm:bottom-3 flex justify-center pointer-events-none z-30 px-3">
-              <div className="px-4 py-1.5 sm:px-5 sm:py-1.5 bg-black/75 backdrop-blur-md rounded-full border border-white/10 text-cyan-300 font-bold uppercase tracking-wider text-[10px] sm:text-xs shadow-md animate-pulse">
-                {cameraReady ? 'Looking for Face — Center Face in Reticle' : 'Connecting Camera...'}
-              </div>
+          ) : (
+            <div className="flex justify-center w-full">
+              {!scanning ? (
+                <button
+                  disabled={!canAuthorize}
+                  onClick={runScan}
+                  className={`w-full py-4 sm:py-5 md:py-5.5 min-h-[68px] sm:min-h-[78px] md:min-h-[86px] rounded-2xl md:rounded-3xl font-black text-sm sm:text-xl md:text-2xl uppercase tracking-wider sm:tracking-[0.22em] transition-all shadow-2xl group relative overflow-hidden flex items-center justify-center border-2
+                    ${canAuthorize 
+                      ? 'bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 text-slate-950 border-emerald-300 shadow-[0_0_50px_rgba(16,185,129,0.55),0_10px_35px_rgba(0,0,0,0.5)] hover:scale-[1.015] active:scale-[0.99] cursor-pointer' 
+                      : 'bg-slate-800 text-slate-500 border-white/5 cursor-not-allowed opacity-50'}`}
+                >
+                  <span className="relative z-10 flex items-center justify-center gap-2.5 sm:gap-3">
+                    <span className="text-xl sm:text-2xl md:text-3xl">⛶</span>
+                    <span>{canAuthorize ? 'AUTHORIZE SCAN' : (cameraReady ? 'DETECTING FACE...' : 'CONNECTING CAMERA...')}</span>
+                  </span>
+                  {canAuthorize && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>}
+                </button>
+              ) : (
+                <div className="w-full py-4 sm:py-5 md:py-5.5 glass rounded-2xl md:rounded-3xl text-center border-2 border-cyan-400/50 flex items-center justify-center gap-4 bg-slate-900/80 shadow-[0_0_40px_rgba(0,243,255,0.3)] min-h-[68px] sm:min-h-[78px] md:min-h-[86px]">
+                  <div className="flex gap-2.5 sm:gap-3.5">
+                    <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.3s] shadow-[0_0_15px_#00f3ff]"></div>
+                    <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.15s] shadow-[0_0_15px_#00f3ff]"></div>
+                    <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 bg-cyan-400 rounded-full animate-bounce shadow-[0_0_15px_#00f3ff]"></div>
+                  </div>
+                  <span className="text-sm sm:text-xl md:text-2xl font-black text-cyan-400 uppercase tracking-widest sm:tracking-[0.25em] animate-pulse">
+                    SCANNING BIOMETRICS...
+                  </span>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -1487,100 +1575,15 @@ Return strictly JSON matching this structure:
 
       {/* Manual Override Option */}
       {!scanning && !complete && !inRange && showManualOption && (
-        <div className="absolute bottom-32 left-0 w-full flex justify-center z-50 animate-in fade-in slide-in-from-bottom-4">
+        <div className="absolute bottom-24 sm:bottom-28 left-0 w-full flex justify-center z-50 animate-in fade-in slide-in-from-bottom-4">
           <button
             onClick={enableManualOverride}
-            className="px-6 py-2 bg-slate-800/90 hover:bg-slate-700 text-slate-300 text-xs font-bold uppercase tracking-widest rounded-full border border-white/10 backdrop-blur-md shadow-lg transition-all hover:scale-105 active:scale-95"
+            className="px-6 py-2 bg-slate-800/90 hover:bg-slate-700 text-slate-300 text-xs font-bold uppercase tracking-widest rounded-full border border-white/10 backdrop-blur-md shadow-lg transition-all hover:scale-105 active:scale-95 cursor-pointer"
           >
             Trouble detection? Click here to override
           </button>
         </div>
       )}
-
-      <div className="w-full max-w-4xl shrink-0 z-10 pt-1">
-        {aiError && (
-          <div className="mb-1 p-2 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300 text-xs flex items-start gap-2">
-            <span className="text-sm">🧠</span>
-            <div>
-              <p className="font-bold text-[10px] uppercase tracking-wider text-amber-400">On-Device Analysis Active</p>
-              <p className="text-amber-300/80 text-[10px]">{aiError}</p>
-            </div>
-          </div>
-        )}
-        {complete && biometricData ? (
-          <div className="space-y-2 animate-in fade-in slide-in-from-bottom-6 duration-500">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 w-full">
-              <div className="glass p-2 sm:p-3 rounded-xl md:rounded-2xl border-b-4 border-cyan-500 bg-black/50 shadow-xl text-center flex flex-col justify-center min-h-[60px] md:min-h-[75px]">
-                <div className="text-[8px] sm:text-[9px] font-black text-cyan-400 uppercase tracking-widest mb-0.5">Optical Age</div>
-                <div className="text-xl sm:text-2xl md:text-3xl font-black text-white">{biometricData.age?.value ?? '??'}<span className="text-[10px] text-slate-500 ml-1">YRS</span></div>
-              </div>
-              <div className="glass p-2 sm:p-3 rounded-xl md:rounded-2xl border-b-4 border-purple-500 bg-black/50 shadow-xl text-center flex flex-col justify-center min-h-[60px] md:min-h-[75px]">
-                <div className="text-[8px] sm:text-[9px] font-black text-purple-400 uppercase tracking-widest mb-0.5">Emotional State</div>
-                <div className="text-xs sm:text-sm md:text-base font-black text-white uppercase break-words leading-tight">
-                  {biometricData.mood?.value ?? 'STABLE'}
-                </div>
-              </div>
-              <div className="glass p-2 sm:p-3 rounded-xl md:rounded-2xl border-b-4 border-emerald-500 bg-black/50 shadow-xl text-center flex flex-col justify-center min-h-[60px] md:min-h-[75px]">
-                <div className="text-[8px] sm:text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-0.5">Gender</div>
-                <div className="text-xs sm:text-sm md:text-base font-black text-white uppercase break-words leading-tight">
-                  {biometricData.gender?.value ?? 'N/A'}
-                </div>
-              </div>
-              <div className="glass p-2 sm:p-3 rounded-xl md:rounded-2xl border-b-4 border-orange-500 bg-black/50 shadow-xl text-center flex flex-col justify-center min-h-[60px] md:min-h-[75px]">
-                <div className="text-[8px] sm:text-[9px] font-black text-orange-400 uppercase tracking-widest mb-0.5">Corrective Lens</div>
-                <div className="text-xs sm:text-sm md:text-base font-black text-white uppercase break-words leading-tight">
-                  {biometricData.glasses?.value ? 'DETECTED' : 'NONE'}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-2 sm:gap-3 w-full">
-              <button
-                onClick={resetScan}
-                className="flex-1 py-3 sm:py-3.5 bg-slate-800/80 border border-white/10 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm md:text-base uppercase tracking-wider hover:bg-slate-700 transition-all shadow-md min-h-[50px] sm:min-h-[58px] flex items-center justify-center cursor-pointer"
-              >
-                {t.back}
-              </button>
-              <button
-                onClick={handleNext}
-                className="flex-[2] py-3 sm:py-3.5 bg-gradient-to-r from-sky-600 to-indigo-600 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm md:text-base uppercase tracking-wider hover:from-sky-500 hover:to-indigo-500 transition-all shadow-md min-h-[50px] sm:min-h-[58px] flex items-center justify-center cursor-pointer"
-              >
-                {t.next}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex justify-center w-full">
-            {!scanning ? (
-              <button
-                disabled={!canAuthorize}
-                onClick={runScan}
-                className={`w-full py-4 sm:py-5 md:py-5.5 min-h-[68px] sm:min-h-[78px] md:min-h-[86px] rounded-2xl md:rounded-3xl font-black text-sm sm:text-xl md:text-2xl uppercase tracking-wider sm:tracking-[0.22em] transition-all shadow-2xl group relative overflow-hidden flex items-center justify-center border-2
-                  ${canAuthorize 
-                    ? 'bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 text-slate-950 border-emerald-300 shadow-[0_0_50px_rgba(16,185,129,0.55),0_10px_35px_rgba(0,0,0,0.5)] hover:scale-[1.015] active:scale-[0.99] cursor-pointer' 
-                    : 'bg-slate-800 text-slate-500 border-white/5 cursor-not-allowed opacity-50'}`}
-              >
-                <span className="relative z-10 flex items-center justify-center gap-2.5 sm:gap-3">
-                  <span className="text-xl sm:text-2xl md:text-3xl">⛶</span>
-                  <span>{canAuthorize ? 'AUTHORIZE SCAN' : (cameraReady ? 'DETECTING FACE...' : 'CONNECTING CAMERA...')}</span>
-                </span>
-                {canAuthorize && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>}
-              </button>
-            ) : (
-              <div className="w-full py-4 sm:py-5 md:py-5.5 glass rounded-2xl md:rounded-3xl text-center border-2 border-cyan-400/50 flex items-center justify-center gap-4 bg-slate-900/80 shadow-[0_0_40px_rgba(0,243,255,0.3)] min-h-[68px] sm:min-h-[78px] md:min-h-[86px]">
-                <div className="flex gap-2.5 sm:gap-3.5">
-                  <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.3s] shadow-[0_0_15px_#00f3ff]"></div>
-                  <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.15s] shadow-[0_0_15px_#00f3ff]"></div>
-                  <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 bg-cyan-400 rounded-full animate-bounce shadow-[0_0_15px_#00f3ff]"></div>
-                </div>
-                <span className="text-sm sm:text-xl md:text-2xl font-black text-cyan-400 uppercase tracking-widest sm:tracking-[0.25em] animate-pulse">
-                  SCANNING BIOMETRICS...
-                </span>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
 
       <style>{`
         @keyframes scan {
