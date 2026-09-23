@@ -293,7 +293,7 @@ const App: React.FC = () => {
 
   return (
     <div className={`app-wrapper`}
-      style={{ background: 'var(--bg-primary)', minHeight: '100vh', position: 'relative' }}
+      style={{ background: 'var(--bg-primary)', height: '100dvh', maxHeight: '100dvh', overflow: 'hidden', position: 'relative' }}
     >
       {/* ─── Global Particle Background ─── */}
       <canvas ref={bgCanvasRef} style={{
@@ -321,26 +321,25 @@ const App: React.FC = () => {
           background: 'radial-gradient(circle, rgba(6,182,212,0.05) 0%, transparent 70%)',
         }} />
       </div>
-      {/* ─── Gesture Overlay removed — camera now lives inside each test's panel ─── */}
 
       {/* ─── Header ─── */}
-      <header className="app-header no-print" style={{ position: 'relative', zIndex: 200 }}>
+      <header className="app-header no-print" style={{ position: 'relative', zIndex: 200, height: 48, padding: '4px 16px', flexShrink: 0 }}>
         {/* Logo + Brand */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {/* Animated Eye Logo */}
           <div style={{
-            width: 36, height: 36,
+            width: 32, height: 32,
             borderRadius: '50%',
             background: 'linear-gradient(135deg, #0ea5e9, #6366f1)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 16px rgba(56,189,248,0.4)',
+            boxShadow: '0 0 14px rgba(56,189,248,0.4)',
             flexShrink: 0,
           }}>
-            <span style={{ fontSize: 18, lineHeight: 1 }}>👁️</span>
+            <span style={{ fontSize: 16, lineHeight: 1 }}>👁️</span>
           </div>
           <div>
             <h1 style={{
-              fontSize: 'clamp(13px, 2.5vw, 17px)',
+              fontSize: 'clamp(12px, 2vw, 15px)',
               fontWeight: 800,
               margin: 0,
               lineHeight: 1.1,
@@ -353,7 +352,7 @@ const App: React.FC = () => {
               {t.app_title}
             </h1>
             <p style={{
-              fontSize: 'clamp(9px, 1.8vw, 11px)',
+              fontSize: 'clamp(8px, 1.4vw, 10px)',
               fontWeight: 500,
               color: 'var(--text-muted)',
               margin: 0,
@@ -370,12 +369,12 @@ const App: React.FC = () => {
           <button
             onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
             style={{
-              width: 34, height: 34,
+              width: 32, height: 32,
               borderRadius: '50%',
               border: '1.5px solid var(--border-color)',
               background: 'var(--bg-secondary)',
               color: 'var(--text-primary)',
-              fontSize: 16,
+              fontSize: 15,
               cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'all 0.2s',
@@ -386,28 +385,8 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      {/* ─── Distance Indicator (during coverage / testing) ─── */}
-      {step === AppStep.Testing && (
-        <div className="distance-indicator no-print" style={{
-          background: distanceStatus === 'ok' ? 'var(--success-bg)' :
-            distanceStatus === 'too_close' ? 'var(--danger-bg)' :
-              distanceStatus === 'too_far' ? 'var(--warning-bg)' : 'var(--bg-secondary)',
-          color: distanceStatus === 'ok' ? 'var(--success)' :
-            distanceStatus === 'too_close' ? 'var(--danger)' :
-              distanceStatus === 'too_far' ? 'var(--warning)' : 'var(--text-muted)',
-          border: `1px solid ${distanceStatus === 'ok' ? 'var(--success)' :
-            distanceStatus === 'too_close' ? 'var(--danger)' :
-              distanceStatus === 'too_far' ? 'var(--warning)' : 'var(--border-color)'}`,
-        }}>
-          <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'currentColor', display: 'inline-block' }} />
-          {distanceStatus === 'ok' ? t.distance_ok :
-            distanceStatus === 'too_close' ? t.too_close :
-              distanceStatus === 'too_far' ? t.too_far : t.no_face}
-        </div>
-      )}
-
       {/* ─── Main Content ─── */}
-      <main className="app-main" style={{ position: 'relative', zIndex: 1 }}>
+      <main className="app-main" style={{ position: 'relative', zIndex: 1, flex: 1, minHeight: 0, overflow: 'hidden' }}>
 
         {/* Step 1: Welcome (NEW — improved) */}
         {step === AppStep.Welcome && (

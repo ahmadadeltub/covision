@@ -159,32 +159,32 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
             {/* Main content */}
             <div style={{
                 position: 'relative', zIndex: 10,
-                width: '100%', maxWidth: 680,
+                width: '100%', maxWidth: 660,
                 height: '100%',
-                padding: 'clamp(16px, 3vh, 32px) clamp(12px, 4vw, 24px) 80px',
+                maxHeight: '100%',
+                padding: 'clamp(6px, 1.2vh, 14px) clamp(10px, 3vw, 20px)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'flex-start',
-                gap: 'clamp(10px, 1.8vh, 20px)',
+                justifyContent: 'space-between',
+                gap: 'clamp(6px, 1vh, 12px)',
                 opacity: loaded ? 1 : 0,
-                transform: loaded ? 'translateY(0)' : 'translateY(24px)',
-                transition: 'all 0.7s cubic-bezier(0.16, 1, 0.3, 1)',
-                overflowY: 'auto',
-                overflowX: 'hidden',
+                transform: loaded ? 'translateY(0)' : 'translateY(16px)',
+                transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                overflow: 'hidden',
             }}>
 
                 {/* Hero — Logo + Title */}
                 <div style={{ textAlign: 'center', flexShrink: 0, width: '100%' }}>
                     {/* Animated logo */}
                     <div style={{
-                        width: 'clamp(64px, 11vh, 100px)',
-                        height: 'clamp(64px, 11vh, 100px)',
-                        margin: '0 auto clamp(12px, 2vh, 20px)',
+                        width: 'clamp(44px, 7vh, 70px)',
+                        height: 'clamp(44px, 7vh, 70px)',
+                        margin: '0 auto clamp(6px, 1vh, 12px)',
                         position: 'relative',
                     }}>
                         <div style={{
-                            position: 'absolute', inset: -6,
+                            position: 'absolute', inset: -4,
                             borderRadius: '50%',
                             border: '2px solid transparent',
                             borderTopColor: 'rgba(56,189,248,0.6)',
@@ -192,7 +192,7 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                             animation: 'spin 3s linear infinite',
                         }} />
                         <div style={{
-                            position: 'absolute', inset: -14,
+                            position: 'absolute', inset: -10,
                             borderRadius: '50%',
                             border: '1.5px solid transparent',
                             borderBottomColor: 'rgba(129,140,248,0.5)',
@@ -204,24 +204,24 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                             background: 'linear-gradient(135deg, rgba(56,189,248,0.15), rgba(129,140,248,0.12))',
                             border: '1.5px solid rgba(56,189,248,0.3)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 'clamp(32px, 6vh, 52px)',
-                            boxShadow: '0 0 40px rgba(56,189,248,0.2)',
+                            fontSize: 'clamp(24px, 4vh, 38px)',
+                            boxShadow: '0 0 30px rgba(56,189,248,0.2)',
                         }}>👁️</div>
                     </div>
 
                     {/* Badge */}
                     <div style={{
                         display: 'inline-flex', alignItems: 'center', gap: 6,
-                        padding: '4px 14px',
+                        padding: '3px 12px',
                         background: 'rgba(56,189,248,0.1)',
                         border: '1px solid rgba(56,189,248,0.2)',
                         borderRadius: 20,
-                        fontSize: 'clamp(9px, 1.3vh, 12px)',
+                        fontSize: 'clamp(9px, 1.1vh, 11px)',
                         fontWeight: 700,
                         letterSpacing: '0.12em',
                         textTransform: 'uppercase',
                         color: 'var(--accent)',
-                        marginBottom: 'clamp(8px, 1.2vh, 14px)',
+                        marginBottom: 'clamp(4px, 0.8vh, 8px)',
                     }}>
                         <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block', animation: 'pulse 2s infinite' }} />
                         AI-Powered Vision Screening
@@ -229,24 +229,24 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
 
                     {/* Title */}
                     <h1 style={{
-                        fontSize: 'clamp(22px, 5.5vw, 44px)',
+                        fontSize: 'clamp(18px, 3.8vh, 32px)',
                         fontWeight: 900,
                         background: 'linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 60%, #818cf8 100%)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         lineHeight: 1.12,
-                        margin: '0 0 clamp(6px, 1vh, 12px)',
+                        margin: '0 0 clamp(4px, 0.6vh, 8px)',
                         letterSpacing: '-0.02em',
                         fontFamily: 'Outfit, Inter, sans-serif',
                     }}>{t.welcome_title}</h1>
 
                     <p style={{
-                        fontSize: 'clamp(13px, 2vh, 17px)',
+                        fontSize: 'clamp(11px, 1.4vh, 14px)',
                         color: 'var(--text-secondary)',
                         fontWeight: 400,
                         maxWidth: 480,
                         margin: '0 auto',
-                        lineHeight: 1.6,
+                        lineHeight: 1.4,
                     }}>{t.welcome_subtitle}</p>
                 </div>
 
@@ -254,21 +254,21 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(2, 1fr)',
-                    gap: 'clamp(8px, 1.2vh, 12px)',
+                    gap: 'clamp(6px, 1vh, 10px)',
                     width: '100%',
                     flexShrink: 0,
                 }}>
                     {features.map((f, i) => (
                         <div key={i} style={{
-                            padding: 'clamp(10px, 1.6vh, 16px) clamp(12px, 2vw, 18px)',
+                            padding: 'clamp(6px, 1vh, 10px) clamp(8px, 1.5vw, 14px)',
                             background: 'var(--bg-card)',
                             backdropFilter: 'blur(16px)',
                             WebkitBackdropFilter: 'blur(16px)',
-                            borderRadius: 14,
+                            borderRadius: 12,
                             border: '1px solid var(--border-color)',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: 10,
+                            gap: 8,
                             transition: 'all 0.25s ease',
                             opacity: loaded ? 1 : 0,
                             transform: loaded ? 'translateY(0)' : 'translateY(16px)',
@@ -277,7 +277,7 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                             onMouseEnter={e => {
                                 (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(56,189,248,0.3)';
                                 (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)';
-                                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 24px rgba(56,189,248,0.1)';
+                                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 6px 20px rgba(56,189,248,0.1)';
                             }}
                             onMouseLeave={e => {
                                 (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border-color)';
@@ -285,8 +285,8 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                                 (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
                             }}
                         >
-                            <span style={{ fontSize: 'clamp(22px, 3.5vh, 34px)', lineHeight: 1, flexShrink: 0 }}>{f.icon}</span>
-                            <span style={{ fontSize: 'clamp(11px, 1.5vh, 15px)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3 }}>{f.label}</span>
+                            <span style={{ fontSize: 'clamp(18px, 2.5vh, 26px)', lineHeight: 1, flexShrink: 0 }}>{f.icon}</span>
+                            <span style={{ fontSize: 'clamp(10px, 1.3vh, 13px)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>{f.label}</span>
                         </div>
                     ))}
                 </div>
@@ -294,14 +294,14 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                 {/* Disclaimer */}
                 <div style={{
                     width: '100%', flexShrink: 0,
-                    padding: 'clamp(8px, 1.2vh, 14px) clamp(12px, 2vw, 18px)',
+                    padding: 'clamp(6px, 0.9vh, 10px) clamp(10px, 1.5vw, 14px)',
                     background: 'rgba(251,191,36,0.06)',
                     border: '1px solid rgba(251,191,36,0.15)',
                     borderRadius: 12,
-                    display: 'flex', alignItems: 'flex-start', gap: 10,
+                    display: 'flex', alignItems: 'center', gap: 8,
                 }}>
-                    <span style={{ fontSize: 16, flexShrink: 0, marginTop: 1 }}>⚠️</span>
-                    <p style={{ fontSize: 'clamp(11px, 1.4vh, 14px)', color: 'var(--text-muted)', lineHeight: 1.55, fontWeight: 500, margin: 0 }}>
+                    <span style={{ fontSize: 14, flexShrink: 0 }}>⚠️</span>
+                    <p style={{ fontSize: 'clamp(9px, 1.1vh, 12px)', color: 'var(--text-muted)', lineHeight: 1.35, fontWeight: 500, margin: 0 }}>
                         <strong style={{ color: 'var(--warning)', fontWeight: 700 }}>{t.disclaimer_title?.replace('⚠️ ', '') || 'Medical Disclaimer'} — </strong>
                         {t.disclaimer_text}
                     </p>
@@ -315,28 +315,28 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                     }}
                     style={{
                         width: '100%', flexShrink: 0, position: 'relative',
-                        padding: 'clamp(14px, 2.2vh, 22px) 20px',
-                        fontSize: 'clamp(15px, 2.4vh, 22px)',
+                        padding: 'clamp(10px, 1.8vh, 16px) 16px',
+                        fontSize: 'clamp(14px, 2vh, 18px)',
                         fontWeight: 800,
                         letterSpacing: '0.08em',
                         textTransform: 'uppercase',
                         color: '#fff',
                         background: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
                         border: 'none',
-                        borderRadius: 16,
+                        borderRadius: 14,
                         cursor: 'pointer',
                         transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                        boxShadow: '0 4px 24px rgba(14,165,233,0.35), 0 1px 4px rgba(0,0,0,0.15)',
+                        boxShadow: '0 4px 20px rgba(14,165,233,0.35)',
                         overflow: 'hidden',
                         fontFamily: 'Outfit, Inter, sans-serif',
                     }}
                     onMouseEnter={e => {
                         (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)';
-                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 32px rgba(14,165,233,0.45), 0 2px 8px rgba(0,0,0,0.2)';
+                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 28px rgba(14,165,233,0.45)';
                     }}
                     onMouseLeave={e => {
                         (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
-                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 24px rgba(14,165,233,0.35), 0 1px 4px rgba(0,0,0,0.15)';
+                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 20px rgba(14,165,233,0.35)';
                     }}
                 >
                     <div style={{
@@ -348,36 +348,36 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                     <span style={{ position: 'relative', zIndex: 1 }}>🚀 {t.begin_screening}</span>
                 </button>
 
-                {/* Live Stats — single visitor counter */}
+                {/* Live Stats + Credits inline row */}
                 <div style={{
                     width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 10,
                     background: 'var(--bg-card)',
                     border: '1px solid var(--border-color)',
-                    borderRadius: 14,
-                    overflow: 'hidden',
+                    borderRadius: 12,
                     flexShrink: 0,
-                    padding: 'clamp(10px, 1.5vh, 14px) 12px',
-                    textAlign: 'center',
+                    padding: 'clamp(5px, 0.8vh, 8px) 12px',
                 }}>
-                    <div style={{ fontSize: 'clamp(9px, 1.1vh, 11px)', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.1em', marginBottom: 4 }}>
-                        👥 Total Visitors
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ fontSize: 'clamp(9px, 1.1vh, 11px)', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.08em' }}>
+                            👥 Visitors:
+                        </span>
+                        <span style={{ fontSize: 'clamp(12px, 1.7vh, 16px)', color: 'var(--accent)', fontWeight: 900, fontFamily: 'Outfit, Inter, sans-serif' }}>
+                            {stats.visitors === 0 ? '—' : stats.visitors.toLocaleString()}
+                        </span>
                     </div>
-                    <div style={{ fontSize: 'clamp(18px, 2.8vh, 26px)', color: 'var(--accent)', fontWeight: 900, fontFamily: 'Outfit, Inter, sans-serif' }}>
-                        {stats.visitors === 0 ? '—' : stats.visitors.toLocaleString()}
+                    <div style={{
+                        fontSize: 'clamp(8px, 1vh, 10px)',
+                        fontWeight: 500,
+                        color: 'var(--text-muted)',
+                        textAlign: 'right',
+                        lineHeight: 1.25,
+                    }}>
+                        Yousef Al-Qahtani, Fahad Rashid · Eng. Ahmad Tubaishat
                     </div>
-                </div>
-
-                {/* Credits */}
-                <div style={{
-                    fontSize: 'clamp(10px, 1.2vh, 12px)',
-                    fontWeight: 500,
-                    color: 'var(--text-muted)',
-                    textAlign: 'center',
-                    lineHeight: 1.6,
-                    flexShrink: 0,
-                    paddingBottom: 8,
-                }}>
-                    Designed by Yousef Al-Qahtani, Fahad Rashid · Supervised by Eng. Ahmad Tubaishat
                 </div>
             </div>
 

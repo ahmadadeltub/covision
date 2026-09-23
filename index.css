@@ -65,8 +65,11 @@
 html,
 body,
 #root {
-  min-height: 100%;
+  height: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
   width: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -75,6 +78,9 @@ body {
   font-family: var(--font-en);
   -webkit-font-smoothing: antialiased;
   transition: background 0.3s, color 0.3s;
+  overflow: hidden;
+  height: 100%;
+  height: 100dvh;
 }
 
 [dir="rtl"] body,
@@ -98,14 +104,17 @@ body {
 
 /* App Layout */
 .app-wrapper {
-  min-height: 100vh;
+  height: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .app-header {
-  padding: 10px 20px;
+  height: 48px;
+  padding: 6px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -116,8 +125,6 @@ body {
   box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 4px 20px rgba(0,0,0,0.04);
   z-index: 200;
   flex-shrink: 0;
-  position: sticky;
-  top: 0;
 }
 
 [data-theme="dark"] .app-header {
@@ -128,12 +135,14 @@ body {
 
 .app-main {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   justify-content: center;
-  padding: 24px;
+  padding: clamp(4px, 1vh, 12px) clamp(6px, 1.5vw, 16px);
 }
 
 /* Cards */

@@ -281,16 +281,16 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
         )}
 
         {/* Header Bar */}
-        <div style={{ flexShrink: 0, padding: '12px 24px' }}>
-          <h3 style={{ fontSize: 'clamp(16px, 4vw, 24px)', fontWeight: 900, color: 'var(--text-primary)', textTransform: 'uppercase', margin: 0 }}>{t.visual_acuity}</h3>
-          <p style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>
+        <div style={{ flexShrink: 0, padding: '6px 16px' }}>
+          <h3 style={{ fontSize: 'clamp(14px, 3vw, 20px)', fontWeight: 900, color: 'var(--text-primary)', textTransform: 'uppercase', margin: 0 }}>{t.visual_acuity}</h3>
+          <p style={{ fontSize: 11, color: 'var(--accent)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 2 }}>
             Trial {currentIndex + 1}/{totalTrials} · {currentTrial.label}
           </p>
         </div>
 
         {/* Progress Bar */}
-        <div style={{ flexShrink: 0, padding: '4px 24px' }}>
-          <div style={{ width: '100%', background: 'var(--progress-bg)', height: 6, borderRadius: 999, overflow: 'hidden' }}>
+        <div style={{ flexShrink: 0, padding: '2px 16px' }}>
+          <div style={{ width: '100%', background: 'var(--progress-bg)', height: 5, borderRadius: 999, overflow: 'hidden' }}>
             <div style={{
               background: 'linear-gradient(90deg, #0284c7, #6366f1)', height: '100%',
               transition: 'all 0.5s ease-out', borderRadius: 999, width: `${progressPct}%`
@@ -299,19 +299,19 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
         </div>
 
         {/* Optotype Display — High-Contrast Clinical Card */}
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, overflow: 'hidden' }}>
-          <div className="rounded-[2.5rem] md:rounded-[3.5rem] flex items-center justify-center shadow-2xl border-4"
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px 12px', overflow: 'hidden' }}>
+          <div className="rounded-2xl md:rounded-3xl flex items-center justify-center shadow-xl border-2"
             style={{
               background: '#ffffff',
               borderColor: 'rgba(0,0,0,0.08)',
-              padding: 'clamp(16px, 3vh, 36px) clamp(24px, 4vw, 48px)',
-              minWidth: `${Math.min(currentTrial.sizePx + 60, 420)}px`,
-              minHeight: `${Math.min(currentTrial.sizePx + 40, 360)}px`,
-              maxWidth: '92%',
-              maxHeight: '92%',
+              padding: 'clamp(8px, 1.5vh, 18px)',
+              width: 'min(92%, 360px)',
+              height: 'min(92%, 260px)',
+              maxHeight: '100%',
             }}>
             <div style={{
-              width: currentTrial.sizePx, height: currentTrial.sizePx,
+              width: 'min(100%, ' + Math.min(currentTrial.sizePx, 200) + 'px)',
+              height: 'min(100%, ' + Math.min(currentTrial.sizePx, 200) + 'px)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s'
             }}>
               {/* Rotated Optotype — Always Clinical High-Contrast Black */}
@@ -334,19 +334,19 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
         </div>
 
         {/* Answer Buttons */}
-        <div style={{ flexShrink: 0, padding: 16 }}>
+        <div style={{ flexShrink: 0, padding: '6px 16px' }}>
           <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, maxWidth: 450, margin: '0 auto'
+            display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, maxWidth: 360, margin: '0 auto'
           }}>
             {DIRECTIONS.map(dir => (
               <button
                 key={dir}
                 onClick={() => handleSelect(dir)}
                 style={{
-                  padding: '12px 0', background: 'var(--bg-card)', backdropFilter: 'blur(10px)',
+                  padding: '6px 0', background: 'var(--bg-card)', backdropFilter: 'blur(10px)',
                   border: `2px solid ${activeButton === dir ? 'var(--accent)' : 'var(--border-color)'}`,
-                  borderRadius: 24, fontSize: 32, transition: 'all 0.2s', cursor: 'pointer',
-                  boxShadow: activeButton === dir ? '0 0 30px rgba(2, 132, 199, 0.35)' : 'none',
+                  borderRadius: 16, fontSize: 22, transition: 'all 0.2s', cursor: 'pointer',
+                  boxShadow: activeButton === dir ? '0 0 20px rgba(2, 132, 199, 0.35)' : 'none',
                   transform: activeButton === dir ? 'scale(1.05)' : 'scale(1)'
                 }}
               >
@@ -360,19 +360,19 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
             ))}
           </div>
 
-          <div style={{ textAlign: 'center', marginTop: 12 }}>
+          <div style={{ textAlign: 'center', marginTop: 4 }}>
             <button
               onClick={() => handleSelect('?')}
               style={{
-                padding: '8px 24px', background: 'var(--bg-card)', border: '1px solid var(--border-color)',
-                borderRadius: 999, fontSize: 10, color: 'var(--text-muted)', fontWeight: 900, textTransform: 'uppercase',
-                letterSpacing: '0.2em', cursor: 'pointer', transition: 'all 0.2s'
+                padding: '5px 18px', background: 'var(--bg-card)', border: '1px solid var(--border-color)',
+                borderRadius: 999, fontSize: 9, color: 'var(--text-muted)', fontWeight: 900, textTransform: 'uppercase',
+                letterSpacing: '0.15em', cursor: 'pointer', transition: 'all 0.2s'
               }}
             >
               Can't See
             </button>
           </div>
-          <div style={{ textAlign: 'center', marginTop: 8, fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <div style={{ textAlign: 'center', marginTop: 3, fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', opacity: 0.8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
             <span>Voice: Say "Up", "Down", "Left", "Right" or "can't see"</span>
             {isListening && <span style={{ color: '#10b981', fontWeight: 'bold' }}>🎤 Listening</span>}
           </div>

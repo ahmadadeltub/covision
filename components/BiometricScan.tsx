@@ -1247,7 +1247,7 @@ Return strictly JSON matching this structure:
   const inRange = canAuthorize;
 
   return (
-    <div className="w-full h-full flex flex-col justify-start md:justify-center items-center space-y-3 overflow-y-auto md:overflow-hidden px-2 sm:px-4 py-3 md:py-0 max-h-full relative">
+    <div className="w-full h-full max-h-full flex flex-col justify-between items-center overflow-hidden px-2 py-1 md:py-2 relative">
       <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
         {[...Array(10)].map((_, i) => (
           <span
@@ -1268,35 +1268,35 @@ Return strictly JSON matching this structure:
         ))}
       </div>
 
-      <div className="w-full max-w-5xl glass p-1.5 rounded-2xl sm:rounded-3xl md:rounded-[3.5rem] border border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative overflow-hidden bg-slate-900/60 shrink-1 z-10">
+      <div className="w-full max-w-4xl glass p-1.5 sm:p-2.5 rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden bg-slate-900/60 flex-1 min-h-0 flex flex-col justify-between shrink-1 z-10">
 
         {!complete && (
-          <div className="scan-header-bar absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-black/90 to-transparent z-40 px-8 flex items-start pt-6 justify-between pointer-events-none">
-            <div className="flex items-center gap-4">
-              <div className={`w-4 h-4 rounded-full ${scanning ? 'bg-red-500 animate-pulse' : 'bg-cyan-400'} shadow-[0_0_20px_currentColor]`}></div>
-              <div className="text-xl md:text-3xl font-black text-white uppercase tracking-tighter drop-shadow-2xl">{status || (manualOverride ? 'MANUAL OVERRIDE' : 'INITIALIZING')}</div>
+          <div className="scan-header-bar absolute top-0 left-0 w-full h-14 bg-gradient-to-b from-black/90 to-transparent z-40 px-4 sm:px-6 flex items-start pt-2 sm:pt-3 justify-between pointer-events-none">
+            <div className="flex items-center gap-3">
+              <div className={`w-3 h-3 rounded-full ${scanning ? 'bg-red-500 animate-pulse' : 'bg-cyan-400'} shadow-[0_0_15px_currentColor]`}></div>
+              <div className="text-sm md:text-xl font-black text-white uppercase tracking-tighter drop-shadow-2xl">{status || (manualOverride ? 'MANUAL OVERRIDE' : 'INITIALIZING')}</div>
             </div>
-            <div className="text-lg font-mono text-cyan-400 font-black tracking-widest">{Math.round(progress)}%</div>
+            <div className="text-sm font-mono text-cyan-400 font-black tracking-widest">{Math.round(progress)}%</div>
           </div>
         )}
 
         {/* Modern Instrument-Grade Live Distance Telemetry Pod */}
-        <div className="w-full flex justify-center py-2 md:py-3 relative z-50">
-          <div className={`px-4 py-2 sm:px-6 sm:py-2.5 md:px-8 md:py-3 rounded-2xl md:rounded-full backdrop-blur-2xl border flex items-center gap-3 md:gap-4 transition-all duration-300 shadow-2xl ${distanceStatus === 'ok' || manualOverride
-            ? 'bg-slate-900/80 border-emerald-500/60 shadow-[0_0_30px_rgba(16,185,129,0.25)] text-emerald-300'
+        <div className="w-full flex justify-center py-1 sm:py-1.5 relative z-50">
+          <div className={`px-3 py-1.5 sm:px-5 sm:py-2 rounded-xl md:rounded-full backdrop-blur-2xl border flex items-center gap-2.5 md:gap-3 transition-all duration-300 shadow-xl ${distanceStatus === 'ok' || manualOverride
+            ? 'bg-slate-900/80 border-emerald-500/60 shadow-[0_0_25px_rgba(16,185,129,0.25)] text-emerald-300'
             : distanceStatus === 'too_close'
-              ? 'bg-slate-900/80 border-rose-500/60 shadow-[0_0_30px_rgba(244,63,94,0.25)] text-rose-300'
-              : 'bg-slate-900/80 border-amber-500/60 shadow-[0_0_30px_rgba(245,158,11,0.25)] text-amber-300'
+              ? 'bg-slate-900/80 border-rose-500/60 shadow-[0_0_25px_rgba(244,63,94,0.25)] text-rose-300'
+              : 'bg-slate-900/80 border-amber-500/60 shadow-[0_0_25px_rgba(245,158,11,0.25)] text-amber-300'
             }`}>
             {/* Pulsing Optical Beacon */}
-            <div className="relative w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center shrink-0 border"
+            <div className="relative w-6 h-6 md:w-7 md:h-7 rounded-lg flex items-center justify-center shrink-0 border"
               style={{
                 backgroundColor: distanceStatus === 'ok' || manualOverride ? 'rgba(16, 185, 129, 0.15)' : distanceStatus === 'too_close' ? 'rgba(244, 63, 94, 0.15)' : 'rgba(245, 158, 11, 0.15)',
                 borderColor: distanceStatus === 'ok' || manualOverride ? 'rgba(16, 185, 129, 0.5)' : distanceStatus === 'too_close' ? 'rgba(244, 63, 94, 0.5)' : 'rgba(245, 158, 11, 0.5)'
               }}
             >
-              <div className={`w-2.5 h-2.5 md:w-3 md:h-3 rounded-full ${distanceStatus === 'ok' || manualOverride ? 'bg-emerald-400 shadow-[0_0_10px_#10b981]' : distanceStatus === 'too_close' ? 'bg-rose-400 shadow-[0_0_10px_#f43f5e]' : 'bg-amber-400 shadow-[0_0_10px_#f59e0b]'}`} />
-              <div className="absolute inset-0 rounded-xl border animate-ping pointer-events-none opacity-40"
+              <div className={`w-2 h-2 rounded-full ${distanceStatus === 'ok' || manualOverride ? 'bg-emerald-400 shadow-[0_0_8px_#10b981]' : distanceStatus === 'too_close' ? 'bg-rose-400 shadow-[0_0_8px_#f43f5e]' : 'bg-amber-400 shadow-[0_0_8px_#f59e0b]'}`} />
+              <div className="absolute inset-0 rounded-lg border animate-ping pointer-events-none opacity-40"
                 style={{ borderColor: distanceStatus === 'ok' || manualOverride ? '#10b981' : distanceStatus === 'too_close' ? '#f43f5e' : '#f59e0b' }}
               />
             </div>
@@ -1304,21 +1304,21 @@ Return strictly JSON matching this structure:
             {/* Numbers & Subtitle */}
             <div className="flex flex-col">
               <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-[9px] md:text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
+                <span className="text-[8px] md:text-[9px] font-mono font-bold uppercase tracking-widest text-slate-400">
                   AI Optical Range
                 </span>
                 {distanceM > 0 && !manualOverride && (
-                  <span className="text-[9px] font-mono font-bold text-slate-500">
+                  <span className="text-[8px] font-mono font-bold text-slate-500">
                     (Target: 1.00m)
                   </span>
                 )}
               </div>
               <div className="flex items-baseline gap-2 leading-none">
-                <span className="text-2xl sm:text-3xl md:text-4xl font-black font-mono tracking-tight tabular-nums text-white drop-shadow">
+                <span className="text-xl sm:text-2xl md:text-3xl font-black font-mono tracking-tight tabular-nums text-white drop-shadow">
                   {manualOverride ? 'N/A' : distanceM > 0 ? distanceM.toFixed(2) : '—.—'}
-                  {!manualOverride && <span className="text-xs sm:text-sm font-sans font-bold text-slate-400 ml-1">m</span>}
+                  {!manualOverride && <span className="text-[10px] sm:text-xs font-sans font-bold text-slate-400 ml-0.5">m</span>}
                 </span>
-                <span className={`px-2 py-0.5 rounded-full text-[9px] md:text-xs font-mono font-bold uppercase tracking-wider border ${distanceStatus === 'ok' || manualOverride
+                <span className={`px-1.5 py-0.5 rounded-full text-[8px] md:text-[10px] font-mono font-bold uppercase tracking-wider border ${distanceStatus === 'ok' || manualOverride
                   ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300'
                   : distanceStatus === 'too_close'
                     ? 'bg-rose-500/20 border-rose-400/40 text-rose-300'
@@ -1337,7 +1337,7 @@ Return strictly JSON matching this structure:
           </div>
         </div>
 
-        <div ref={containerRef} className="relative aspect-video max-h-[38vh] sm:max-h-[46vh] md:max-h-[55vh] mx-auto rounded-2xl sm:rounded-3xl md:rounded-[3rem] overflow-hidden bg-black border border-white/5 shadow-inner transition-all duration-500">
+        <div ref={containerRef} className="relative aspect-video flex-1 min-h-0 max-h-[44vh] sm:max-h-[48vh] mx-auto rounded-xl sm:rounded-2xl md:rounded-3xl overflow-hidden bg-black border border-white/5 shadow-inner transition-all duration-500">
 
           <video
             ref={videoRef}
@@ -1433,53 +1433,53 @@ Return strictly JSON matching this structure:
         </div>
       )}
 
-      <div className="w-full max-w-5xl min-h-[140px] flex flex-col justify-center shrink-0 z-10">
+      <div className="w-full max-w-4xl shrink-0 z-10 pt-1">
         {aiError && (
-          <div className="mb-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-amber-300 text-sm flex items-start gap-3">
-            <span className="text-lg">🧠</span>
+          <div className="mb-1 p-2 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300 text-xs flex items-start gap-2">
+            <span className="text-sm">🧠</span>
             <div>
-              <p className="font-bold text-xs uppercase tracking-wider text-amber-400 mb-1">On-Device Analysis Active</p>
-              <p className="text-amber-300/80 text-xs">{aiError}</p>
+              <p className="font-bold text-[10px] uppercase tracking-wider text-amber-400">On-Device Analysis Active</p>
+              <p className="text-amber-300/80 text-[10px]">{aiError}</p>
             </div>
           </div>
         )}
         {complete && biometricData ? (
-          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-10 duration-700">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6 w-full">
-              <div className="glass p-3.5 sm:p-5 rounded-2xl md:rounded-[2rem] border-b-4 md:border-b-8 border-cyan-500 bg-black/50 shadow-2xl transition-transform hover:scale-105 text-center flex flex-col justify-center min-h-[95px] md:min-h-[120px]">
-                <div className="text-[9px] sm:text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-0.5 md:mb-1">Optical Age</div>
-                <div className="text-2xl sm:text-3xl md:text-5xl font-black text-white">{biometricData.age?.value ?? '??'}<span className="text-xs text-slate-500 ml-1">YRS</span></div>
+          <div className="space-y-2 animate-in fade-in slide-in-from-bottom-6 duration-500">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 w-full">
+              <div className="glass p-2 sm:p-3 rounded-xl md:rounded-2xl border-b-4 border-cyan-500 bg-black/50 shadow-xl text-center flex flex-col justify-center min-h-[60px] md:min-h-[75px]">
+                <div className="text-[8px] sm:text-[9px] font-black text-cyan-400 uppercase tracking-widest mb-0.5">Optical Age</div>
+                <div className="text-xl sm:text-2xl md:text-3xl font-black text-white">{biometricData.age?.value ?? '??'}<span className="text-[10px] text-slate-500 ml-1">YRS</span></div>
               </div>
-              <div className="glass p-3.5 sm:p-5 rounded-2xl md:rounded-[2rem] border-b-4 md:border-b-8 border-purple-500 bg-black/50 shadow-2xl transition-transform hover:scale-105 text-center flex flex-col justify-center min-h-[95px] md:min-h-[120px]">
-                <div className="text-[9px] sm:text-[10px] font-black text-purple-400 uppercase tracking-widest mb-0.5 md:mb-1">Emotional State</div>
-                <div className="text-base sm:text-xl md:text-2xl lg:text-3xl font-black text-white uppercase break-words leading-tight">
+              <div className="glass p-2 sm:p-3 rounded-xl md:rounded-2xl border-b-4 border-purple-500 bg-black/50 shadow-xl text-center flex flex-col justify-center min-h-[60px] md:min-h-[75px]">
+                <div className="text-[8px] sm:text-[9px] font-black text-purple-400 uppercase tracking-widest mb-0.5">Emotional State</div>
+                <div className="text-xs sm:text-sm md:text-base font-black text-white uppercase break-words leading-tight">
                   {biometricData.mood?.value ?? 'STABLE'}
                 </div>
               </div>
-              <div className="glass p-3.5 sm:p-5 rounded-2xl md:rounded-[2rem] border-b-4 md:border-b-8 border-emerald-500 bg-black/50 shadow-2xl transition-transform hover:scale-105 text-center flex flex-col justify-center min-h-[95px] md:min-h-[120px]">
-                <div className="text-[9px] sm:text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-0.5 md:mb-1">Gender</div>
-                <div className="text-base sm:text-xl md:text-2xl lg:text-3xl font-black text-white uppercase break-words leading-tight">
+              <div className="glass p-2 sm:p-3 rounded-xl md:rounded-2xl border-b-4 border-emerald-500 bg-black/50 shadow-xl text-center flex flex-col justify-center min-h-[60px] md:min-h-[75px]">
+                <div className="text-[8px] sm:text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-0.5">Gender</div>
+                <div className="text-xs sm:text-sm md:text-base font-black text-white uppercase break-words leading-tight">
                   {biometricData.gender?.value ?? 'N/A'}
                 </div>
               </div>
-              <div className="glass p-3.5 sm:p-5 rounded-2xl md:rounded-[2rem] border-b-4 md:border-b-8 border-orange-500 bg-black/50 shadow-2xl transition-transform hover:scale-105 text-center flex flex-col justify-center min-h-[95px] md:min-h-[120px]">
-                <div className="text-[9px] sm:text-[10px] font-black text-orange-400 uppercase tracking-widest mb-0.5 md:mb-1">Corrective Lens</div>
-                <div className="text-base sm:text-xl md:text-2xl lg:text-3xl font-black text-white uppercase break-words leading-tight">
+              <div className="glass p-2 sm:p-3 rounded-xl md:rounded-2xl border-b-4 border-orange-500 bg-black/50 shadow-xl text-center flex flex-col justify-center min-h-[60px] md:min-h-[75px]">
+                <div className="text-[8px] sm:text-[9px] font-black text-orange-400 uppercase tracking-widest mb-0.5">Corrective Lens</div>
+                <div className="text-xs sm:text-sm md:text-base font-black text-white uppercase break-words leading-tight">
                   {biometricData.glasses?.value ? 'DETECTED' : 'NONE'}
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-3 sm:gap-4 w-full">
+            <div className="flex gap-2 sm:gap-3 w-full">
               <button
                 onClick={resetScan}
-                className="flex-1 py-3.5 sm:py-5 bg-slate-800/80 border border-white/10 text-white rounded-2xl md:rounded-3xl font-black text-sm sm:text-base md:text-xl uppercase tracking-wider md:tracking-widest hover:bg-slate-700 transition-all shadow-xl"
+                className="flex-1 py-2 sm:py-3 bg-slate-800/80 border border-white/10 text-white rounded-xl md:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider hover:bg-slate-700 transition-all shadow-md"
               >
                 {t.back}
               </button>
               <button
                 onClick={handleNext}
-                className="flex-[2] py-3.5 sm:py-5 bg-gradient-to-r from-sky-600 to-indigo-600 text-white rounded-2xl md:rounded-3xl font-black text-sm sm:text-base md:text-xl uppercase tracking-wider md:tracking-widest hover:from-sky-500 hover:to-indigo-500 transition-all shadow-xl"
+                className="flex-[2] py-2 sm:py-3 bg-gradient-to-r from-sky-600 to-indigo-600 text-white rounded-xl md:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider hover:from-sky-500 hover:to-indigo-500 transition-all shadow-md"
               >
                 {t.next}
               </button>
@@ -1491,22 +1491,22 @@ Return strictly JSON matching this structure:
               <button
                 disabled={!canAuthorize}
                 onClick={runScan}
-                className={`w-full py-4 sm:py-6 md:py-9 rounded-2xl sm:rounded-3xl md:rounded-[3.5rem] font-black text-base sm:text-2xl md:text-4xl lg:text-5xl uppercase tracking-wider sm:tracking-widest md:tracking-[0.3em] transition-all shadow-2xl group relative overflow-hidden
+                className={`w-full py-2.5 sm:py-3.5 md:py-4 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm md:text-lg uppercase tracking-wider md:tracking-[0.2em] transition-all shadow-xl group relative overflow-hidden
                   ${canAuthorize 
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-black hover:scale-[1.02] hover:shadow-[0_0_80px_rgba(16,185,129,0.6)] cursor-pointer' 
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-black hover:scale-[1.01] hover:shadow-[0_0_50px_rgba(16,185,129,0.5)] cursor-pointer' 
                     : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'}`}
               >
                 <span className="relative z-10">{canAuthorize ? 'AUTHORIZE SCAN' : (cameraReady ? 'DETECTING FACE...' : 'CONNECTING CAMERA...')}</span>
                 {canAuthorize && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-300/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>}
               </button>
             ) : (
-              <div className="w-full p-6 sm:p-10 md:p-14 glass rounded-2xl sm:rounded-3xl md:rounded-[3.5rem] text-center border-2 border-cyan-500/20 flex items-center justify-center gap-6 sm:gap-10 bg-black/40 shadow-inner">
-                <div className="flex gap-4 sm:gap-6">
-                  <div className="w-4 sm:w-6 h-4 sm:h-6 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.3s] shadow-[0_0_20px_#00f3ff]"></div>
-                  <div className="w-4 sm:w-6 h-4 sm:h-6 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.15s] shadow-[0_0_20px_#00f3ff]"></div>
-                  <div className="w-4 sm:w-6 h-4 sm:h-6 bg-cyan-400 rounded-full animate-bounce shadow-[0_0_20px_#00f3ff]"></div>
+              <div className="w-full p-2.5 sm:p-4 glass rounded-xl sm:rounded-2xl text-center border-2 border-cyan-500/20 flex items-center justify-center gap-4 bg-black/40 shadow-inner">
+                <div className="flex gap-2 sm:gap-3">
+                  <div className="w-2.5 sm:w-3.5 h-2.5 sm:h-3.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.3s] shadow-[0_0_12px_#00f3ff]"></div>
+                  <div className="w-2.5 sm:w-3.5 h-2.5 sm:h-3.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.15s] shadow-[0_0_12px_#00f3ff]"></div>
+                  <div className="w-2.5 sm:w-3.5 h-2.5 sm:h-3.5 bg-cyan-400 rounded-full animate-bounce shadow-[0_0_12px_#00f3ff]"></div>
                 </div>
-                <span className="text-base sm:text-lg md:text-4xl font-black text-cyan-400 uppercase tracking-widest sm:tracking-[0.2em] md:tracking-[0.6em] animate-pulse">
+                <span className="text-xs sm:text-sm md:text-lg font-black text-cyan-400 uppercase tracking-widest sm:tracking-[0.2em] md:tracking-[0.3em] animate-pulse">
                   SCANNING
                 </span>
               </div>

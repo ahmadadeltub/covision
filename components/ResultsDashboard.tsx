@@ -157,53 +157,53 @@ const ResultsDashboard: React.FC<Props> = ({ lang, t, results, onReset }) => {
   };
 
   return (
-    <div ref={dashboardRef} className="w-full max-w-7xl h-auto md:h-full max-h-none md:max-h-[92vh] flex flex-col glass rounded-2xl sm:rounded-3xl md:rounded-[4rem] shadow-xl md:shadow-[0_0_150px_rgba(0,0,0,0.8)] border border-white/10 overflow-y-auto md:overflow-hidden bg-slate-900/60 p-3 sm:p-6 md:p-8 animate-in fade-in zoom-in-95 duration-700">
+    <div ref={dashboardRef} className="w-full max-w-7xl h-full max-h-full flex flex-col glass rounded-2xl md:rounded-3xl shadow-xl border border-white/10 overflow-hidden bg-slate-900/60 p-2.5 sm:p-4 md:p-5 animate-in fade-in zoom-in-95 duration-500">
 
       {/* Top Section: Header & Summary */}
-      <div className="shrink-0 flex flex-col sm:flex-row justify-between items-center gap-4 md:gap-6 mb-4 md:mb-6">
+      <div className="shrink-0 flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 mb-2 md:mb-3">
         <div className="text-center sm:text-left rtl:sm:text-right">
-          <h2 className="text-3xl sm:text-4xl md:text-6xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none drop-shadow-sm">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none drop-shadow-sm">
             {t.results_title}
           </h2>
-          <div className="mt-2 flex items-center justify-center sm:justify-start gap-4">
-            <div className="h-1 w-8 bg-sky-500 rounded-full"></div>
-            <p className="text-sky-700 dark:text-cyan-400 font-black uppercase tracking-[0.3em] md:tracking-[0.4em] text-[10px] md:text-xs">System Analysis Finalized</p>
+          <div className="mt-1 flex items-center justify-center sm:justify-start gap-3">
+            <div className="h-1 w-6 bg-sky-500 rounded-full"></div>
+            <p className="text-sky-700 dark:text-cyan-400 font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-[9px] md:text-[10px]">System Analysis Finalized</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 sm:gap-6 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 px-5 py-3 sm:px-8 sm:py-4 rounded-2xl md:rounded-[2.5rem] backdrop-blur-3xl shadow-xl">
+        <div className="flex items-center gap-3 sm:gap-4 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl md:rounded-2xl backdrop-blur-3xl shadow-lg">
           <div className="text-right rtl:text-left">
-            <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{t.reliability_score}</div>
-            <div className="text-3xl sm:text-4xl md:text-6xl font-black text-slate-900 dark:text-white leading-none">{(overallConfidence * 100).toFixed(0)}%</div>
+            <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{t.reliability_score}</div>
+            <div className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white leading-none">{(overallConfidence * 100).toFixed(0)}%</div>
           </div>
-          <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shadow-[0_0_30px_rgba(0,243,255,0.4)] ${overallConfidence > 0.8 ? 'bg-emerald-500' : 'bg-amber-500'}`}>
+          <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center text-xl sm:text-2xl shadow-[0_0_20px_rgba(0,243,255,0.4)] ${overallConfidence > 0.8 ? 'bg-emerald-500' : 'bg-amber-500'}`}>
             {overallConfidence > 0.8 ? '✅' : '⚠️'}
           </div>
         </div>
       </div>
 
       {/* Middle Section: Results & AI Insights */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-4 md:gap-6 md:overflow-hidden min-h-0">
+      <div className="flex-1 flex flex-col lg:flex-row gap-3 md:gap-4 overflow-hidden min-h-0">
 
         {/* Results Scrollable Area */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar px-1 md:px-2 space-y-3 md:space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-1 md:px-2 space-y-2 md:space-y-3 min-h-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-3">
             {results.map((res, i) => {
               const status = getRiskStatus(res);
               return (
-                <div key={i} className="group p-4 sm:p-6 md:p-8 rounded-2xl md:rounded-[2.5rem] bg-slate-100/80 dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 flex items-center justify-between gap-4 md:gap-6 transition-all hover:border-sky-400 dark:hover:border-cyan-400 hover:bg-sky-50 dark:hover:bg-cyan-500/10 shadow-xl">
+                <div key={i} className="group p-3 sm:p-4 rounded-xl md:rounded-2xl bg-slate-100/80 dark:bg-black/40 border border-slate-200 dark:border-white/5 flex items-center justify-between gap-3 md:gap-4 transition-all hover:border-sky-400 dark:hover:border-cyan-400 hover:bg-sky-50 dark:hover:bg-cyan-500/10 shadow-md">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 sm:gap-3 mb-1.5 sm:mb-2 flex-wrap">
-                      <h4 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 dark:text-white truncate uppercase tracking-tight">{res.testName}</h4>
-                      <span className={`px-3 sm:px-4 py-0.5 sm:py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${status === 'OPTIMAL' || status === 'PASS' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20'
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <h4 className="text-sm sm:text-base md:text-lg font-black text-slate-900 dark:text-white truncate uppercase tracking-tight">{res.testName}</h4>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${status === 'OPTIMAL' || status === 'PASS' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20'
                         }`}>
                         {status}
                       </span>
                     </div>
-                    <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 leading-snug font-medium italic">"{res.findings}"</p>
+                    <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 leading-snug font-medium italic">"{res.findings}"</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="text-3xl sm:text-4xl md:text-6xl font-black text-sky-600 dark:text-cyan-400 drop-shadow-sm">{res.score}/{res.total}</div>
+                    <div className="text-2xl sm:text-3xl md:text-4xl font-black text-sky-600 dark:text-cyan-400 drop-shadow-sm">{res.score}/{res.total}</div>
                   </div>
                 </div>
               );
@@ -212,22 +212,21 @@ const ResultsDashboard: React.FC<Props> = ({ lang, t, results, onReset }) => {
         </div>
 
         {/* AI Insight Box - Fixed height to ensure layout stability */}
-        <div className="w-full lg:w-[400px] xl:w-[450px] shrink-0 bg-sky-50/80 dark:bg-cyan-950/20 border-2 border-sky-200 dark:border-cyan-500/20 p-4 sm:p-6 md:p-8 rounded-2xl md:rounded-[3.5rem] flex flex-col relative overflow-hidden shadow-inner">
+        <div className="w-full lg:w-[360px] xl:w-[400px] shrink-0 bg-sky-50/80 dark:bg-cyan-950/20 border border-sky-200 dark:border-cyan-500/20 p-3 sm:p-4 md:p-5 rounded-xl md:rounded-2xl flex flex-col relative overflow-hidden shadow-inner">
           <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 blur-[50px] pointer-events-none"></div>
 
-          <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6 shrink-0">
-            <span className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-sky-100 dark:bg-cyan-500/20 flex items-center justify-center text-sky-600 dark:text-cyan-400 text-xl sm:text-2xl border border-sky-200 dark:border-cyan-500/30">🧠</span>
-            <h3 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-wider">{t.ai_insights}</h3>
+          <div className="flex items-center gap-2.5 mb-2 sm:mb-3 shrink-0">
+            <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-sky-100 dark:bg-cyan-500/20 flex items-center justify-center text-sky-600 dark:text-cyan-400 text-lg border border-sky-200 dark:border-cyan-500/30">🧠</span>
+            <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">{t.ai_insights}</h3>
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 text-slate-800 dark:text-slate-200 text-sm sm:text-base md:text-lg font-medium leading-relaxed italic">
+          <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-medium leading-relaxed italic">
             {loadingAi ? (
-              <div className="space-y-4 py-4">
-                <div className="h-4 bg-white/5 rounded-full w-full animate-pulse"></div>
-                <div className="h-4 bg-white/5 rounded-full w-11/12 animate-pulse"></div>
-                <div className="h-4 bg-white/5 rounded-full w-4/5 animate-pulse"></div>
-                <div className="h-4 bg-white/5 rounded-full w-full animate-pulse"></div>
-                <div className="h-4 bg-white/5 rounded-full w-11/12 animate-pulse"></div>
+              <div className="space-y-3 py-2">
+                <div className="h-3 bg-white/5 rounded-full w-full animate-pulse"></div>
+                <div className="h-3 bg-white/5 rounded-full w-11/12 animate-pulse"></div>
+                <div className="h-3 bg-white/5 rounded-full w-4/5 animate-pulse"></div>
+                <div className="h-3 bg-white/5 rounded-full w-full animate-pulse"></div>
               </div>
             ) : (
               <div className="whitespace-pre-line">{aiInsight}</div>
@@ -237,29 +236,29 @@ const ResultsDashboard: React.FC<Props> = ({ lang, t, results, onReset }) => {
       </div>
 
       {/* Bottom Section: Actions */}
-      <div className="shrink-0 pt-4 md:pt-6 flex flex-col sm:flex-row gap-3 md:gap-4 max-w-5xl mx-auto w-full">
+      <div className="shrink-0 pt-2 md:pt-3 flex flex-col sm:flex-row gap-2 md:gap-3 max-w-5xl mx-auto w-full">
         <button
           onClick={() => window.print()}
-          className="flex-1 py-3.5 sm:py-4 md:py-6 bg-gradient-to-r from-sky-600 to-indigo-600 text-white rounded-2xl md:rounded-[2.5rem] font-black uppercase text-xs sm:text-sm md:text-lg tracking-wider md:tracking-[0.2em] hover:shadow-[0_0_40px_rgba(2,132,199,0.4)] transition-all border border-white/10 active:scale-95 flex items-center justify-center gap-2"
+          className="flex-1 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-sky-600 to-indigo-600 text-white rounded-xl md:rounded-2xl font-black uppercase text-xs sm:text-sm tracking-wider md:tracking-[0.15em] hover:shadow-[0_0_30px_rgba(2,132,199,0.4)] transition-all border border-white/10 active:scale-95 flex items-center justify-center gap-1.5"
         >
           {t.download_report}
         </button>
         <button
           onClick={() => { setShowEmailModal(true); setEmailStatus('idle'); }}
-          className="flex-1 py-3.5 sm:py-4 md:py-6 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-2xl md:rounded-[2.5rem] font-black uppercase text-xs sm:text-sm md:text-lg tracking-wider md:tracking-[0.2em] hover:shadow-[0_0_40px_rgba(16,185,129,0.4)] transition-all border border-white/10 active:scale-95 flex items-center justify-center gap-2"
+          className="flex-1 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-xl md:rounded-2xl font-black uppercase text-xs sm:text-sm tracking-wider md:tracking-[0.15em] hover:shadow-[0_0_30px_rgba(16,185,129,0.4)] transition-all border border-white/10 active:scale-95 flex items-center justify-center gap-1.5"
         >
           ✉️ {t.send_email}
         </button>
         <button
           onClick={onReset}
-          className="flex-1 py-3.5 sm:py-4 md:py-6 bg-gradient-to-r from-violet-600 to-indigo-700 text-white rounded-2xl md:rounded-[2.5rem] font-black uppercase text-xs sm:text-sm md:text-lg tracking-wider md:tracking-[0.2em] hover:shadow-[0_0_40px_rgba(139,92,246,0.4)] transition-all border border-white/10 active:scale-95 flex items-center justify-center gap-2"
+          className="flex-1 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-violet-600 to-indigo-700 text-white rounded-xl md:rounded-2xl font-black uppercase text-xs sm:text-sm tracking-wider md:tracking-[0.15em] hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] transition-all border border-white/10 active:scale-95 flex items-center justify-center gap-1.5"
         >
           📋 View Full Report
         </button>
       </div>
 
-      <div className="shrink-0 mt-3 md:mt-4 text-center opacity-40">
-        <p className="text-[8px] md:text-[10px] text-slate-500 font-black uppercase tracking-[0.5em] italic">
+      <div className="shrink-0 mt-1.5 md:mt-2 text-center opacity-40">
+        <p className="text-[8px] md:text-[9px] text-slate-500 font-black uppercase tracking-[0.4em] italic">
           {t.disclaimer_text}
         </p>
       </div>

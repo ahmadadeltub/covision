@@ -248,18 +248,18 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, faceLandmarksRef, dist
         <div className="w-full h-full flex flex-row gap-4 animate-in fade-in duration-500 overflow-hidden">
 
             {/* ─── LEFT: Camera Feed Panel ─── */}
-            <div className="shrink-0 flex flex-col gap-3 items-center" style={{ width: 220 }}>
-                <div className="w-full aspect-[3/4] rounded-2xl overflow-hidden bg-black border-2 border-[#1c96c5]/40 shadow-[0_0_30px_rgba(28,150,197,0.2)] relative">
+            <div className="shrink-0 flex flex-col gap-2.5 items-center" style={{ width: 'clamp(150px, 18vw, 200px)' }}>
+                <div className="w-full aspect-[3/4] rounded-xl overflow-hidden bg-black border-2 border-[#1c96c5]/40 shadow-[0_0_20px_rgba(28,150,197,0.2)] relative">
                     <video ref={cameraRef} autoPlay muted playsInline className="w-full h-full object-cover scale-x-[-1] brightness-110" />
                     {/* Modern Dotted Face Mesh Overlay */}
                     <FaceMeshCanvas videoRef={cameraRef} landmarksRef={faceLandmarksRef} color="#1c96c5" className="absolute inset-0 w-full h-full pointer-events-none" />
-                    <div className="absolute top-2 left-2 glass px-2 py-0.5 rounded-full border border-[#1c96c5]/30 flex items-center gap-1">
+                    <div className="absolute top-1.5 left-1.5 glass px-2 py-0.5 rounded-full border border-[#1c96c5]/30 flex items-center gap-1">
                         <div className="w-1.5 h-1.5 rounded-full bg-[#1c96c5] animate-pulse"></div>
                         <span className="text-[8px] font-bold text-[#1c96c5] uppercase tracking-widest">LIVE</span>
                     </div>
                     {/* Eye cover status badge */}
                     {isTesting && (
-                        <div className={`absolute bottom-2 left-2 right-2 px-2 py-1 rounded-lg text-center text-[9px] font-black uppercase tracking-wider ${
+                        <div className={`absolute bottom-1.5 left-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-center text-[8px] font-black uppercase tracking-wider ${
                             isEyeUncovered
                                 ? 'bg-red-500/80 text-white border border-red-400'
                                 : 'bg-emerald-500/80 text-white border border-emerald-400'
@@ -273,21 +273,21 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, faceLandmarksRef, dist
                 </div>
 
                 {/* Test Info */}
-                <div className="w-full glass rounded-2xl border border-white/5 p-3 space-y-2">
+                <div className="w-full glass rounded-xl border border-white/5 p-2 space-y-1.5">
                     <div className="text-center">
-                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Ishihara</div>
-                        {isTesting && <div className="text-lg font-black text-white">Plate {currentPlateIndex + 1}</div>}
-                        {!isTesting && <div className="text-sm font-black text-white uppercase">{step === 'intro' ? 'Intro' : 'Instruction'}</div>}
+                        <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Ishihara</div>
+                        {isTesting && <div className="text-base font-black text-white">Plate {currentPlateIndex + 1}</div>}
+                        {!isTesting && <div className="text-xs font-black text-white uppercase">{step === 'intro' ? 'Intro' : 'Instruction'}</div>}
                     </div>
                     {isTesting && (
                         <>
                             <div className="h-px bg-white/5"></div>
                             <div className="flex items-center justify-between">
-                                <span className="text-[10px] text-slate-500 uppercase font-bold">Progress</span>
-                                <span className="text-sm font-black text-white">{currentPlateIndex + 1}/3</span>
+                                <span className="text-[9px] text-slate-500 uppercase font-bold">Progress</span>
+                                <span className="text-xs font-black text-white">{currentPlateIndex + 1}/3</span>
                             </div>
-                            <div className="flex items-center justify-center pt-1">
-                                <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
+                            <div className="flex items-center justify-center pt-0.5">
+                                <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
                                     BOTH EYES
                                 </span>
                             </div>
@@ -297,11 +297,11 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, faceLandmarksRef, dist
             </div>
 
             {/* ─── RIGHT: Test Content ─── */}
-            <div className="flex-1 flex flex-col glass rounded-[2rem] border border-white/10 bg-slate-900/40 overflow-hidden min-w-0 relative">
+            <div className="flex-1 flex flex-col glass rounded-2xl md:rounded-3xl border border-white/10 bg-slate-900/40 overflow-hidden min-w-0 relative">
 
                 {/* Distance Bar - Enforcing 1m distance (same as calibration) */}
                 {stream && (
-                    <div className="shrink-0 px-6 pt-4 pb-0 z-20">
+                    <div className="shrink-0 px-4 pt-2.5 pb-0 z-20">
                         <DistanceBar
                             distanceM={propDistanceM}
                             status={propDistanceStatus}
@@ -316,29 +316,29 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, faceLandmarksRef, dist
                 <div className={`flex-1 flex flex-col min-h-0 transition-opacity duration-300 ${(isPaused || isEyeUncovered) ? 'opacity-30 pointer-events-none blur-sm' : ''}`}>
 
                     {/* Header */}
-                    <div className="shrink-0 px-6 py-3 border-b border-white/5 flex items-center justify-between">
+                    <div className="shrink-0 px-4 py-2 border-b border-white/5 flex items-center justify-between">
                         <div>
-                            <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight leading-none">{t.color_intro_title}</h3>
-                            <p className="text-xs text-cyan-400 font-bold uppercase tracking-widest mt-0.5">Ishihara Color Plates</p>
+                            <h3 className="text-lg md:text-xl font-black text-white uppercase tracking-tight leading-none">{t.color_intro_title}</h3>
+                            <p className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest mt-0.5">Ishihara Color Plates</p>
                         </div>
                     </div>
 
                     {/* Content Logic */}
                     {step === 'intro' && (
-                        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-8">
-                            <div className="space-y-4">
-                                <h2 className="text-3xl font-black text-white">Bilateral Vision Test</h2>
-                                <p className="text-slate-300 max-w-lg mx-auto">
+                        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-6">
+                            <div className="space-y-3">
+                                <h2 className="text-2xl font-black text-white">Bilateral Vision Test</h2>
+                                <p className="text-slate-300 text-sm max-w-lg mx-auto">
                                     We will test each eye separately. You will need to cover one eye at a time with your hand or an eye patch.
                                 </p>
                             </div>
                             
                             <div className="flex flex-col items-center gap-2">
-                                <div className="w-24 h-24 rounded-full border-4 border-cyan-500/30 flex items-center justify-center relative">
+                                <div className="w-20 h-20 rounded-full border-4 border-cyan-500/30 flex items-center justify-center relative">
                                     <div className="absolute inset-0 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin" style={{ animationDuration: '2s' }}></div>
-                                    <span className="text-4xl font-black text-white">{introCountdown}</span>
+                                    <span className="text-3xl font-black text-white">{introCountdown}</span>
                                 </div>
-                                <p className="text-cyan-400 font-black uppercase tracking-[0.2em] text-sm">Starting Test</p>
+                                <p className="text-cyan-400 font-black uppercase tracking-[0.2em] text-xs">Starting Test</p>
                             </div>
                         </div>
                     )}
@@ -347,7 +347,7 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, faceLandmarksRef, dist
                         <>
 
                             {/* Progress Bar */}
-                            <div className="shrink-0 px-6 pt-2">
+                            <div className="shrink-0 px-4 pt-1.5">
                                 <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                                     <div
                                         className="bg-gradient-to-r from-emerald-500 to-cyan-500 h-full transition-all duration-500 rounded-full"
@@ -357,34 +357,34 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, faceLandmarksRef, dist
                             </div>
 
                             {/* Plate + question */}
-                            <div className="flex-1 min-h-0 flex flex-col items-center justify-center p-4 gap-3 relative">
+                            <div className="flex-1 min-h-0 flex flex-col items-center justify-center p-2 gap-2 relative">
                                 {/* Feedback Overlay */}
                                 {feedback && (
-                                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-900/40 backdrop-blur-[2px] rounded-[2rem] animate-in fade-in duration-200">
-                                        <div className={`w-32 h-32 rounded-full flex items-center justify-center text-6xl shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in zoom-in duration-300 ${feedback === 'correct' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
+                                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-900/40 backdrop-blur-[2px] rounded-2xl animate-in fade-in duration-200">
+                                        <div className={`w-24 h-24 rounded-full flex items-center justify-center text-5xl shadow-[0_0_40px_rgba(0,0,0,0.5)] animate-in zoom-in duration-300 ${feedback === 'correct' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
                                             {feedback === 'correct' ? '✅' : '❌'}
                                         </div>
                                     </div>
                                 )}
                                 {/* Ishihara Plate Image */}
-                                <div className="w-full max-w-sm aspect-square relative rounded-full overflow-hidden shadow-2xl bg-[#f5f0e0] border-4 border-white/5">
+                                <div className="max-h-[30vh] sm:max-h-[36vh] md:max-h-[40vh] aspect-square relative rounded-full overflow-hidden shadow-2xl bg-[#f5f0e0] border-4 border-white/5 shrink-1">
                                     <img
                                         src={plate?.imageSrc}
                                         alt={`Ishihara Plate`}
                                         className="w-full h-full object-contain"
                                     />
                                 </div>
-                                <p className="text-lg font-bold text-white text-center">{t.what_number}</p>
+                                <p className="text-sm sm:text-base font-bold text-white text-center">{t.what_number}</p>
                             </div>
 
                             {/* Answer buttons */}
-                            <div className="shrink-0 p-4 pt-0 space-y-2">
+                            <div className="shrink-0 p-2.5 pt-0 space-y-1.5">
                                 <div className="grid grid-cols-2 gap-2 max-w-md mx-auto">
                                     {options.map((opt) => (
                                         <button
                                             key={opt}
                                             onClick={() => handleAnswer(opt)}
-                                            className="py-4 glass border-2 border-white/10 rounded-2xl font-black text-3xl text-white hover:border-cyan-400 hover:bg-cyan-500/20 transition-all active:scale-90"
+                                            className="py-2 sm:py-2.5 md:py-3 glass border-2 border-white/10 rounded-xl md:rounded-2xl font-black text-xl sm:text-2xl md:text-3xl text-white hover:border-cyan-400 hover:bg-cyan-500/20 transition-all active:scale-90"
                                         >
                                             {opt}
                                         </button>
@@ -392,11 +392,11 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, faceLandmarksRef, dist
                                 </div>
                                 <button
                                     onClick={() => handleAnswer('none')}
-                                    className="w-full py-3 glass border border-white/5 rounded-full text-xs md:text-sm text-slate-500 font-black uppercase tracking-[0.4em] hover:text-white transition-colors"
+                                    className="w-full py-1.5 sm:py-2 glass border border-white/5 rounded-full text-[10px] sm:text-xs text-slate-400 font-black uppercase tracking-[0.3em] hover:text-white transition-colors"
                                 >
                                     {t.cant_see}
                                 </button>
-                                <div className="text-center mt-2 text-xs text-slate-500 uppercase tracking-widest opacity-60 flex items-center justify-center gap-2">
+                                <div className="text-center mt-1 text-[10px] text-slate-500 uppercase tracking-widest opacity-60 flex items-center justify-center gap-2">
                                     <span>Voice: Say the number or "can't see"</span>
                                     {isListening && <span className="text-emerald-400 font-bold animate-pulse">🎤 Listening</span>}
                                 </div>

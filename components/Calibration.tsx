@@ -852,8 +852,8 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
   const canProceed = localStatus === 'ok';
 
   return (
-    <div className="w-full flex-1 flex items-center justify-center p-1 sm:p-2 md:p-3 overflow-y-auto md:overflow-hidden bg-transparent">
-      <div className="glass w-full max-w-[98vw] lg:max-w-7xl h-auto min-h-0 md:h-[94vh] md:max-h-[96vh] rounded-2xl md:rounded-[2.5rem] shadow-2xl border border-slate-200/80 dark:border-white/10 flex flex-col items-center justify-between relative overflow-y-auto md:overflow-hidden bg-white/70 dark:bg-slate-900/60 p-2 sm:p-3 md:p-4 lg:p-5 animate-in fade-in zoom-in-95 duration-700">
+    <div className="w-full h-full max-h-full flex items-center justify-center p-1 sm:p-2 overflow-hidden bg-transparent">
+      <div className="glass w-full max-w-[98vw] lg:max-w-6xl h-full max-h-full rounded-2xl md:rounded-3xl shadow-2xl border border-slate-200/80 dark:border-white/10 flex flex-col items-center justify-between relative overflow-hidden bg-white/70 dark:bg-slate-900/60 p-2 sm:p-3 md:p-4 animate-in fade-in zoom-in-95 duration-500">
 
         {/* Background Elements */}
         <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
@@ -862,8 +862,8 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
         </div>
 
         {/* Header */}
-        <div className="relative z-10 w-full text-center shrink-0 mb-1 sm:mb-2">
-          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none drop-shadow-sm">
+        <div className="relative z-10 w-full text-center shrink-0 mb-1">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none drop-shadow-sm">
             {t.calibration_title}
           </h2>
         </div>
@@ -872,37 +872,37 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
         {/* MODERN INSTRUMENT-GRADE DISTANCE TELEMETRY */}
         {/* ═══════════════════════════════════════════ */}
         <div
-          className="distance-telemetry-pod w-full max-w-5xl lg:max-w-6xl mx-auto shrink-0 bg-slate-950/85 dark:bg-slate-950/85 border border-slate-700/60 rounded-xl sm:rounded-2xl md:rounded-3xl p-2.5 sm:p-3 md:p-3.5 backdrop-blur-xl shadow-xl relative overflow-hidden"
-          style={{ borderColor: getDistanceColor() + '40', boxShadow: `0 0 30px ${getDistanceColor()}18` }}
+          className="distance-telemetry-pod w-full max-w-4xl mx-auto shrink-0 bg-slate-950/85 dark:bg-slate-950/85 border border-slate-700/60 rounded-xl sm:rounded-2xl p-2 sm:p-2.5 backdrop-blur-xl shadow-xl relative overflow-hidden"
+          style={{ borderColor: getDistanceColor() + '40', boxShadow: `0 0 25px ${getDistanceColor()}18` }}
         >
           {/* Top Row: Distance readout + Guidance + Delta + Stability status */}
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5 sm:mb-2 px-1">
+          <div className="flex flex-wrap items-center justify-between gap-1.5 mb-1 px-1">
             {/* Left: Distance metric */}
-            <div className="flex items-baseline gap-1.5 sm:gap-2">
-              <span className="text-2xl sm:text-3xl md:text-4xl font-black font-mono tabular-nums leading-none tracking-tight" style={{ color: getDistanceColor() }}>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl sm:text-2xl md:text-3xl font-black font-mono tabular-nums leading-none tracking-tight" style={{ color: getDistanceColor() }}>
                 {effectiveDistanceM > 0 ? effectiveDistanceM.toFixed(2) : '—.—'}
               </span>
-              <span className="text-sm sm:text-base text-slate-400 font-bold uppercase">m</span>
-              <span className="text-[10px] md:text-xs font-mono font-bold text-slate-400 uppercase tracking-widest ml-1 hidden sm:inline">
+              <span className="text-xs sm:text-sm text-slate-400 font-bold uppercase">m</span>
+              <span className="text-[9px] md:text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest ml-1 hidden sm:inline">
                 (Target: 1.00m)
               </span>
             </div>
 
             {/* Right: Badges */}
-            <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-1.5">
               {/* Guidance Instruction Badge */}
               <div
-                className="flex items-center gap-1.5 py-1 px-2.5 sm:px-3 rounded-full border text-[11px] sm:text-xs font-black uppercase tracking-wider animate-pulse"
+                className="flex items-center gap-1 py-0.5 px-2 sm:px-2.5 rounded-full border text-[10px] sm:text-xs font-black uppercase tracking-wider animate-pulse"
                 style={{ background: getDistanceColor() + '18', borderColor: getDistanceColor() + '40', color: getDistanceColor() }}
               >
-                <span className="text-sm sm:text-base">{guidance.icon}</span>
+                <span className="text-xs sm:text-sm">{guidance.icon}</span>
                 <span>{guidance.text}</span>
               </div>
 
               {/* Delta Badge */}
               {effectiveDistanceM > 0 && (
                 <div
-                  className="px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-mono font-bold border items-center gap-1 hidden md:flex"
+                  className="px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-mono font-bold border items-center gap-1 hidden md:flex"
                   style={{
                     backgroundColor: localStatus === 'ok' ? 'rgba(16, 185, 129, 0.15)' : getDistanceColor() + '18',
                     borderColor: getDistanceColor() + '50',
@@ -922,11 +922,11 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
 
               {/* Countdown / Lock Badge */}
               {localStatus === 'ok' && (
-                <div className={`px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-mono font-black border flex items-center gap-1 shadow-sm ${effectiveStable || stableCountdown === 0
+                <div className={`px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-mono font-black border flex items-center gap-1 shadow-sm ${effectiveStable || stableCountdown === 0
                   ? 'bg-emerald-500/25 border-emerald-400/60 text-emerald-300 animate-pulse'
                   : 'bg-cyan-500/20 border-cyan-400/50 text-cyan-300'
                   }`}>
-                  <span className="text-xs">🔒</span>
+                  <span className="text-[10px]">🔒</span>
                   <span>{effectiveStable || stableCountdown === 0 ? 'LOCKED' : `HOLD ${stableCountdown}s`}</span>
                 </div>
               )}
@@ -934,7 +934,7 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
           </div>
 
           {/* Precision Caliper Rail */}
-          <div className="relative w-full h-6 sm:h-7 rounded-full bg-slate-900/90 border border-slate-700/80 overflow-hidden shadow-inner flex items-center">
+          <div className="relative w-full h-5 sm:h-6 rounded-full bg-slate-900/90 border border-slate-700/80 overflow-hidden shadow-inner flex items-center">
             {/* Green target zone (0.85m - 1.15m on a 0-2m scale) */}
             <div
               className="absolute top-0 h-full border-x transition-all duration-300 pointer-events-none"
@@ -954,7 +954,7 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
               style={{
                 width: `${Math.min((effectiveDistanceM / 2) * 100, 100)}%`,
                 background: `linear-gradient(90deg, ${getDistanceColor()}33, ${getDistanceColor()})`,
-                boxShadow: `0 0 15px ${getDistanceColor()}88`
+                boxShadow: `0 0 12px ${getDistanceColor()}88`
               }}
             />
 
@@ -967,34 +967,34 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
             {/* Current position reticle cursor */}
             {effectiveDistanceM > 0 && (
               <div
-                className="absolute top-1/2 w-5 sm:w-6 h-5 sm:h-6 rounded-full border-2 border-white transition-all duration-300 ease-out flex items-center justify-center z-20 pointer-events-none"
+                className="absolute top-1/2 w-4 sm:w-5 h-4 sm:h-5 rounded-full border-2 border-white transition-all duration-300 ease-out flex items-center justify-center z-20 pointer-events-none"
                 style={{
                   left: `${Math.min((effectiveDistanceM / 2) * 100, 100)}%`,
                   transform: 'translate(-50%, -50%)',
                   backgroundColor: getDistanceColor(),
-                  boxShadow: `0 0 16px ${getDistanceColor()}`
+                  boxShadow: `0 0 12px ${getDistanceColor()}`
                 }}
               >
-                <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-white animate-pulse" />
+                <div className="w-1 sm:w-1.5 h-1 sm:h-1.5 rounded-full bg-white animate-pulse" />
               </div>
             )}
           </div>
 
           {/* Calibrated Ticks */}
-          <div className="flex justify-between items-center text-[9px] sm:text-[10px] font-mono font-bold text-slate-500 px-2 mt-1 select-none">
+          <div className="flex justify-between items-center text-[8px] sm:text-[9px] font-mono font-bold text-slate-500 px-2 mt-0.5 select-none">
             <span>0.0m</span>
             <span>0.5m</span>
-            <span className="text-emerald-400 font-black">1.0m (TARGET ZONE)</span>
+            <span className="text-emerald-400 font-black">1.0m (TARGET)</span>
             <span>1.5m</span>
             <span>2.0m</span>
           </div>
         </div>
 
         {/* ═══════════════════════════════════════════ */}
-        {/* CAMERA FEED — ENLARGED, CENTERED, FITS PAGE */}
+        {/* CAMERA FEED — FITS PAGE 100% */}
         {/* ═══════════════════════════════════════════ */}
         <div
-          className="relative flex-1 w-full max-w-5xl lg:max-w-6xl min-h-[340px] sm:min-h-[420px] md:min-h-[480px] lg:min-h-[520px] max-h-[64vh] md:max-h-[68vh] rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] overflow-hidden bg-black border-2 shadow-[0_0_50px_rgba(0,200,255,0.15)] mx-auto flex items-center justify-center my-2 transition-all duration-300"
+          className="relative flex-1 min-h-0 w-full max-w-4xl aspect-video max-h-[44vh] sm:max-h-[48vh] rounded-xl sm:rounded-2xl md:rounded-3xl overflow-hidden bg-black border-2 shadow-2xl mx-auto flex items-center justify-center my-1 transition-all duration-300"
           style={{ borderColor: getDistanceColor() + '60' }}
         >
           <video
@@ -1011,30 +1011,30 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
             style={{ zIndex: 5 }}
           />
           {/* Camera overlay corners */}
-          <div className="absolute inset-0 pointer-events-none p-4 sm:p-6 md:p-8">
-            <div className="absolute top-4 sm:top-6 left-4 sm:left-6 w-10 sm:w-16 h-10 sm:h-16 border-t-4 border-l-4 rounded-tl-2xl transition-colors duration-300" style={{ borderColor: getDistanceColor() }}></div>
-            <div className="absolute top-4 sm:top-6 right-4 sm:right-6 w-10 sm:w-16 h-10 sm:h-16 border-t-4 border-r-4 rounded-tr-2xl transition-colors duration-300" style={{ borderColor: getDistanceColor() }}></div>
-            <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 w-10 sm:w-16 h-10 sm:h-16 border-b-4 border-l-4 rounded-bl-2xl transition-colors duration-300" style={{ borderColor: getDistanceColor() }}></div>
-            <div className="absolute bottom-4 sm:bottom-6 right-4 sm:right-6 w-10 sm:w-16 h-10 sm:h-16 border-b-4 border-r-4 rounded-br-2xl transition-colors duration-300" style={{ borderColor: getDistanceColor() }}></div>
+          <div className="absolute inset-0 pointer-events-none p-3 sm:p-4 md:p-6">
+            <div className="absolute top-3 sm:top-4 left-3 sm:left-4 w-8 sm:w-12 h-8 sm:h-12 border-t-3 border-l-3 rounded-tl-xl transition-colors duration-300" style={{ borderColor: getDistanceColor() }}></div>
+            <div className="absolute top-3 sm:top-4 right-3 sm:right-4 w-8 sm:w-12 h-8 sm:h-12 border-t-3 border-r-3 rounded-tr-xl transition-colors duration-300" style={{ borderColor: getDistanceColor() }}></div>
+            <div className="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 w-8 sm:w-12 h-8 sm:h-12 border-b-3 border-l-3 rounded-bl-xl transition-colors duration-300" style={{ borderColor: getDistanceColor() }}></div>
+            <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 w-8 sm:w-12 h-8 sm:h-12 border-b-3 border-r-3 rounded-br-xl transition-colors duration-300" style={{ borderColor: getDistanceColor() }}></div>
           </div>
 
           {/* Live Distance Overlay */}
           <div
-            className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 glass px-5 sm:px-7 py-2 sm:py-2.5 rounded-full border flex items-center gap-2 backdrop-blur-md shadow-2xl z-20"
+            className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 glass px-4 sm:px-6 py-1.5 rounded-full border flex items-center gap-2 backdrop-blur-md shadow-2xl z-20"
             style={{ borderColor: getDistanceColor() + '60' }}
           >
-            <span className="text-xs sm:text-sm animate-pulse" style={{ color: getDistanceColor() }}>●</span>
-            <span className="text-white font-black text-xs sm:text-sm md:text-base uppercase tracking-widest whitespace-nowrap">
-              {t.distance_live || 'DISTANCE'}: <span style={{ color: getDistanceColor(), fontSize: '1.25rem' }}>
+            <span className="text-[10px] sm:text-xs animate-pulse" style={{ color: getDistanceColor() }}>●</span>
+            <span className="text-white font-black text-[11px] sm:text-xs md:text-sm uppercase tracking-widest whitespace-nowrap">
+              {t.distance_live || 'DISTANCE'}: <span style={{ color: getDistanceColor(), fontSize: '1.1rem' }}>
                 {effectiveDistanceM > 0 ? effectiveDistanceM.toFixed(2) : '--'}
-              </span> <span className="text-slate-400 text-[10px] sm:text-xs">{t.meters?.toUpperCase?.() || 'METERS'}</span>
+              </span> <span className="text-slate-400 text-[9px] sm:text-[10px]">{t.meters?.toUpperCase?.() || 'METERS'}</span>
             </span>
           </div>
 
           {/* Stability countdown indicator */}
           {localStatus === 'ok' && !effectiveStable && (
-            <div className="absolute top-3 sm:top-4 left-1/2 -translate-x-1/2 glass px-5 py-2 rounded-full border border-amber-400/50 backdrop-blur-md shadow-2xl z-20">
-              <span className="text-amber-300 font-black text-xs sm:text-sm uppercase tracking-wider animate-pulse flex items-center gap-2">
+            <div className="absolute top-2 sm:top-3 left-1/2 -translate-x-1/2 glass px-4 py-1.5 rounded-full border border-amber-400/50 backdrop-blur-md shadow-2xl z-20">
+              <span className="text-amber-300 font-black text-[11px] sm:text-xs uppercase tracking-wider animate-pulse flex items-center gap-1.5">
                 <span>⏱</span> {t.hold_steady || 'HOLD STEADY'}: {stableCountdown}s
               </span>
             </div>
@@ -1044,10 +1044,10 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
         {/* ═══════════════════════════════════════════ */}
         {/* ACTION CONTROLS */}
         {/* ═══════════════════════════════════════════ */}
-        <div className="relative z-10 w-full max-w-5xl lg:max-w-6xl mx-auto flex flex-row items-center justify-between gap-3 sm:gap-4 shrink-0 mt-1 sm:mt-2">
+        <div className="relative z-10 w-full max-w-4xl mx-auto flex flex-row items-center justify-between gap-2.5 sm:gap-3 shrink-0 mt-1">
           <button
             onClick={handleFinish}
-            className="py-3 sm:py-3.5 px-4 sm:px-6 rounded-2xl font-bold text-xs sm:text-sm uppercase tracking-wider md:tracking-widest transition-all bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 hover:text-black dark:hover:text-white border border-slate-300 dark:border-slate-700 shadow-sm shrink-0"
+            className="py-2.5 sm:py-3 px-3.5 sm:px-5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 hover:text-black dark:hover:text-white border border-slate-300 dark:border-slate-700 shadow-sm shrink-0"
           >
             Skip 1m (Testing)
           </button>
@@ -1055,8 +1055,8 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
           <button
             onClick={handleFinish}
             disabled={!canProceed}
-            className={`group flex-1 py-3.5 sm:py-4 rounded-2xl md:rounded-3xl font-black text-sm sm:text-base md:text-xl uppercase tracking-wider md:tracking-[0.25em] transition-all transform hover:scale-[1.01] active:scale-95 relative overflow-hidden shadow-xl ${canProceed
-              ? 'bg-gradient-to-r from-sky-600 to-indigo-600 text-white hover:from-sky-500 hover:to-indigo-500 hover:shadow-[0_0_40px_rgba(2,132,199,0.5)] cursor-pointer'
+            className={`group flex-1 py-2.5 sm:py-3 rounded-xl md:rounded-2xl font-black text-xs sm:text-sm md:text-base uppercase tracking-wider md:tracking-[0.2em] transition-all transform hover:scale-[1.01] active:scale-95 relative overflow-hidden shadow-xl ${canProceed
+              ? 'bg-gradient-to-r from-sky-600 to-indigo-600 text-white hover:from-sky-500 hover:to-indigo-500 hover:shadow-[0_0_30px_rgba(2,132,199,0.5)] cursor-pointer'
               : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
               }`}
           >
