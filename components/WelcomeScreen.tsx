@@ -254,14 +254,14 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(2, 1fr)',
-                    gap: 'clamp(8px, 1.3vh, 14px)',
+                    gap: 'clamp(6px, 1vh, 12px)',
                     width: '100%',
                     flexShrink: 0,
                 }}>
                     {features.map((f, i) => (
                         <div key={i} style={{
-                            padding: 'clamp(10px, 1.5vh, 16px) clamp(12px, 2.2vw, 20px)',
-                            minHeight: 'clamp(54px, 7.2vh, 70px)',
+                            padding: 'clamp(8px, 1.2vh, 14px) clamp(10px, 1.8vw, 18px)',
+                            minHeight: 'clamp(48px, 6.2vh, 64px)',
                             background: 'var(--bg-card)',
                             backdropFilter: 'blur(20px)',
                             WebkitBackdropFilter: 'blur(20px)',
@@ -270,7 +270,7 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                             boxShadow: '0 4px 18px rgba(0,0,0,0.06)',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: 'clamp(10px, 1.6vw, 16px)',
+                            gap: 'clamp(8px, 1.4vw, 14px)',
                             transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
                             opacity: loaded ? 1 : 0,
                             transform: loaded ? 'translateY(0)' : 'translateY(16px)',
@@ -288,15 +288,15 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                             }}
                         >
                             <div style={{
-                                width: 'clamp(36px, 4.8vh, 48px)',
-                                height: 'clamp(36px, 4.8vh, 48px)',
+                                width: 'clamp(32px, 4.2vh, 44px)',
+                                height: 'clamp(32px, 4.2vh, 44px)',
                                 borderRadius: 12,
                                 background: 'linear-gradient(135deg, rgba(56,189,248,0.15), rgba(99,102,241,0.1))',
                                 border: '1px solid rgba(56,189,248,0.25)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                fontSize: 'clamp(20px, 2.8vh, 28px)',
+                                fontSize: 'clamp(18px, 2.5vh, 26px)',
                                 flexShrink: 0,
                                 boxShadow: '0 2px 10px rgba(56,189,248,0.1)',
                             }}>
@@ -319,7 +319,7 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                 {/* Disclaimer */}
                 <div style={{
                     width: '100%', flexShrink: 0,
-                    padding: 'clamp(6px, 0.9vh, 10px) clamp(10px, 1.5vw, 14px)',
+                    padding: 'clamp(5px, 0.7vh, 8px) clamp(10px, 1.5vw, 14px)',
                     background: 'rgba(251,191,36,0.06)',
                     border: '1px solid rgba(251,191,36,0.15)',
                     borderRadius: 12,
@@ -340,19 +340,19 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                     }}
                     style={{
                         width: '100%', flexShrink: 0, position: 'relative',
-                        padding: 'clamp(18px, 2.7vh, 26px) 28px',
-                        minHeight: 'clamp(74px, 11vh, 96px)',
-                        fontSize: 'clamp(18px, 2.6vh, 25px)',
+                        padding: 'clamp(22px, 3.4vh, 32px) 32px',
+                        minHeight: 'clamp(88px, 14vh, 120px)',
+                        fontSize: 'clamp(20px, 3vh, 30px)',
                         fontWeight: 900,
-                        letterSpacing: '0.1em',
+                        letterSpacing: '0.12em',
                         textTransform: 'uppercase',
                         color: '#fff',
                         background: 'linear-gradient(135deg, #0284c7 0%, #0ea5e9 45%, #6366f1 100%)',
                         border: 'none',
-                        borderRadius: 24,
+                        borderRadius: 28,
                         cursor: 'pointer',
                         transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                        boxShadow: '0 10px 34px rgba(14,165,233,0.48)',
+                        boxShadow: '0 12px 42px rgba(14,165,233,0.55)',
                         overflow: 'hidden',
                         fontFamily: 'Outfit, Inter, sans-serif',
                         display: 'flex',
@@ -361,21 +361,21 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
                     }}
                     onMouseEnter={e => {
                         (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)';
-                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 12px 40px rgba(14,165,233,0.65)';
+                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 16px 48px rgba(14,165,233,0.7)';
                     }}
                     onMouseLeave={e => {
                         (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
-                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 10px 34px rgba(14,165,233,0.48)';
+                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 12px 42px rgba(14,165,233,0.55)';
                     }}
                 >
                     <div style={{
                         position: 'absolute', inset: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)',
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)',
                         transform: 'translateX(-100%)',
                         animation: 'shimmer 2.5s ease-in-out infinite',
                     }} />
-                    <span style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <span style={{ fontSize: 'clamp(22px, 3.2vh, 30px)' }}>🚀</span>
+                    <span style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 14 }}>
+                        <span style={{ fontSize: 'clamp(26px, 4vh, 38px)' }}>🚀</span>
                         <span>{t.begin_screening}</span>
                     </span>
                 </button>
