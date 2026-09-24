@@ -637,16 +637,46 @@ const MedicalReport: React.FC<Props> = ({
                 useCORS: true,
                 backgroundColor: '#ffffff', // Pure white background
                 scrollY: 0,
-                windowWidth: 1040, // Standard desktop page width
+                windowWidth: 1100, // Standard desktop page width that fully fits buttons and charts
                 onclone: (clonedDoc) => {
+                    const clonedPage = clonedDoc.querySelector('[data-report-page="true"]');
+                    if (clonedPage) {
+                        (clonedPage as HTMLElement).style.width = '1040px';
+                        (clonedPage as HTMLElement).style.maxWidth = '1040px';
+                        (clonedPage as HTMLElement).style.margin = '0 auto';
+                        (clonedPage as HTMLElement).style.padding = '8px 0';
+                        (clonedPage as HTMLElement).style.background = '#ffffff';
+                    }
                     const clonedEl = clonedDoc.querySelector('[data-report-container="true"]');
                     if (clonedEl) {
                         (clonedEl as HTMLElement).style.background = '#ffffff';
                         (clonedEl as HTMLElement).style.boxShadow = 'none';
-                        (clonedEl as HTMLElement).style.border = 'none';
-                        (clonedEl as HTMLElement).style.maxWidth = '980px';
+                        (clonedEl as HTMLElement).style.border = '1px solid #cbd5e1';
+                        (clonedEl as HTMLElement).style.width = '1000px';
+                        (clonedEl as HTMLElement).style.maxWidth = '1000px';
                         (clonedEl as HTMLElement).style.margin = '0 auto';
                     }
+                    const actionBar = clonedDoc.querySelector('.print-action-bar');
+                    if (actionBar) {
+                        (actionBar as HTMLElement).style.display = 'flex';
+                        (actionBar as HTMLElement).style.flexWrap = 'wrap';
+                        (actionBar as HTMLElement).style.justifyContent = 'center';
+                        (actionBar as HTMLElement).style.gap = '10px';
+                        (actionBar as HTMLElement).style.marginBottom = '16px';
+                    }
+                    // Expand all graph/chart wrappers so they never clip in the canvas
+                    clonedDoc.querySelectorAll('.overflow-x-auto').forEach((box) => {
+                        (box as HTMLElement).style.overflow = 'visible';
+                        (box as HTMLElement).style.width = '100%';
+                    });
+                    // Ensure SVGs have exact width & overflow
+                    clonedDoc.querySelectorAll('svg').forEach((svg) => {
+                        (svg as SVGElement).style.overflow = 'visible';
+                    });
+                    // Hide any open modals in the clone
+                    clonedDoc.querySelectorAll('.no-print').forEach((modal) => {
+                        (modal as HTMLElement).style.display = 'none';
+                    });
                 },
             });
 
@@ -946,79 +976,7 @@ const MedicalReport: React.FC<Props> = ({
     // ─────────────────────────────────────────────────────────────
     return (
         <div className="w-full h-full flex flex-col items-center overflow-y-auto p-3 sm:p-6" dir="ltr">
-            {/* ─── ACTION BAR (NO-PRINT) ─── */}
-            <div className="no-print w-full max-w-5xl flex flex-wrap gap-2.5 sm:gap-3 justify-center mb-5 z-20">
-                <button
-                    onClick={handleExportPDF}
-                    className="px-5 sm:px-6 py-3.5 sm:py-4 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider transition-all shadow-md shadow-cyan-600/25 flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
-                >
-                    <span className="text-base sm:text-xl">📄</span> {t.export_pdf}
-                </button>
-                <button
-                    onClick={() => window.print()}
-                    className="px-5 sm:px-6 py-3.5 sm:py-4 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-white/10 text-slate-800 dark:text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
-                >
-                    <span className="text-base sm:text-xl">🖨️</span> {t.print_report}
-                </button>
-                <button
-                    onClick={() => {
-                        setShowEmailModal(true);
-                        setEmailStatus('idle');
-                    }}
-                    className="px-5 sm:px-6 py-3.5 sm:py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider transition-all shadow-md shadow-emerald-600/25 flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
-                >
-                    <span className="text-base sm:text-xl">✉️</span> {t.send_email}
-                </button>
-                <button
-                    onClick={handleShareWhatsApp}
-                    disabled={whatsappSending}
-                    className="px-5 sm:px-6 py-3.5 sm:py-4 bg-green-600 hover:bg-green-500 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider transition-all shadow-md shadow-green-600/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
-                >
-                    {whatsappSending ? (
-                        <>
-                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            Attaching PDF...
-                        </>
-                    ) : (
-                        <>
-                            <span className="text-base sm:text-xl">💬</span> {t.send_whatsapp || 'WhatsApp'}
-                        </>
-                    )}
-                </button>
-                <button
-                    onClick={() => setShowResearchMode(!showResearchMode)}
-                    className="px-5 sm:px-6 py-3.5 sm:py-4 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-white/10 text-slate-800 dark:text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider hover:border-purple-500 hover:text-purple-600 transition-all shadow-sm flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
-                >
-                    <span className="text-base sm:text-xl">🔬</span> {t.research_mode}
-                </button>
-                <button
-                    onClick={onReset}
-                    className="px-5 sm:px-6 py-3.5 sm:py-4 bg-slate-900 dark:bg-slate-800 text-white border-2 border-slate-700 rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider hover:bg-slate-800 transition-all shadow-md flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
-                >
-                    <span className="text-base sm:text-xl">🔄</span> {t.new_screening}
-                </button>
-            </div>
-
-            {/* Research Mode Panel */}
-            {showResearchMode && (
-                <div className="no-print w-full max-w-4xl bg-purple-50 border border-purple-200 rounded-2xl p-4 mb-6 flex flex-wrap gap-3 justify-center items-center shadow-sm">
-                    <span className="text-purple-900 font-black text-xs uppercase tracking-wider">🔬 Clinical Research Mode:</span>
-                    <button
-                        onClick={handleExportCSV}
-                        className="px-4 py-1.5 bg-purple-600 text-white rounded-lg font-bold text-xs hover:bg-purple-500 transition-all shadow-sm"
-                    >
-                        📊 {t.export_csv}
-                    </button>
-                    <button
-                        onClick={handleExportJSON}
-                        className="px-4 py-1.5 bg-purple-600 text-white rounded-lg font-bold text-xs hover:bg-purple-500 transition-all shadow-sm"
-                    >
-                        📋 {t.export_json}
-                    </button>
-                </div>
-            )}
-
-            {/* ─── WHATSAPP MODAL ─── */}
+            {/* ─── WHATSAPP MODAL (KEPT OUTSIDE REPORT REF) ─── */}
             {showWhatsAppModal && (
                 <div
                     className="no-print fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in"
@@ -1080,7 +1038,7 @@ const MedicalReport: React.FC<Props> = ({
                 </div>
             )}
 
-            {/* ─── EMAIL MODAL ─── */}
+            {/* ─── EMAIL MODAL (KEPT OUTSIDE REPORT REF) ─── */}
             {showEmailModal && (
                 <div
                     className="no-print fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in"
@@ -1162,15 +1120,92 @@ const MedicalReport: React.FC<Props> = ({
                 </div>
             )}
 
-            {/* ─────────────────────────────────────────────────────────────
-                REPORT CONTAINER — PURE WHITE MEDICAL DESIGN SHEET
-                ───────────────────────────────────────────────────────────── */}
+            {/* ─── FULL REPORT PAGE WRAPPER (INCLUDES ACTION BUTTONS & CLINICAL REPORT) ─── */}
             <div
                 ref={reportRef}
-                data-report-container="true"
-                className="w-full max-w-4xl bg-white text-slate-900 border border-slate-200 shadow-2xl rounded-3xl p-6 sm:p-10 space-y-7"
-                style={{ background: '#ffffff', color: '#0f172a' }}
+                data-report-page="true"
+                className="w-full max-w-5xl flex flex-col items-center"
             >
+                {/* ─── ACTION BAR (SHOWS IN PRINT & PDF SAME AS SCREEN) ─── */}
+                <div className="print-action-bar w-full max-w-5xl flex flex-wrap gap-2.5 sm:gap-3 justify-center mb-5 z-20">
+                    <button
+                        onClick={handleExportPDF}
+                        className="px-5 sm:px-6 py-3.5 sm:py-4 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider transition-all shadow-md shadow-cyan-600/25 flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
+                    >
+                        <span className="text-base sm:text-xl">📄</span> {t.export_pdf}
+                    </button>
+                    <button
+                        onClick={() => window.print()}
+                        className="px-5 sm:px-6 py-3.5 sm:py-4 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-white/10 text-slate-800 dark:text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
+                    >
+                        <span className="text-base sm:text-xl">🖨️</span> {t.print_report}
+                    </button>
+                    <button
+                        onClick={() => {
+                            setShowEmailModal(true);
+                            setEmailStatus('idle');
+                        }}
+                        className="px-5 sm:px-6 py-3.5 sm:py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider transition-all shadow-md shadow-emerald-600/25 flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
+                    >
+                        <span className="text-base sm:text-xl">✉️</span> {t.send_email}
+                    </button>
+                    <button
+                        onClick={handleShareWhatsApp}
+                        disabled={whatsappSending}
+                        className="px-5 sm:px-6 py-3.5 sm:py-4 bg-green-600 hover:bg-green-500 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider transition-all shadow-md shadow-green-600/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
+                    >
+                        {whatsappSending ? (
+                            <>
+                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Attaching PDF...
+                            </>
+                        ) : (
+                            <>
+                                <span className="text-base sm:text-xl">💬</span> {t.send_whatsapp || 'WhatsApp'}
+                            </>
+                        )}
+                    </button>
+                    <button
+                        onClick={() => setShowResearchMode(!showResearchMode)}
+                        className="px-5 sm:px-6 py-3.5 sm:py-4 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-white/10 text-slate-800 dark:text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider hover:border-purple-500 hover:text-purple-600 transition-all shadow-sm flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
+                    >
+                        <span className="text-base sm:text-xl">🔬</span> {t.research_mode}
+                    </button>
+                    <button
+                        onClick={onReset}
+                        className="px-5 sm:px-6 py-3.5 sm:py-4 bg-slate-900 dark:bg-slate-800 text-white border-2 border-slate-700 rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider hover:bg-slate-800 transition-all shadow-md flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
+                    >
+                        <span className="text-base sm:text-xl">🔄</span> {t.new_screening}
+                    </button>
+                </div>
+
+                {/* Research Mode Panel */}
+                {showResearchMode && (
+                    <div className="print-research-panel w-full max-w-4xl bg-purple-50 border border-purple-200 rounded-2xl p-4 mb-6 flex flex-wrap gap-3 justify-center items-center shadow-sm">
+                        <span className="text-purple-900 font-black text-xs uppercase tracking-wider">🔬 Clinical Research Mode:</span>
+                        <button
+                            onClick={handleExportCSV}
+                            className="px-4 py-1.5 bg-purple-600 text-white rounded-lg font-bold text-xs hover:bg-purple-500 transition-all shadow-sm cursor-pointer"
+                        >
+                            📊 {t.export_csv}
+                        </button>
+                        <button
+                            onClick={handleExportJSON}
+                            className="px-4 py-1.5 bg-purple-600 text-white rounded-lg font-bold text-xs hover:bg-purple-500 transition-all shadow-sm cursor-pointer"
+                        >
+                            📋 {t.export_json}
+                        </button>
+                    </div>
+                )}
+
+                {/* ─────────────────────────────────────────────────────────────
+                    REPORT CONTAINER — PURE WHITE MEDICAL DESIGN SHEET
+                    ───────────────────────────────────────────────────────────── */}
+                <div
+                    data-report-container="true"
+                    className="w-full max-w-4xl bg-white text-slate-900 border border-slate-200 shadow-2xl rounded-3xl p-6 sm:p-10 space-y-7"
+                    style={{ background: '#ffffff', color: '#0f172a' }}
+                >
                 {/* ═══ 1. CLINICAL HEADER & LETTERHEAD ═══ */}
                 <div className="border-b border-slate-200 pb-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
                     <div className="flex items-center gap-4">
@@ -1602,6 +1637,7 @@ const MedicalReport: React.FC<Props> = ({
                         CoVision AI Health Technologies • Report ID: {reportId} • All Rights Reserved
                     </p>
                 </div>
+            </div>
             </div>
         </div>
     );

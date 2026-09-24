@@ -542,20 +542,72 @@ body {
   .app-wrapper {
     background: #ffffff !important;
     color: #000000 !important;
-    font-size: 10px !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     height: auto !important;
     overflow: visible !important;
   }
 
-  /* ----- FORCE DARK TEXT FOR VISIBILITY ON WHITE PAPER ----- */
-  .text-white,
-  .text-slate-100,
-  .text-slate-200,
-  .text-slate-300 {
+  /* ----- FORCE DARK TEXT FOR VISIBILITY ON WHITE PAPER (EXCEPT BUTTONS & BADGES) ----- */
+  .text-white:not(button):not(button *):not([class*="bg-cyan"]):not([class*="bg-cyan"] *):not([class*="bg-emerald"]):not([class*="bg-emerald"] *):not([class*="bg-green"]):not([class*="bg-green"] *):not([class*="bg-purple"]):not([class*="bg-purple"] *):not([class*="bg-slate-900"]):not([class*="bg-slate-900"] *):not([class*="bg-slate-800"]):not([class*="bg-slate-800"] *):not([class*="bg-blue"]):not([class*="bg-blue"] *):not([class*="bg-rose"]):not([class*="bg-rose"] *):not([class*="bg-red"]):not([class*="bg-red"] *):not([class*="bg-gradient"]):not([class*="bg-gradient"] *),
+  .text-slate-100:not(button):not(button *),
+  .text-slate-200:not(button):not(button *),
+  .text-slate-300:not(button):not(button *) {
     color: #0f172a !important;
-    /* Extremely dark slate */
+  }
+
+  /* Keep crisp white text on colored/dark buttons and badges in print */
+  button.text-white,
+  button .text-white,
+  button[class*="bg-cyan"],
+  button[class*="bg-cyan"] *,
+  button[class*="bg-emerald"],
+  button[class*="bg-emerald"] *,
+  button[class*="bg-green"],
+  button[class*="bg-green"] *,
+  button[class*="bg-purple"],
+  button[class*="bg-purple"] *,
+  button[class*="bg-slate-900"],
+  button[class*="bg-slate-900"] *,
+  button[class*="bg-slate-800"],
+  button[class*="bg-slate-800"] *,
+  button[class*="bg-blue"],
+  button[class*="bg-blue"] *,
+  button[class*="bg-gradient"],
+  button[class*="bg-gradient"] * {
+    color: #ffffff !important;
+  }
+
+  /* Action bar & research mode print presentation */
+  .print-action-bar {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    margin-bottom: 20px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .print-action-bar button,
+  .print-research-panel button,
+  button {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .print-research-panel {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    margin-bottom: 20px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   .text-slate-400,
@@ -640,8 +692,20 @@ body {
     display: none !important;
   }
 
-  canvas {
+  video,
+  canvas.particle-canvas,
+  #particle-canvas,
+  .ambient-canvas,
+  [data-ambient="true"] {
     display: none !important;
+  }
+
+  /* Ensure all SVG charts and graphical elements render with exact colors and no clipping */
+  svg {
+    overflow: visible !important;
+    max-width: 100% !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   /* Force all sections visible */
@@ -780,8 +844,52 @@ body {
 }
 
 .exporting-pdf video,
-.exporting-pdf canvas {
+.exporting-pdf canvas.particle-canvas,
+.exporting-pdf #particle-canvas,
+.exporting-pdf .ambient-canvas,
+.exporting-pdf [data-ambient="true"] {
   display: none !important;
+}
+
+.exporting-pdf .print-action-bar {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  margin-bottom: 20px !important;
+}
+
+.exporting-pdf .print-research-panel {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  margin-bottom: 20px !important;
+}
+
+.exporting-pdf button.text-white,
+.exporting-pdf button .text-white,
+.exporting-pdf button[class*="bg-cyan"],
+.exporting-pdf button[class*="bg-cyan"] *,
+.exporting-pdf button[class*="bg-emerald"],
+.exporting-pdf button[class*="bg-emerald"] *,
+.exporting-pdf button[class*="bg-green"],
+.exporting-pdf button[class*="bg-green"] *,
+.exporting-pdf button[class*="bg-purple"],
+.exporting-pdf button[class*="bg-purple"] *,
+.exporting-pdf button[class*="bg-slate-900"],
+.exporting-pdf button[class*="bg-slate-900"] *,
+.exporting-pdf button[class*="bg-slate-800"],
+.exporting-pdf button[class*="bg-slate-800"] *,
+.exporting-pdf button[class*="bg-blue"],
+.exporting-pdf button[class*="bg-blue"] *,
+.exporting-pdf button[class*="bg-gradient"],
+.exporting-pdf button[class*="bg-gradient"] * {
+  color: #ffffff !important;
+}
+
+.exporting-pdf svg {
+  overflow: visible !important;
 }
 
 /* ----- CLEAN WHITE THEME FOR PDF ----- */
