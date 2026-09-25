@@ -174,55 +174,27 @@ const AstigmatismTest: React.FC<Props> = ({ t, stream, onFinish }) => {
 
   // Testing Phase UI
   return (
-    <div className="w-full h-full flex flex-col md:flex-row gap-3 md:gap-4 animate-in fade-in duration-500 overflow-x-hidden overflow-y-auto relative">
+    <div className="w-full h-full flex flex-col animate-in fade-in duration-500 overflow-hidden relative">
 
-      {/* LEFT: Info Panel */}
-      <div className="w-full md:w-[260px] lg:w-[300px] shrink-0 flex flex-col gap-2 md:gap-3 items-center">
-        <div className="w-full glass rounded-2xl border border-slate-200 dark:border-white/5 p-3 space-y-2">
-          <div className="text-center">
-            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{currentPattern.icon} {currentPattern.label}</div>
+      {/* ═══════════════════ MOBILE LAYOUT (< md) ═══════════════════ */}
+      <div className="md:hidden flex flex-col h-full overflow-hidden">
+        {/* Compact header */}
+        <div className="shrink-0 flex items-center justify-between px-3 py-1.5 bg-slate-900/60 backdrop-blur-md border-b border-white/5">
+          <div>
+            <div className="text-xs font-black text-white uppercase tracking-wide leading-tight">{t.astigmatism_test}</div>
+            <div className="text-[10px] text-cyan-400 font-bold uppercase">{currentPattern.icon} {currentPattern.label} · Trial {trialIdx + 1}/{TOTAL_TRIALS}</div>
           </div>
-          <div className="h-px bg-slate-200 dark:bg-white/5"></div>
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-500 uppercase font-bold">Trial</span>
-            <span className="text-sm font-black text-slate-900 dark:text-white">{trialIdx + 1}/{TOTAL_TRIALS}</span>
-          </div>
-          <div className="flex items-center justify-center pt-1">
-            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-100 text-sky-700 dark:bg-cyan-500/20 dark:text-cyan-400 border border-sky-300 dark:border-cyan-500/40">
-              BOTH EYES
-            </span>
-          </div>
+          <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">BOTH EYES</span>
         </div>
-        <div className="text-center px-2 py-1">
-          <div className="text-xs sm:text-sm font-black text-sky-700 dark:text-cyan-400 flex items-center gap-1.5 justify-center uppercase tracking-wide">
-            <span>Tap &quot;Sharp&quot; or &quot;Blurred&quot; below</span>
+        {/* Progress bar */}
+        <div className="shrink-0 px-3 py-1.5">
+          <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+            <div className="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full transition-all duration-500 rounded-full" style={{ width: `${progressPct}%` }} />
           </div>
         </div>
-        <div className="hidden md:block w-full">
-          <AIBotBubble botState={botState} isEyeUncovered={false} coverEye={undefined} isListening={isListening} transcript={transcript} />
-        </div>
-      </div>
-
-      {/* RIGHT: Test Content */}
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-
-        <div className="shrink-0 px-3 md:px-6 py-2 md:py-3">
-          <h3 className="text-lg md:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">{t.astigmatism_test}</h3>
-          <p className="text-xs text-sky-700 dark:text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
-            {t.astigmatism_desc} &mdash; BOTH EYES
-          </p>
-        </div>
-
-        <div className="shrink-0 px-3 md:px-6 pt-1 md:pt-2">
-          <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-            <div className="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full transition-all duration-500 rounded-full"
-              style={{ width: `${progressPct}%` }} />
-          </div>
-        </div>
-
-        {/* Pattern Display */}
-        <div className="flex-1 min-h-0 flex items-center justify-center p-2 sm:p-3">
-          <div className="w-[min(48vw,20vh)] h-[min(48vw,20vh)] max-h-[160px] sm:max-h-[180px] bg-white rounded-2xl p-2.5 sm:p-3 border-4 border-white/10 shadow-xl">
+        {/* Pattern display */}
+        <div className="flex-1 min-h-0 flex items-center justify-center px-4 py-1">
+          <div style={{ width: 'min(55vw, 180px)', height: 'min(55vw, 180px)' }} className="bg-white rounded-2xl p-2.5 border-4 border-white/10 shadow-xl">
             <svg viewBox="0 0 100 100" className="w-full h-full">
               {currentPattern.key === 'clock' && (
                 <>
@@ -284,43 +256,185 @@ const AstigmatismTest: React.FC<Props> = ({ t, stream, onFinish }) => {
             </svg>
           </div>
         </div>
-
-        {/* Smart Answer Buttons — Compact 2x2 Grid with Horizontal Layout */}
-        <div className="shrink-0 p-2 sm:p-3 pt-0 space-y-1.5">
-          <p className="text-center text-[10px] sm:text-xs text-slate-500 uppercase tracking-widest font-bold mb-0.5">How do all the lines appear to you?</p>
-          <div className="grid grid-cols-2 gap-2 max-w-xl mx-auto">
+        {/* Buttons */}
+        <div className="shrink-0 px-3 pb-2 space-y-1.5">
+          <p className="text-center text-[10px] text-slate-500 uppercase tracking-widest font-bold">How do all the lines appear?</p>
+          <div className="grid grid-cols-2 gap-2">
             <button onClick={() => handleChoice(false)}
-              className="py-2 px-2.5 min-h-[46px] sm:min-h-[50px] bg-emerald-500/10 border-2 border-emerald-500/30 text-emerald-400 rounded-xl sm:rounded-2xl hover:bg-emerald-500/20 transition-all active:scale-95 flex items-center gap-2 justify-start cursor-pointer">
-              <span className="text-xl sm:text-2xl shrink-0">&#x2705;</span>
-              <div className="text-left min-w-0">
-                <span className="font-black uppercase text-xs sm:text-sm tracking-wide block leading-tight truncate">All Lines Sharp</span>
-                <span className="block text-[8px] sm:text-[10px] text-emerald-400/80 normal-case tracking-normal leading-tight truncate">Equal clarity</span>
+              className="py-2 px-2 h-[54px] bg-emerald-500/10 border-2 border-emerald-500/30 text-emerald-400 rounded-xl hover:bg-emerald-500/20 transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer">
+              <span className="text-xl shrink-0">✅</span>
+              <div className="text-left">
+                <span className="font-black uppercase text-xs block leading-tight">All Sharp</span>
+                <span className="block text-[9px] text-emerald-400/80 leading-tight">Equal clarity</span>
               </div>
             </button>
             <button onClick={() => handleChoice(true)}
-              className="py-2 px-2.5 min-h-[46px] sm:min-h-[50px] bg-amber-500/10 border-2 border-amber-500/30 text-amber-400 rounded-xl sm:rounded-2xl hover:bg-amber-500/20 transition-all active:scale-95 flex items-center gap-2 justify-start cursor-pointer">
-              <span className="text-xl sm:text-2xl shrink-0">&#x26A0;&#xFE0F;</span>
-              <div className="text-left min-w-0">
-                <span className="font-black uppercase text-xs sm:text-sm tracking-wide block leading-tight truncate">Some Blurred</span>
-                <span className="block text-[8px] sm:text-[10px] text-amber-400/80 normal-case tracking-normal leading-tight truncate">Certain lines lighter</span>
+              className="py-2 px-2 h-[54px] bg-amber-500/10 border-2 border-amber-500/30 text-amber-400 rounded-xl hover:bg-amber-500/20 transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer">
+              <span className="text-xl shrink-0">⚠️</span>
+              <div className="text-left">
+                <span className="font-black uppercase text-xs block leading-tight">Some Blurred</span>
+                <span className="block text-[9px] text-amber-400/80 leading-tight">Lines lighter</span>
               </div>
             </button>
             <button onClick={() => { setSelectedPositions([1,2,3,4,5,6]); handleChoice(true, true); }}
-              className="py-2 px-2.5 min-h-[46px] sm:min-h-[50px] bg-orange-500/10 border-2 border-orange-500/30 text-orange-400 rounded-xl sm:rounded-2xl hover:bg-orange-500/20 transition-all active:scale-95 flex items-center gap-2 justify-start cursor-pointer">
-              <span className="text-xl sm:text-2xl shrink-0">&#x1F300;</span>
-              <div className="text-left min-w-0">
-                <span className="font-black uppercase text-xs sm:text-sm tracking-wide block leading-tight truncate">Lines Are Wavy</span>
-                <span className="block text-[8px] sm:text-[10px] text-orange-400/80 normal-case tracking-normal leading-tight truncate">Lines bend/curve</span>
+              className="py-2 px-2 h-[54px] bg-orange-500/10 border-2 border-orange-500/30 text-orange-400 rounded-xl hover:bg-orange-500/20 transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer">
+              <span className="text-xl shrink-0">🌀</span>
+              <div className="text-left">
+                <span className="font-black uppercase text-xs block leading-tight">Wavy Lines</span>
+                <span className="block text-[9px] text-orange-400/80 leading-tight">Lines bend</span>
               </div>
             </button>
             <button onClick={() => { setSelectedPositions([1,2,3,4,5,6,7,8,9,10,11,12]); handleChoice(true, true); }}
-              className="py-2 px-2.5 min-h-[46px] sm:min-h-[50px] bg-red-500/10 border-2 border-red-500/30 text-red-400 rounded-xl sm:rounded-2xl hover:bg-red-500/20 transition-all active:scale-95 flex items-center gap-2 justify-start cursor-pointer">
-              <span className="text-xl sm:text-2xl shrink-0">&#x274C;</span>
-              <div className="text-left min-w-0">
-                <span className="font-black uppercase text-xs sm:text-sm tracking-wide block leading-tight truncate">Very Distorted</span>
-                <span className="block text-[8px] sm:text-[10px] text-red-400/80 normal-case tracking-normal leading-tight truncate">Can't see clearly</span>
+              className="py-2 px-2 h-[54px] bg-red-500/10 border-2 border-red-500/30 text-red-400 rounded-xl hover:bg-red-500/20 transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer">
+              <span className="text-xl shrink-0">❌</span>
+              <div className="text-left">
+                <span className="font-black uppercase text-xs block leading-tight">Distorted</span>
+                <span className="block text-[9px] text-red-400/80 leading-tight">Can't see clearly</span>
               </div>
             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ═══════════════════ DESKTOP LAYOUT (≥ md) ═══════════════════ */}
+      <div className="hidden md:flex flex-row h-full gap-4 overflow-hidden">
+        {/* LEFT: Info Panel */}
+        <div className="w-[260px] lg:w-[300px] shrink-0 flex flex-col gap-3 items-center">
+          <div className="w-full glass rounded-2xl border border-slate-200 dark:border-white/5 p-3 space-y-2">
+            <div className="text-center">
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{currentPattern.icon} {currentPattern.label}</div>
+            </div>
+            <div className="h-px bg-slate-200 dark:bg-white/5"></div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-slate-500 uppercase font-bold">Trial</span>
+              <span className="text-sm font-black text-slate-900 dark:text-white">{trialIdx + 1}/{TOTAL_TRIALS}</span>
+            </div>
+            <div className="flex items-center justify-center pt-1">
+              <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-100 text-sky-700 dark:bg-cyan-500/20 dark:text-cyan-400 border border-sky-300 dark:border-cyan-500/40">BOTH EYES</span>
+            </div>
+          </div>
+          <div className="text-center px-2 py-1">
+            <div className="text-xs font-black text-sky-700 dark:text-cyan-400 flex items-center gap-1.5 justify-center uppercase tracking-wide">
+              <span>Tap &quot;Sharp&quot; or &quot;Blurred&quot; below</span>
+            </div>
+          </div>
+          <div className="w-full">
+            <AIBotBubble botState={botState} isEyeUncovered={false} coverEye={undefined} isListening={isListening} transcript={transcript} />
+          </div>
+        </div>
+
+        {/* RIGHT: Test Content */}
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+          <div className="shrink-0 px-6 py-3">
+            <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">{t.astigmatism_test}</h3>
+            <p className="text-xs text-sky-700 dark:text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
+              {t.astigmatism_desc} &mdash; BOTH EYES
+            </p>
+          </div>
+          <div className="shrink-0 px-6 pt-2">
+            <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+              <div className="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full transition-all duration-500 rounded-full" style={{ width: `${progressPct}%` }} />
+            </div>
+          </div>
+          <div className="flex-1 min-h-0 flex items-center justify-center p-3">
+            <div className="w-[min(48vw,20vh)] h-[min(48vw,20vh)] max-h-[180px] bg-white rounded-2xl p-2.5 border-4 border-white/10 shadow-xl">
+              <svg viewBox="0 0 100 100" className="w-full h-full">
+                {currentPattern.key === 'clock' && (
+                  <>
+                    {Array.from({ length: 12 }).map((_, i) => {
+                      const angle = (i * 30 * Math.PI) / 180;
+                      const x2 = 50 + 38 * Math.cos(angle - Math.PI / 2);
+                      const y2 = 50 + 38 * Math.sin(angle - Math.PI / 2);
+                      const labelX = 50 + 44 * Math.cos(angle - Math.PI / 2);
+                      const labelY = 50 + 44 * Math.sin(angle - Math.PI / 2);
+                      return (<g key={i}>
+                        <line x1="50" y1="50" x2={x2} y2={y2} stroke="#000" strokeWidth="1" strokeLinecap="round" />
+                        <text x={labelX} y={labelY} dominantBaseline="middle" textAnchor="middle" fontSize="3.5" fontWeight="bold" fill="#333">{i === 0 ? 12 : i}</text>
+                      </g>);
+                    })}
+                    <circle cx="50" cy="50" r="2" fill="#000" />
+                  </>
+                )}
+                {currentPattern.key === 'starburst' && (
+                  <>
+                    {Array.from({ length: 36 }).map((_, i) => {
+                      const angle = (i * 10 * Math.PI) / 180;
+                      return <line key={i} x1="50" y1="50" x2={50 + 42 * Math.cos(angle)} y2={50 + 42 * Math.sin(angle)} stroke="#000" strokeWidth={i % 3 === 0 ? '1.2' : '0.5'} />;
+                    })}
+                    <circle cx="50" cy="50" r="1" fill="#000" />
+                  </>
+                )}
+                {currentPattern.key === 'cross' && (
+                  <>
+                    <line x1="10" y1="50" x2="90" y2="50" stroke="#000" strokeWidth="1.5" />
+                    <line x1="50" y1="10" x2="50" y2="90" stroke="#000" strokeWidth="1.5" />
+                    <line x1="18" y1="18" x2="82" y2="82" stroke="#000" strokeWidth="1" />
+                    <line x1="82" y1="18" x2="18" y2="82" stroke="#000" strokeWidth="1" />
+                    {[15, 25, 35].map(r => <circle key={r} cx="50" cy="50" r={r} fill="none" stroke="#000" strokeWidth="0.4" />)}
+                    <circle cx="50" cy="50" r="1.5" fill="#000" />
+                  </>
+                )}
+                {currentPattern.key === 'radial' && (
+                  <>
+                    {Array.from({ length: 24 }).map((_, i) => {
+                      const angle = (i * 15 * Math.PI) / 180;
+                      return <line key={i} x1={50 + 8 * Math.cos(angle)} y1={50 + 8 * Math.sin(angle)} x2={50 + 44 * Math.cos(angle)} y2={50 + 44 * Math.sin(angle)} stroke="#000" strokeWidth={i % 2 === 0 ? '1.5' : '0.6'} />;
+                    })}
+                    <circle cx="50" cy="50" r="2" fill="#000" />
+                  </>
+                )}
+                {currentPattern.key === 'parallel' && (
+                  <>
+                    {Array.from({ length: 8 }).map((_, i) => {
+                      const y = 15 + i * 10;
+                      return <line key={`h${i}`} x1="10" y1={y} x2="90" y2={y} stroke="#000" strokeWidth="1" />;
+                    })}
+                    {Array.from({ length: 8 }).map((_, i) => {
+                      const x = 15 + i * 10;
+                      return <line key={`v${i}`} x1={x} y1="10" x2={x} y2="90" stroke="#000" strokeWidth="0.6" strokeDasharray="2,2" />;
+                    })}
+                    <circle cx="50" cy="50" r="2" fill="#000" />
+                  </>
+                )}
+              </svg>
+            </div>
+          </div>
+          <div className="shrink-0 p-3 pt-0 space-y-1.5">
+            <p className="text-center text-xs text-slate-500 uppercase tracking-widest font-bold mb-0.5">How do all the lines appear to you?</p>
+            <div className="grid grid-cols-2 gap-2 max-w-xl mx-auto">
+              <button onClick={() => handleChoice(false)}
+                className="py-2 px-2.5 min-h-[50px] bg-emerald-500/10 border-2 border-emerald-500/30 text-emerald-400 rounded-2xl hover:bg-emerald-500/20 transition-all active:scale-95 flex items-center gap-2 justify-start cursor-pointer">
+                <span className="text-2xl shrink-0">✅</span>
+                <div className="text-left min-w-0">
+                  <span className="font-black uppercase text-sm tracking-wide block leading-tight truncate">All Lines Sharp</span>
+                  <span className="block text-[10px] text-emerald-400/80 normal-case tracking-normal leading-tight truncate">Equal clarity</span>
+                </div>
+              </button>
+              <button onClick={() => handleChoice(true)}
+                className="py-2 px-2.5 min-h-[50px] bg-amber-500/10 border-2 border-amber-500/30 text-amber-400 rounded-2xl hover:bg-amber-500/20 transition-all active:scale-95 flex items-center gap-2 justify-start cursor-pointer">
+                <span className="text-2xl shrink-0">⚠️</span>
+                <div className="text-left min-w-0">
+                  <span className="font-black uppercase text-sm tracking-wide block leading-tight truncate">Some Blurred</span>
+                  <span className="block text-[10px] text-amber-400/80 normal-case tracking-normal leading-tight truncate">Certain lines lighter</span>
+                </div>
+              </button>
+              <button onClick={() => { setSelectedPositions([1,2,3,4,5,6]); handleChoice(true, true); }}
+                className="py-2 px-2.5 min-h-[50px] bg-orange-500/10 border-2 border-orange-500/30 text-orange-400 rounded-2xl hover:bg-orange-500/20 transition-all active:scale-95 flex items-center gap-2 justify-start cursor-pointer">
+                <span className="text-2xl shrink-0">🌀</span>
+                <div className="text-left min-w-0">
+                  <span className="font-black uppercase text-sm tracking-wide block leading-tight truncate">Lines Are Wavy</span>
+                  <span className="block text-[10px] text-orange-400/80 normal-case tracking-normal leading-tight truncate">Lines bend/curve</span>
+                </div>
+              </button>
+              <button onClick={() => { setSelectedPositions([1,2,3,4,5,6,7,8,9,10,11,12]); handleChoice(true, true); }}
+                className="py-2 px-2.5 min-h-[50px] bg-red-500/10 border-2 border-red-500/30 text-red-400 rounded-2xl hover:bg-red-500/20 transition-all active:scale-95 flex items-center gap-2 justify-start cursor-pointer">
+                <span className="text-2xl shrink-0">❌</span>
+                <div className="text-left min-w-0">
+                  <span className="font-black uppercase text-sm tracking-wide block leading-tight truncate">Very Distorted</span>
+                  <span className="block text-[10px] text-red-400/80 normal-case tracking-normal leading-tight truncate">Can't see clearly</span>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
       </div>
