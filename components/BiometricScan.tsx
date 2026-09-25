@@ -3,7 +3,6 @@ import { GoogleGenAI } from "@google/genai";
 import React, { useEffect, useRef, useState, RefObject } from 'react';
 import { Language, UserProfile, DistanceStatus } from '../types';
 import { isLowPowerDevice } from '../utils/devicePerformance';
-import { AiCameraDotsCanvas, AiPageDotsBackground, useAiDotsFlushPhase } from './AiDotsTheme';
 
 const BIOMETRIC_FACE_TRIANGLES = [
   [10,338,297],[10,297,332],[10,332,284],[10,284,251],[10,251,389],[10,389,356],
@@ -103,7 +102,6 @@ const BiometricScan: React.FC<Props> = ({
   const [aiError, setAiError] = useState<string | null>(null);
   const [biometricData, setBiometricData] = useState<BiometricResult | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
-  const flushState = useAiDotsFlushPhase();
 
   // ─── Manual Override State ───
   const [manualOverride, setManualOverride] = useState(false);
@@ -218,6 +216,7 @@ const BiometricScan: React.FC<Props> = ({
               canvas.height = ch;
             }
             try {
+              ctx.clearRect(0, 0, cw, ch);
               const liveDist = (window as any).__covisionCurrentDistance || distanceMRef.current || distanceM;
               drawFaceMask(ctx, landmarks, cw, ch, liveDist);
             } catch (err) {
@@ -1258,8 +1257,25 @@ Return strictly JSON matching this structure:
 
   return (
     <div className="w-full h-full max-h-full flex flex-col justify-between items-center overflow-hidden px-2 py-1 md:py-2 relative">
-      {/* ─── Futuristic AI Neural Dots Background (22-Second Flushing Cycle) ─── */}
-      <AiPageDotsBackground />
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+        {[...Array(10)].map((_, i) => (
+          <span
+            key={i}
+            className="floating-icon"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              '--tw-x': `${(Math.random() - 0.5) * 300}px`,
+              '--tw-y': `${(Math.random() - 0.5) * 300}px`,
+              '--tw-rotate': `${(Math.random() - 0.5) * 360}deg`,
+              '--tw-duration': `${15 + Math.random() * 20}s`,
+              animationDelay: `${Math.random() * -15}s`,
+            } as any}
+          >
+            {i % 2 === 0 ? '👁️' : '👓'}
+          </span>
+        ))}
+      </div>
 
       <div className="w-full max-w-4xl glass p-2 sm:p-3 rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden bg-slate-900/70 flex-1 min-h-0 flex flex-col justify-between shrink-1 z-10 gap-2">
 
@@ -1326,10 +1342,6 @@ Return strictly JSON matching this structure:
 
           {/* Right: Mesh Indicators & Progress */}
           <div className="flex items-center gap-2">
-            <span className="hidden lg:inline-flex px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-[9px] font-mono font-bold text-cyan-300 items-center gap-1.5 shadow-sm">
-              <span className={`w-1.5 h-1.5 rounded-full ${flushState.waveActive ? 'bg-cyan-300 animate-ping' : 'bg-cyan-400 animate-pulse'}`} />
-              <span>AI DOTS 22s FLUSH</span>
-            </span>
             <span className="hidden md:inline-flex px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-[9px] font-mono font-bold text-cyan-300">
               468-PTS AI
             </span>
@@ -1358,13 +1370,6 @@ Return strictly JSON matching this structure:
               muted
               playsInline
               className="absolute inset-0 w-full h-full object-cover scale-x-[-1] brightness-125 contrast-[1.1]"
-            />
-
-            {/* ─── Futuristic AI Dots Background for Camera with 22-Second Flushing Cycle ─── */}
-            <AiCameraDotsCanvas
-              videoRef={videoRef}
-              faceLandmarksRef={faceLandmarksRef}
-              isScanning={scanning}
             />
 
             {/* AI Face Mesh Canvas Overlay */}
@@ -1413,17 +1418,6 @@ Return strictly JSON matching this structure:
             <div className="absolute top-2 sm:top-2.5 left-2.5 sm:left-3 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-black/70 backdrop-blur-md border border-cyan-500/30 text-cyan-300 font-mono text-[9px] sm:text-[10px] font-bold tracking-wider flex items-center gap-1.5 z-30 pointer-events-none shadow-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_6px_#00f3ff]" />
               <span>[ ⛶ AI OPTICAL RETICLE · LIVE ]</span>
-            </div>
-
-            {/* HUD Center: AI Dots 22s Flush Status Pill */}
-            <div className="hidden sm:flex absolute top-2 sm:top-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 sm:py-1 rounded-md bg-black/80 backdrop-blur-md border border-cyan-500/40 text-cyan-300 font-mono text-[9px] font-bold tracking-wider items-center gap-1.5 z-30 pointer-events-none shadow-[0_0_15px_rgba(0,243,255,0.25)]">
-              <span className={`w-1.5 h-1.5 rounded-full ${flushState.waveActive ? 'bg-cyan-300 animate-ping' : flushState.phase === 'hidden' ? 'bg-slate-600' : 'bg-cyan-400 animate-pulse'}`} />
-              <span className="text-cyan-200">AI DOTS THEME</span>
-              <span className="text-cyan-500">·</span>
-              <span className="text-cyan-300">{flushState.phaseLabel}</span>
-              <span className="text-[8px] text-cyan-400/80 bg-cyan-950/60 px-1 py-0.2 rounded border border-cyan-500/30 tabular-nums">
-                {Math.floor(flushState.cycleSeconds)}s/22s
-              </span>
             </div>
 
             {/* HUD Top-Right Overlay Pill */}
