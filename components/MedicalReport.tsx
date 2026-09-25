@@ -463,6 +463,8 @@ const MedicalReport: React.FC<Props> = ({
     const [whatsappSending, setWhatsappSending] = useState(false);
     const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
     const [whatsappPdfReady, setWhatsappPdfReady] = useState(false);
+    const [pdfExporting, setPdfExporting] = useState(false);
+    const [printingReport, setPrintingReport] = useState(false);
 
     // Unique Cryptographic Report Identifier
     const reportId = useMemo(() => {
@@ -624,7 +626,7 @@ const MedicalReport: React.FC<Props> = ({
     // ─────────────────────────────────────────────────────────────
     // PDF GENERATION — CLEAN WHITE A4 LAYOUT
     // ─────────────────────────────────────────────────────────────
-    const generatePDFBlob = async (): Promise<Blob | null> => {
+    const generatePDFBlob = async (forPrint = false): Promise<Blob | null> => {
         if (!reportRef.current) return null;
         try {
             document.body.classList.add('exporting-pdf');
@@ -663,6 +665,15 @@ const MedicalReport: React.FC<Props> = ({
                         (actionBar as HTMLElement).style.justifyContent = 'center';
                         (actionBar as HTMLElement).style.gap = '10px';
                         (actionBar as HTMLElement).style.marginBottom = '16px';
+                    }
+                    // In the generated PDF capture, always show the pristine standard button labels
+                    const exportBtn = clonedDoc.querySelector('[data-action-btn="export"]');
+                    if (exportBtn) {
+                        exportBtn.innerHTML = '<span style="font-size: 16px; margin-right: 6px;">📄</span> ' + (t.export_pdf || 'Export PDF');
+                    }
+                    const printBtn = clonedDoc.querySelector('[data-action-btn="print"]');
+                    if (printBtn) {
+                        printBtn.innerHTML = '<span style="font-size: 16px; margin-right: 6px;">🖨️</span> ' + (t.print_report || 'Print Report');
                     }
                     // Expand all graph/chart wrappers so they never clip in the canvas
                     clonedDoc.querySelectorAll('.overflow-x-auto').forEach((box) => {
@@ -737,6 +748,16 @@ const MedicalReport: React.FC<Props> = ({
                 pdf.text('CONFIDENTIAL MEDICAL DOCUMENT — PRELIMINARY SCREENING ONLY', margin, pdfHeight - 4);
                 pdf.text(`Page ${page + 1} of ${totalPages}`, pdfWidth / 2 - 8, pdfHeight - 4);
                 pdf.text(`Date: ${patient.dateTime}`, pdfWidth - margin - 35, pdfHeight - 4);
+            }
+
+            if (forPrint) {
+                try {
+                    pdf.autoPrint({ variant: 'non-conform' });
+                } catch {
+                    try {
+                        (pdf as any).autoPrint();
+                    } catch {}
+                }
             }
 
             return pdf.output('blob');
@@ -904,17 +925,93 @@ const MedicalReport: React.FC<Props> = ({
     };
 
     const handleExportPDF = async () => {
+        if (pdfExporting || printingReport) return;
+        setPdfExporting(true);
         try {
-            const pdfBlob = await generatePDFBlob();
+            const pdfBlob = await generatePDFBlob(false);
             if (!pdfBlob) return;
             const url = URL.createObjectURL(pdfBlob);
             const a = document.createElement('a');
             a.href = url;
             a.download = `CoVision-Medical-Report-${reportId}.pdf`;
+            document.body.appendChild(a);
             a.click();
-            URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 4000);
         } catch (err) {
             console.error('PDF export failed:', err);
+        } finally {
+            setPdfExporting(false);
+        }
+    };
+
+    const handlePrintReport = async () => {
+        if (printingReport || pdfExporting) return;
+        setPrintingReport(true);
+        try {
+            // Generate the exact same high-resolution multi-page PDF report as Export PDF
+            const pdfBlob = await generatePDFBlob(true);
+            if (!pdfBlob) {
+                setPrintingReport(false);
+                return;
+            }
+
+            const blobUrl = URL.createObjectURL(pdfBlob);
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'fixed';
+            iframe.style.right = '0';
+            iframe.style.bottom = '0';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.border = '0';
+            iframe.style.visibility = 'hidden';
+            iframe.src = blobUrl;
+            document.body.appendChild(iframe);
+
+            let printTriggered = false;
+
+            const triggerPrint = () => {
+                if (printTriggered) return;
+                printTriggered = true;
+                try {
+                    iframe.contentWindow?.focus();
+                    iframe.contentWindow?.print();
+                } catch (err) {
+                    console.warn('Iframe print failed, falling back to window.open print:', err);
+                    const printWin = window.open(blobUrl, '_blank');
+                    if (printWin) {
+                        printWin.focus();
+                        printWin.print();
+                    }
+                }
+            };
+
+            iframe.onload = () => {
+                setTimeout(triggerPrint, 350);
+            };
+
+            // Fallback timeout in case iframe onload does not fire for application/pdf in some browsers
+            setTimeout(() => {
+                if (!printTriggered) {
+                    triggerPrint();
+                }
+            }, 1200);
+
+            // Cleanup after print dialog
+            setTimeout(() => {
+                try {
+                    if (document.body.contains(iframe)) {
+                        document.body.removeChild(iframe);
+                    }
+                    URL.revokeObjectURL(blobUrl);
+                } catch {}
+            }, 120000);
+        } catch (err) {
+            console.error('Print report failed:', err);
+            // Fallback to native window.print if anything fails
+            window.print();
+        } finally {
+            setPrintingReport(false);
         }
     };
 
@@ -1129,16 +1226,38 @@ const MedicalReport: React.FC<Props> = ({
                 {/* ─── ACTION BAR (SHOWS IN PRINT & PDF SAME AS SCREEN) ─── */}
                 <div className="print-action-bar w-full max-w-5xl flex flex-wrap gap-2.5 sm:gap-3 justify-center mb-5 z-20">
                     <button
+                        data-action-btn="export"
                         onClick={handleExportPDF}
-                        className="px-5 sm:px-6 py-3.5 sm:py-4 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider transition-all shadow-md shadow-cyan-600/25 flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
+                        disabled={pdfExporting || printingReport}
+                        className="px-5 sm:px-6 py-3.5 sm:py-4 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider transition-all shadow-md shadow-cyan-600/25 flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <span className="text-base sm:text-xl">📄</span> {t.export_pdf}
+                        {pdfExporting ? (
+                            <>
+                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span>Generating PDF...</span>
+                            </>
+                        ) : (
+                            <>
+                                <span className="text-base sm:text-xl">📄</span> {t.export_pdf}
+                            </>
+                        )}
                     </button>
                     <button
-                        onClick={() => window.print()}
-                        className="px-5 sm:px-6 py-3.5 sm:py-4 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-white/10 text-slate-800 dark:text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95"
+                        data-action-btn="print"
+                        onClick={handlePrintReport}
+                        disabled={pdfExporting || printingReport}
+                        className="px-5 sm:px-6 py-3.5 sm:py-4 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-white/10 text-slate-800 dark:text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-base uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm flex items-center gap-2 min-h-[54px] sm:min-h-[62px] cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <span className="text-base sm:text-xl">🖨️</span> {t.print_report}
+                        {printingReport ? (
+                            <>
+                                <span className="w-4 h-4 border-2 border-slate-500/30 border-t-slate-500 dark:border-white/30 dark:border-t-white rounded-full animate-spin" />
+                                <span>Preparing Print...</span>
+                            </>
+                        ) : (
+                            <>
+                                <span className="text-base sm:text-xl">🖨️</span> {t.print_report}
+                            </>
+                        )}
                     </button>
                     <button
                         onClick={() => {
