@@ -63,12 +63,12 @@ const TestSelector: React.FC<Props> = ({ lang, t, onComplete }) => {
         </div>
 
         {/* Header Section */}
-        <div className="relative z-10 text-center mb-1 sm:mb-2 shrink-0">
-          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none drop-shadow-sm">
+        <div className="relative z-10 text-center mb-1 sm:mb-2 shrink-0 py-1">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-tight drop-shadow-sm min-h-[44px] sm:min-h-[52px] flex items-center justify-center">
             {t.test_selection || 'Screening Battery Selection'}
           </h2>
           <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 mt-1.5 sm:mt-2">
-            <p className="text-[10px] sm:text-xs md:text-sm text-sky-600 dark:text-cyan-400 uppercase tracking-widest font-black">
+            <p className="text-xs sm:text-sm md:text-base text-sky-600 dark:text-cyan-400 uppercase tracking-widest font-black">
               Select Vision Modules (3 Samples Per Test)
             </p>
             <div className="flex items-center gap-2">
@@ -90,23 +90,23 @@ const TestSelector: React.FC<Props> = ({ lang, t, onComplete }) => {
           </div>
         </div>
 
-        {/* Selection Grid — Bigger Cards, Expanded & Fitted to Page */}
+        {/* Selection Grid — Spacious Cards with Taller, Prominent Test Labels */}
         <div className="relative z-10 flex-1 min-h-0 flex flex-col justify-center px-1 md:px-2 my-1 sm:my-2 overflow-y-auto">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3.5 md:gap-4 lg:gap-5 max-w-6xl mx-auto w-full h-full items-stretch py-1">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-5 lg:gap-6 max-w-6xl mx-auto w-full h-full items-stretch py-1">
             {testOptions.map(opt => {
               const isSelected = selected.includes(opt.type);
               return (
                 <button
                   key={opt.type}
                   onClick={() => toggle(opt.type)}
-                  className={`group relative flex flex-col items-center justify-center p-3 sm:p-4 md:p-5 lg:p-6 rounded-2xl md:rounded-3xl border-2 sm:border-3 transition-all duration-300 transform hover:scale-[1.02] active:scale-95 cursor-pointer min-h-[96px] sm:min-h-[120px] md:min-h-[145px] lg:min-h-[165px] ${
+                  className={`group relative flex flex-col items-center justify-center p-3.5 sm:p-5 md:p-6 lg:p-7 rounded-2xl md:rounded-3xl border-2 sm:border-3 transition-all duration-300 transform hover:scale-[1.02] active:scale-95 cursor-pointer min-h-[135px] sm:min-h-[160px] md:min-h-[185px] lg:min-h-[210px] ${
                     isSelected 
                     ? 'border-sky-500 dark:border-cyan-400 bg-sky-50/90 dark:bg-cyan-500/20 shadow-lg dark:shadow-[0_0_35px_rgba(0,243,255,0.3)] ring-2 ring-sky-400/30' 
                     : 'border-slate-200 dark:border-white/10 bg-white/80 dark:bg-black/40 hover:border-slate-300 dark:hover:border-white/25 hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm'
                   }`}
                 >
                   {/* Status Indicator */}
-                  <div className={`absolute top-2 right-2 sm:top-2.5 sm:right-2.5 flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border transition-all ${
+                  <div className={`absolute top-2.5 right-2.5 sm:top-3 sm:right-3 flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full border transition-all ${
                     isSelected
                       ? 'border-sky-500 bg-sky-100 text-sky-700 dark:border-cyan-400 dark:bg-cyan-400/20 dark:text-cyan-300'
                       : 'border-slate-200 bg-slate-100 text-slate-500 dark:border-white/10 dark:bg-white/5'
@@ -118,24 +118,26 @@ const TestSelector: React.FC<Props> = ({ lang, t, onComplete }) => {
                   </div>
 
                   {/* 3 Samples Badge */}
-                  <div className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 hidden sm:flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800/60 dark:bg-black/50 border border-white/10 text-[8px] sm:text-[9px] font-mono font-bold text-slate-400 dark:text-slate-300 uppercase">
+                  <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800/80 dark:bg-black/60 border border-white/10 text-[8px] sm:text-[9px] md:text-[10px] font-mono font-bold text-slate-300 uppercase shadow-sm">
                     <span>3 SAMPLES</span>
                   </div>
 
                   {/* Icon — Bigger Size */}
-                  <span className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-1 sm:mb-2 transition-all duration-300 leading-none ${isSelected ? 'scale-110 drop-shadow-md' : 'grayscale opacity-40'}`}>
+                  <span className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-1 sm:mb-2 transition-all duration-300 leading-none ${isSelected ? 'scale-110 drop-shadow-md' : 'grayscale opacity-40'}`}>
                     {opt.icon}
                   </span>
 
-                  {/* Label — Bigger & Clear */}
-                  <span className={`text-xs sm:text-sm md:text-base lg:text-lg font-black uppercase tracking-wide text-center transition-colors duration-300 leading-snug px-1 ${
-                    isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-500'
-                  }`}>
-                    {opt.label}
-                  </span>
+                  {/* Test Label — Increased Height, Line-Height, & Prominence */}
+                  <div className="w-full min-h-[46px] sm:min-h-[56px] md:min-h-[64px] lg:min-h-[72px] flex items-center justify-center px-1 sm:px-2 my-0.5 sm:my-1">
+                    <span className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-black uppercase tracking-wide text-center transition-colors duration-300 leading-snug md:leading-normal ${
+                      isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-500'
+                    }`}>
+                      {opt.label}
+                    </span>
+                  </div>
 
                   {/* Module Subtitle */}
-                  <span className="text-[9px] sm:text-[10px] md:text-xs font-semibold text-slate-400 dark:text-slate-400 mt-0.5 sm:mt-1 text-center">
+                  <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-slate-500 dark:text-slate-400 text-center">
                     {opt.desc}
                   </span>
                 </button>
