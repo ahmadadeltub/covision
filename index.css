@@ -1702,3 +1702,20 @@ body {
   background-color: #f8fafc !important;
   border-color: #cbd5e1 !important;
 }
+
+/* ============================================================
+   NVIDIA Jetson & Edge Hardware Acceleration
+   Promotes video, canvas, and glass elements to direct GPU layers
+   ============================================================ */
+canvas, video {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.glass {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: auto;
+}

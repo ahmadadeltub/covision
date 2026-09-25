@@ -172,11 +172,13 @@ Reply with ONLY the matched output value (e.g. "up", "down", "left", "right", "?
 If nothing matches, reply with exactly: NONE`;
 
   try {
-    const result = await ai.models.generateContent({
-      model: 'gemini-3.6-flash',  // active Gemini 3.6 Flash model
+    const aiPromise = ai.models.generateContent({
+      model: 'gemini-2.5-flash',  // ultra-low latency Gemini model
       contents: prompt,
       config: { maxOutputTokens: 10, temperature: 0 },  // deterministic, minimal output
     });
+    const timeoutPromise = new Promise<any>((_, reject) => setTimeout(() => reject(new Error('Voice AI timeout')), 2500));
+    const result = await Promise.race([aiPromise, timeoutPromise]);
     const raw = (result.text || '').trim().replace(/['"]/g, '');
     if (raw === 'NONE' || !raw) return null;
     // Validate it's actually a valid output

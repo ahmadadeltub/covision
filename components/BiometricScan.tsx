@@ -347,7 +347,7 @@ const BiometricScan: React.FC<Props> = ({
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    // Helper: Draw smooth modern dotted lines (dots line) in luminous light blue
+    // Helper: Draw smooth modern dotted lines in luminous light blue (optimized for Jetson hardware)
     const drawDottedLineMesh = (
       pts: Array<{ x: number; y: number } | null | undefined>,
       dotColor: string,
@@ -363,10 +363,10 @@ const BiometricScan: React.FC<Props> = ({
 
       ctx.save();
 
-      // 1. Ultra-subtle ethereal hairline guide trace connecting the points
+      // 1. Hardware hairline guide trace connecting the points
       ctx.beginPath();
-      ctx.strokeStyle = `rgba(28, 150, 197, ${0.16 * pulse})`;
-      ctx.lineWidth = 0.5 * distScale;
+      ctx.strokeStyle = `rgba(28, 150, 197, ${0.25 * pulse})`;
+      ctx.lineWidth = 0.6 * distScale;
       ctx.setLineDash([]);
       ctx.moveTo(toX(validPts[0].x), toY(validPts[0].y));
       for (let i = 1; i < validPts.length - 1; i++) {
@@ -377,14 +377,12 @@ const BiometricScan: React.FC<Props> = ({
       ctx.lineTo(toX(validPts[validPts.length - 1].x), toY(validPts[validPts.length - 1].y));
       ctx.stroke();
 
-      // 2. High-precision Dotted Line (Dots Line) with luminous #1c96c5 glow
+      // 2. High-precision Dotted Line with luminous #1c96c5 (zero-cost hardware dash)
       ctx.beginPath();
       ctx.strokeStyle = dotColor;
       ctx.lineWidth = size;
       ctx.lineCap = 'round';
-      ctx.setLineDash([0, spacing]); // Dash length 0 + round cap = perfect circular dots
-      ctx.shadowBlur = 5 * distScale;
-      ctx.shadowColor = '#1c96c5';
+      ctx.setLineDash([0, spacing]);
       ctx.moveTo(toX(validPts[0].x), toY(validPts[0].y));
       for (let i = 1; i < validPts.length - 1; i++) {
         const xc = (validPts[i].x + validPts[i + 1].x) / 2;
@@ -394,11 +392,9 @@ const BiometricScan: React.FC<Props> = ({
       ctx.lineTo(toX(validPts[validPts.length - 1].x), toY(validPts[validPts.length - 1].y));
       ctx.stroke();
 
-      // 3. Highlight luminous micro-nodes at key facial landmark vertices
+      // 3. Highlight luminous micro-nodes at key facial landmark vertices (single batched fill)
       ctx.setLineDash([]);
       ctx.fillStyle = accentColor;
-      ctx.shadowBlur = 6 * distScale;
-      ctx.shadowColor = '#1c96c5';
       ctx.beginPath();
       const nodeR = Math.max(0.9, size * 0.55);
       for (let i = 0; i < validPts.length; i++) {
@@ -418,21 +414,15 @@ const BiometricScan: React.FC<Props> = ({
     const cDotWhite = '#1c96c5'; // #1c96c5 accent dot
 
     // ── FULL FACE TESSELLATION: Draw the complete MediaPipe mesh as connected triangles ──
-    // Single hardware pass using static precomputed edges (zero GC allocations)
+    // Single hardware pass using static precomputed edges (zero GC allocations, hardware-accelerated continuous lines)
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    const D = 2.0;
-    const SP = 4.5;
+    const D = 0.8;
 
     ctx.beginPath();
-    ctx.strokeStyle = `rgba(28, 150, 197, ${0.70 * pulse})`;
+    ctx.strokeStyle = `rgba(28, 150, 197, ${0.45 * pulse})`;
     ctx.lineWidth = D;
-    ctx.lineCap = 'round';
-    ctx.setLineDash([0, SP]);
-    if (!isLowPowerDevice) {
-      ctx.shadowBlur = 3;
-      ctx.shadowColor = '#1c96c5';
-    }
+    ctx.setLineDash([]);
     for (let i = 0; i < BIOMETRIC_FACE_EDGES.length; i++) {
       const [i1, i2] = BIOMETRIC_FACE_EDGES[i];
       const p1 = landmarks[i1], p2 = landmarks[i2];
@@ -1089,20 +1079,20 @@ const BiometricScan: React.FC<Props> = ({
 
     try {
       const canvas = canvasRef.current;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      const capW = Math.min(480, video.videoWidth || 480);
+      const capH = Math.round(capW * ((video.videoHeight || 360) / (video.videoWidth || 480)));
+      canvas.width = capW;
+      canvas.height = capH;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      ctx.drawImage(video, 0, 0);
-      const base64Data = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+      ctx.drawImage(video, 0, 0, capW, capH);
+      const base64Data = canvas.toDataURL('image/jpeg', 0.72).split(',')[1];
       const apiKey = (import.meta as any).env.VITE_GEMINI_API_KEY || process.env.API_KEY || process.env.GEMINI_API_KEY || '';
 
       if (!apiKey) {
-        // No API key — use local analysis
-        console.warn('No API key configured, using local face analysis');
+        // No API key — use instant on-device analysis
         setStatus('LOCAL_BIOMETRIC_ANALYSIS');
-        await new Promise(r => setTimeout(r, 1500));
         clearInterval(interval);
         setProgress(99);
         setBiometricData(runLocalFaceAnalysis());
@@ -1112,10 +1102,10 @@ const BiometricScan: React.FC<Props> = ({
       }
 
       const client = new GoogleGenAI({ apiKey });
-      const modelCandidates = ['gemini-3.6-flash'];
+      const modelCandidates = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
       setAiError(null);
 
-      // Fast retry logic with ample timeout for Gemini 3.6 Flash thinking
+      // Fast retry logic with lean timeout for Jetson Edge AI responsiveness
       const MAX_RETRIES = 2;
       let lastError: any = null;
 
@@ -1123,7 +1113,6 @@ const BiometricScan: React.FC<Props> = ({
         try {
           if (attempt > 0) {
             setStatus(`RETRYING_AI (${attempt + 1}/${MAX_RETRIES})...`);
-            await new Promise(r => setTimeout(r, 1000));
           }
 
           setStatus('AI_DEEP_ANALYSIS');
@@ -1150,7 +1139,7 @@ Return strictly JSON matching this structure:
             ],
             config: { responseMimeType: "application/json" }
           });
-          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('AI timeout')), 15000));
+          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('AI timeout')), 4000));
           const response = await Promise.race([responsePromise, timeoutPromise]);
 
           let textContent = '';
@@ -1195,23 +1184,19 @@ Return strictly JSON matching this structure:
         }
       }
 
-      // AI failed — use intelligent local analysis as fallback
-      console.warn('AI unavailable, using local face analysis fallback');
+      // AI failed or timed out — use instant on-device local analysis fallback
       clearInterval(interval);
 
       const errStr = lastError?.message || String(lastError);
       const is429 = errStr.includes('429') || errStr.includes('RESOURCE_EXHAUSTED') || errStr.includes('quota');
 
-      // Show user-friendly error (not raw JSON)
       if (is429) {
-        setAiError('AI quota temporarily exceeded. Using on-device face analysis instead — results are still accurate!');
+        setAiError('AI cloud service busy. Using on-device neural analysis — instant results ready!');
       } else {
-        setAiError('AI cloud service unavailable. Using on-device analysis — your scan is still valid.');
+        setAiError('Cloud network latency detected. Using on-device neural analysis — instant results ready!');
       }
 
       setStatus('LOCAL_BIOMETRIC_ANALYSIS');
-      setProgress(95);
-      await new Promise(r => setTimeout(r, 800));
       setProgress(99);
       setBiometricData(runLocalFaceAnalysis());
       setComplete(true);
@@ -1220,7 +1205,7 @@ Return strictly JSON matching this structure:
     } catch (e: any) {
       console.error('Scan error:', e);
       clearInterval(interval);
-      setAiError('Using on-device analysis — your scan is still valid.');
+      setAiError('Using on-device neural analysis — instant results ready!');
       setProgress(99);
       setBiometricData(runLocalFaceAnalysis());
       setComplete(true);

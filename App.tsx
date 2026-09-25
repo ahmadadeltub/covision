@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Language, AppStep, PatientInfo, UserProfile, TestType, CalibrationData, TestResult, AcuityResult, ColorVisionResult, DistanceCompliance } from './types';
 import { translations } from './translations';
 import { useFaceDistance } from './hooks/useFaceDistance';
-import { isLowPowerDevice, RECOMMENDED_PARTICLE_COUNT } from './utils/devicePerformance';
+import { isJetson, isLowPowerDevice, RECOMMENDED_PARTICLE_COUNT } from './utils/devicePerformance';
 
 // ─── Original Components (restored) ───
 import BiometricScan from './components/BiometricScan';
@@ -313,7 +313,7 @@ const App: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    if (isLowPowerDevice || isActiveVisionStep) {
+    if (isJetson || isLowPowerDevice || isActiveVisionStep) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       return;
     }

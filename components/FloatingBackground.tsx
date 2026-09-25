@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
+import { isJetson, isLowPowerDevice } from '../utils/devicePerformance';
 
 const icons = [
     // Eye Icon
@@ -28,10 +29,10 @@ const FloatingBackground: React.FC = () => {
     const [items, setItems] = useState<any[]>([]);
 
     useEffect(() => {
-        // Generate random items on mount to avoid hydration mismatch if used with SSR (though this is SPA)
-        const newItems = Array.from({ length: 15 }).map((_, i) => {
+        const count = (isJetson || isLowPowerDevice) ? 3 : 15;
+        const newItems = Array.from({ length: count }).map((_, i) => {
             const type = i % 3;
-            const size = 30 + Math.random() * 100;
+            const size = 30 + Math.random() * 80;
             const left = Math.random() * 100;
             const top = Math.random() * 100;
             const delay = Math.random() * 20;

@@ -240,10 +240,10 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
 
       ctx.save();
 
-      // 1. Ultra-subtle ethereal hairline guide trace connecting the points
+      // 1. Hardware hairline guide trace connecting the points
       ctx.beginPath();
-      ctx.strokeStyle = `rgba(28, 150, 197, ${0.16 * pulse})`;
-      ctx.lineWidth = 0.5 * distScale;
+      ctx.strokeStyle = `rgba(28, 150, 197, ${0.25 * pulse})`;
+      ctx.lineWidth = 0.6 * distScale;
       ctx.setLineDash([]);
       ctx.moveTo(toX(validPts[0].x), toY(validPts[0].y));
       for (let i = 1; i < validPts.length - 1; i++) {
@@ -254,14 +254,12 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
       ctx.lineTo(toX(validPts[validPts.length - 1].x), toY(validPts[validPts.length - 1].y));
       ctx.stroke();
 
-      // 2. High-precision Dotted Line (Dots Line) with luminous #1c96c5 glow
+      // 2. High-precision Dotted Line with luminous #1c96c5
       ctx.beginPath();
       ctx.strokeStyle = dotColor;
       ctx.lineWidth = size;
       ctx.lineCap = 'round';
-      ctx.setLineDash([0, spacing]); // Dash length 0 + round cap = perfect circular dots
-      ctx.shadowBlur = 5 * distScale;
-      ctx.shadowColor = '#1c96c5';
+      ctx.setLineDash([0, spacing]);
       ctx.moveTo(toX(validPts[0].x), toY(validPts[0].y));
       for (let i = 1; i < validPts.length - 1; i++) {
         const xc = (validPts[i].x + validPts[i + 1].x) / 2;
@@ -271,11 +269,9 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
       ctx.lineTo(toX(validPts[validPts.length - 1].x), toY(validPts[validPts.length - 1].y));
       ctx.stroke();
 
-      // 3. Highlight luminous micro-nodes at key facial landmark vertices
+      // 3. Highlight luminous micro-nodes at key facial landmark vertices (single batched fill)
       ctx.setLineDash([]);
       ctx.fillStyle = accentColor;
-      ctx.shadowBlur = 6 * distScale;
-      ctx.shadowColor = '#1c96c5';
       ctx.beginPath();
       const nodeR = Math.max(0.9, size * 0.55);
       for (let i = 0; i < validPts.length; i++) {
@@ -296,21 +292,15 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
     const cDotWhite = '#1c96c5'; // #1c96c5 accent dot
 
     // ── FULL FACE TESSELLATION: Draw the complete MediaPipe mesh as connected triangles ──
-    // Single hardware pass using static precomputed edges (zero GC allocations)
+    // Single hardware pass using static precomputed edges (zero GC allocations, hardware-accelerated continuous lines)
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    const D = 2.0; // fixed base dot size for mesh triangles
-    const SP = 4.5; // dot spacing
+    const D = 0.8;
 
     ctx.beginPath();
-    ctx.strokeStyle = `rgba(28, 150, 197, ${0.70 * pulse})`;
+    ctx.strokeStyle = `rgba(28, 150, 197, ${0.45 * pulse})`;
     ctx.lineWidth = D;
-    ctx.lineCap = 'round';
-    ctx.setLineDash([0, SP]);
-    if (!isLowPowerDevice) {
-      ctx.shadowBlur = 3;
-      ctx.shadowColor = '#1c96c5';
-    }
+    ctx.setLineDash([]);
     for (let i = 0; i < CALIBRATION_FACE_EDGES.length; i++) {
       const [i1, i2] = CALIBRATION_FACE_EDGES[i];
       const p1 = landmarks[i1], p2 = landmarks[i2];

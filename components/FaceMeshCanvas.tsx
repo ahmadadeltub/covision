@@ -179,23 +179,22 @@ export const FaceMeshCanvas: React.FC<FaceMeshCanvasProps> = ({
 
               ctx.lineCap = 'round';
               ctx.lineJoin = 'round';
+              ctx.setLineDash([]);
 
-              // High-speed hardware-friendly contour drawer (zero allocations inside loop)
+              // High-speed hardware-accelerated contour drawer (zero CPU dash calculations)
               const drawContourIndices = (
                 indices: number[],
-                dotColor: string,
-                dotSize: number,
-                dotSpacing: number,
+                strokeColor: string,
+                lineWidth: number,
                 accentColor = color
               ) => {
                 const len = indices.length;
                 if (len < 2) return;
 
-                // 1. Hardware hairline stroke
+                // 1. Hardware continuous line stroke
                 ctx.beginPath();
-                ctx.strokeStyle = `rgba(28, 150, 197, ${0.18 * pulse})`;
-                ctx.lineWidth = 0.5;
-                ctx.setLineDash([]);
+                ctx.strokeStyle = strokeColor;
+                ctx.lineWidth = lineWidth;
                 let started = false;
                 for (let i = 0; i < len; i++) {
                   const p = lm[indices[i]];
@@ -206,27 +205,10 @@ export const FaceMeshCanvas: React.FC<FaceMeshCanvasProps> = ({
                 }
                 ctx.stroke();
 
-                // 2. High-precision Dotted Line (Dots Line) with luminous #1c96c5
-                ctx.beginPath();
-                ctx.strokeStyle = dotColor;
-                ctx.lineWidth = dotSize;
-                ctx.lineCap = 'round';
-                ctx.setLineDash([0, dotSpacing]);
-                started = false;
-                for (let i = 0; i < len; i++) {
-                  const p = lm[indices[i]];
-                  if (!p || !isFinite(p.x) || !isFinite(p.y)) continue;
-                  const x = toX(p.x), y = toY(p.y);
-                  if (!started) { ctx.moveTo(x, y); started = true; }
-                  else { ctx.lineTo(x, y); }
-                }
-                ctx.stroke();
-
-                // 3. Luminous micro-nodes at key vertices
-                ctx.setLineDash([]);
+                // 2. Luminous micro-nodes at key vertices (single batched fill)
                 ctx.fillStyle = accentColor;
                 ctx.beginPath();
-                const nodeR = Math.max(0.8, dotSize * 0.55);
+                const nodeR = Math.max(0.9, lineWidth * 0.6);
                 for (let i = 0; i < len; i += 2) {
                   const p = lm[indices[i]];
                   if (!p || !isFinite(p.x) || !isFinite(p.y)) continue;
@@ -238,14 +220,13 @@ export const FaceMeshCanvas: React.FC<FaceMeshCanvasProps> = ({
               };
 
               // Palette (#1c96c5)
-              const cLightBlue = `rgba(28, 150, 197, ${0.90 * pulse})`;
+              const cLightBlue = `rgba(28, 150, 197, ${0.85 * pulse})`;
               const cCyanLight = color;
 
-              // ── 1. Triangles Tessellation (Single Hardware Pass) ──
+              // ── 1. Triangles Tessellation (Single Hardware GPU Pass — Zero Dash Cost) ──
               ctx.beginPath();
-              ctx.strokeStyle = `rgba(28, 150, 197, ${0.68 * pulse})`;
-              ctx.lineWidth = 1.6;
-              ctx.setLineDash([0, 4.5]);
+              ctx.strokeStyle = `rgba(28, 150, 197, ${0.45 * pulse})`;
+              ctx.lineWidth = 0.8;
               for (let i = 0; i < FACE_EDGES.length; i++) {
                 const [i1, i2] = FACE_EDGES[i];
                 const p1 = lm[i1], p2 = lm[i2];
@@ -256,24 +237,24 @@ export const FaceMeshCanvas: React.FC<FaceMeshCanvasProps> = ({
               ctx.stroke();
 
               // ── 2. Facial Contours ──
-              drawContourIndices(CONTOURS.faceOval, cCyanLight, 2.2, 5);
-              drawContourIndices(CONTOURS.foreheadTop, cCyanLight, 1.9, 5);
-              drawContourIndices(CONTOURS.foreheadMid, cLightBlue, 1.8, 5);
-              drawContourIndices(CONTOURS.foreheadLow, cCyanLight, 1.8, 5);
-              drawContourIndices(CONTOURS.foreheadVertMid, cCyanLight, 1.9, 5);
-              drawContourIndices(CONTOURS.browRight, cCyanLight, 2.0, 4.5);
-              drawContourIndices(CONTOURS.browLeft, cCyanLight, 2.0, 4.5);
-              drawContourIndices(CONTOURS.orbitRight, cLightBlue, 1.7, 5);
-              drawContourIndices(CONTOURS.orbitLeft, cLightBlue, 1.7, 5);
-              drawContourIndices(CONTOURS.nasalMidline, cCyanLight, 2.1, 4.5);
-              drawContourIndices(CONTOURS.nasalBridgeHoriz, cLightBlue, 1.7, 5);
-              drawContourIndices(CONTOURS.nasalWingR, cLightBlue, 1.7, 5);
-              drawContourIndices(CONTOURS.nasalWingL, cLightBlue, 1.7, 5);
-              drawContourIndices(CONTOURS.cheekVertR, cLightBlue, 1.7, 5);
-              drawContourIndices(CONTOURS.cheekVertL, cLightBlue, 1.7, 5);
-              drawContourIndices(CONTOURS.jawContour, cLightBlue, 2.0, 5.5);
-              drawContourIndices(CONTOURS.outerLips, cCyanLight, 2.0, 4.5);
-              drawContourIndices(CONTOURS.innerLips, cLightBlue, 1.6, 5);
+              drawContourIndices(CONTOURS.faceOval, cCyanLight, 1.8);
+              drawContourIndices(CONTOURS.foreheadTop, cCyanLight, 1.4);
+              drawContourIndices(CONTOURS.foreheadMid, cLightBlue, 1.2);
+              drawContourIndices(CONTOURS.foreheadLow, cCyanLight, 1.2);
+              drawContourIndices(CONTOURS.foreheadVertMid, cCyanLight, 1.4);
+              drawContourIndices(CONTOURS.browRight, cCyanLight, 1.5);
+              drawContourIndices(CONTOURS.browLeft, cCyanLight, 1.5);
+              drawContourIndices(CONTOURS.orbitRight, cLightBlue, 1.2);
+              drawContourIndices(CONTOURS.orbitLeft, cLightBlue, 1.2);
+              drawContourIndices(CONTOURS.nasalMidline, cCyanLight, 1.6);
+              drawContourIndices(CONTOURS.nasalBridgeHoriz, cLightBlue, 1.2);
+              drawContourIndices(CONTOURS.nasalWingR, cLightBlue, 1.2);
+              drawContourIndices(CONTOURS.nasalWingL, cLightBlue, 1.2);
+              drawContourIndices(CONTOURS.cheekVertR, cLightBlue, 1.2);
+              drawContourIndices(CONTOURS.cheekVertL, cLightBlue, 1.2);
+              drawContourIndices(CONTOURS.jawContour, cLightBlue, 1.5);
+              drawContourIndices(CONTOURS.outerLips, cCyanLight, 1.6);
+              drawContourIndices(CONTOURS.innerLips, cLightBlue, 1.2);
 
               // ── 3. High-Density Facial Landmark Dot Matrix ──
               ctx.setLineDash([]);

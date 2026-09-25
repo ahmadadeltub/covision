@@ -727,6 +727,7 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
     };
 
     const lastFaceSendRef = useRef(0);
+    const lastVideoTimeRef = useRef(-1);
     const lastInferenceDurationRef = useRef(15);
     const lastPoseSendRef = useRef(0);
     const lastHandSendRef = useRef(0);
@@ -779,10 +780,13 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
 
         const timestamp = performance.now();
         const currentInterval = getAdaptiveInferenceInterval(lastInferenceDurationRef.current);
+        const videoTime = video.currentTime;
+        const isNewVideoFrame = videoTime !== lastVideoTimeRef.current;
 
-        // Adaptive FaceLandmarker execution — budget inference time to never starve main thread on Jetson Nano / RPi 5
-        if (faceLandmarkerRef.current && (timestamp - lastFaceSendRef.current) >= currentInterval) {
+        // Adaptive FaceLandmarker execution — executes on new video frames with zero-lag on Jetson Orin
+        if (faceLandmarkerRef.current && isNewVideoFrame && (currentInterval === 0 || (timestamp - lastFaceSendRef.current) >= currentInterval)) {
             try {
+                lastVideoTimeRef.current = videoTime;
                 lastFaceSendRef.current = timestamp;
                 sendCountRef.current++;
                 debugInfoRef.current.sendCount = sendCountRef.current;

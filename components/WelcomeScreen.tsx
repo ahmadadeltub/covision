@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Language } from '../types';
 import { translations } from '../translations';
 import { requestForToken } from '../firebase';
-import { isLowPowerDevice } from '../utils/devicePerformance';
+import { isJetson, isLowPowerDevice } from '../utils/devicePerformance';
 
 interface Props {
     lang: Language;
@@ -68,7 +68,7 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
         resize();
         window.addEventListener('resize', resize);
 
-        const count = isLowPowerDevice ? 12 : 24;
+        const count = isJetson ? 6 : (isLowPowerDevice ? 10 : 22);
         for (let i = 0; i < count; i++) {
             particles.push({
                 x: Math.random() * canvas.width,
@@ -80,7 +80,7 @@ const WelcomeScreen: React.FC<Props> = ({ lang, onStart }) => {
             });
         }
 
-        const maxDist = isLowPowerDevice ? 120 : 160;
+        const maxDist = (isJetson || isLowPowerDevice) ? 100 : 150;
         const animate = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             particles.forEach((p, i) => {
