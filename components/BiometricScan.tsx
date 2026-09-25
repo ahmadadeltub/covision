@@ -217,9 +217,12 @@ const BiometricScan: React.FC<Props> = ({
               canvas.width = cw;
               canvas.height = ch;
             }
-            ctx.clearRect(0, 0, cw, ch);
-            const liveDist = (window as any).__covisionCurrentDistance || distanceMRef.current || distanceM;
-            drawFaceMask(ctx, landmarks, cw, ch, liveDist);
+            try {
+              const liveDist = (window as any).__covisionCurrentDistance || distanceMRef.current || distanceM;
+              drawFaceMask(ctx, landmarks, cw, ch, liveDist);
+            } catch (err) {
+              console.warn('BiometricScan: drawFaceMask caught error:', err);
+            }
 
             landmarkDrawCountRef.current++;
             if (landmarkDrawCountRef.current === 1) {
