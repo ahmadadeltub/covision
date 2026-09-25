@@ -237,23 +237,31 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // ─── Camera Management ───
+  // ─── Camera Management (Universal Multi-Device Fallback) ───
   const initCamera = useCallback(async () => {
     if (streamRef.current) return;
     try {
-      // Explicit 640×480 @ 30fps capped — prevents Linux V4L2 USB cameras on Jetson/RPi from allocating 1080p buffers
+      // 1. Primary: user-facing 640x480 (optimal for AI edge models & low latency)
       const s = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: 'user',
-          width: { ideal: 640, max: 640 },
-          height: { ideal: 480, max: 480 },
-          frameRate: { ideal: 30, max: 30 },
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          frameRate: { ideal: 30 },
         }
       });
       streamRef.current = s;
       setStream(s);
     } catch (err) {
-      console.warn('Camera unavailable:', err);
+      console.warn('Standard camera constraint failed, attempting generic video fallback for USB/TV/external cams:', err);
+      try {
+        // 2. Fallback: generic video stream (vital for external USB webcams, Smart TVs, or cameras without facingMode)
+        const s = await navigator.mediaDevices.getUserMedia({ video: true });
+        streamRef.current = s;
+        setStream(s);
+      } catch (fallbackErr) {
+        console.warn('Camera access unavailable on this device:', fallbackErr);
+      }
     }
   }, []);
 
