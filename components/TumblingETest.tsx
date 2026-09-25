@@ -325,25 +325,35 @@ const TumblingETest: React.FC<Props> = ({ lang, distanceStatus, distanceComplian
                     </svg>
                 </div>
 
-                {/* Direction Buttons */}
+                {/* Direction Buttons — Single Row of 4 */}
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: 12,
+                    gridTemplateColumns: 'repeat(4, 1fr)',
+                    gap: 8,
                     width: '100%',
                 }}>
-                    {DIRECTIONS.map(dir => (
+                    {(['left', 'up', 'down', 'right'] as Direction[]).map(dir => (
                         <button
                             key={dir}
                             className="dir-btn"
                             onClick={() => handleAnswer(dir)}
                             disabled={isPaused}
-                            style={{ opacity: isPaused ? 0.4 : 1 }}
+                            style={{
+                                opacity: isPaused ? 0.4 : 1,
+                                minHeight: 52,
+                                padding: '8px 4px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: 16,
+                                cursor: isPaused ? 'not-allowed' : 'pointer'
+                            }}
                         >
-                            <span style={{ fontSize: 36 }}>
+                            <span style={{ fontSize: 28, lineHeight: 1 }}>
                                 {dir === 'up' ? '⬆️' : dir === 'down' ? '⬇️' : dir === 'left' ? '⬅️' : '➡️'}
                             </span>
-                            <span style={{ fontSize: 16, marginTop: 4 }}>
+                            <span style={{ fontSize: 12, marginTop: 4, fontWeight: 800 }}>
                                 {t[dir]}
                             </span>
                         </button>

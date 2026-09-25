@@ -139,10 +139,10 @@ const VisualFieldTest: React.FC<Props> = ({ lang, t, stream, onFinish }) => {
         </div>
       </div>
 
-      {/* Central Perimeter Arena */}
+      {/* Central Perimeter Arena — Responsively Flexible */}
       <div
         onClick={handleStimulusSeen}
-        className="w-full flex-1 my-2 bg-slate-950 rounded-3xl border-2 border-slate-700 shadow-2xl relative overflow-hidden flex items-center justify-center cursor-pointer min-h-[260px]"
+        className="w-full flex-1 min-h-0 my-1.5 bg-slate-950 rounded-2xl md:rounded-3xl border-2 border-slate-700 shadow-xl relative overflow-hidden flex items-center justify-center cursor-pointer max-h-[340px]"
       >
         {/* Subtle grid lines */}
         <div className="absolute inset-0 opacity-15 pointer-events-none">
@@ -155,10 +155,10 @@ const VisualFieldTest: React.FC<Props> = ({ lang, t, stream, onFinish }) => {
 
         {/* Persistent Red Fixation Target in Center */}
         <div className="relative z-20 flex flex-col items-center pointer-events-none">
-          <div className="w-5 h-5 rounded-full bg-rose-500 border-2 border-white shadow-[0_0_20px_#f43f5e] animate-pulse flex items-center justify-center">
+          <div className="w-4 h-4 rounded-full bg-rose-500 border-2 border-white shadow-[0_0_15px_#f43f5e] animate-pulse flex items-center justify-center">
             <div className="w-1.5 h-1.5 rounded-full bg-white" />
           </div>
-          <span className="text-[9px] font-black uppercase text-rose-400 tracking-widest mt-1">
+          <span className="text-[9px] font-black uppercase text-rose-400 tracking-widest mt-0.5">
             Fixate Here
           </span>
         </div>
@@ -166,7 +166,7 @@ const VisualFieldTest: React.FC<Props> = ({ lang, t, stream, onFinish }) => {
         {/* Flashing Peripheral Stimulus */}
         {isStimulusVisible && activeStimulus && (
           <div
-            className="absolute z-30 w-6 h-6 rounded-full bg-amber-300 border-2 border-white shadow-[0_0_25px_#fef08a] transition-all transform scale-125"
+            className="absolute z-30 w-5 h-5 rounded-full bg-amber-300 border-2 border-white shadow-[0_0_20px_#fef08a] transition-all transform scale-125"
             style={{
               left: `${activeStimulus.x}%`,
               top: `${activeStimulus.y}%`,
@@ -176,18 +176,18 @@ const VisualFieldTest: React.FC<Props> = ({ lang, t, stream, onFinish }) => {
         )}
 
         {/* Tap/Click Helper Notice */}
-        <div className="absolute bottom-2.5 left-0 right-0 text-center pointer-events-none px-2">
-          <span className="px-4 py-1.5 rounded-full bg-black/75 border border-white/15 text-xs sm:text-sm text-slate-200 font-bold uppercase tracking-wider backdrop-blur-sm shadow-md">
+        <div className="absolute bottom-2 left-0 right-0 text-center pointer-events-none px-2">
+          <span className="px-3 py-1 rounded-full bg-black/75 border border-white/15 text-[11px] sm:text-xs text-slate-200 font-bold uppercase tracking-wider backdrop-blur-sm shadow-md">
             Sample {Math.min(stimulusIndex + 1, TOTAL_STIMULI)} of {TOTAL_STIMULI}: Look at red dot & tap when yellow dot flashes
           </span>
         </div>
       </div>
 
-      {/* Action / Trigger Button */}
-      <div className="w-full max-w-xl shrink-0 pt-1">
+      {/* Action / Trigger Button — Always Visible */}
+      <div className="w-full max-w-xl shrink-0 pt-0.5 pb-1">
         <button
           onClick={handleStimulusSeen}
-          className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 rounded-2xl font-black text-sm uppercase tracking-wider shadow-lg shadow-amber-500/20 active:scale-95 transition-all min-h-[56px] flex items-center justify-center gap-2 cursor-pointer"
+          className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider shadow-md active:scale-95 transition-all min-h-[46px] sm:min-h-[50px] flex items-center justify-center gap-2 cursor-pointer"
         >
           <span>👁️‍🗨️</span>
           <span>I Saw The Peripheral Flash!</span>

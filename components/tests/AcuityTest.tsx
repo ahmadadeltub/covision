@@ -299,19 +299,19 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
         </div>
 
         {/* Optotype Display — High-Contrast Clinical Card */}
-        <div style={{ flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px 8px', overflow: 'hidden' }}>
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2px 8px', overflow: 'hidden' }}>
           <div className="rounded-2xl md:rounded-3xl flex items-center justify-center shadow-xl border-2"
             style={{
               background: '#ffffff',
               borderColor: 'rgba(0,0,0,0.08)',
-              padding: 'clamp(6px, 1.2vh, 16px)',
-              width: 'min(92%, 340px)',
-              height: 'min(90%, 220px)',
-              maxHeight: '100%',
+              padding: 'clamp(6px, 1.2vh, 14px)',
+              width: 'min(92%, 300px)',
+              height: 'min(90%, 170px)',
+              maxHeight: '170px',
             }}>
             <div style={{
-              width: 'min(100%, ' + Math.min(currentTrial.sizePx, 180) + 'px)',
-              height: 'min(100%, ' + Math.min(currentTrial.sizePx, 180) + 'px)',
+              width: 'min(100%, ' + Math.min(currentTrial.sizePx, 140) + 'px)',
+              height: 'min(100%, ' + Math.min(currentTrial.sizePx, 140) + 'px)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s'
             }}>
               {/* Rotated Optotype — Always Clinical High-Contrast Black */}
@@ -333,26 +333,26 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
           </div>
         </div>
 
-        {/* Answer Buttons — Significantly Enlarged */}
-        <div style={{ flexShrink: 0, padding: '6px 16px' }}>
+        {/* Answer Buttons — Single Responsive Row */}
+        <div style={{ flexShrink: 0, padding: '4px 12px' }}>
           <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, maxWidth: 480, margin: '0 auto'
+            display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, maxWidth: 440, margin: '0 auto'
           }}>
-            {DIRECTIONS.map(dir => (
+            {(['left', 'up', 'down', 'right'] as Direction[]).map(dir => (
               <button
                 key={dir}
                 onClick={() => handleSelect(dir)}
                 style={{
-                  minHeight: 'clamp(64px, 8.5vh, 84px)',
-                  padding: 'clamp(10px, 2vh, 16px) 0', background: 'var(--bg-card)', backdropFilter: 'blur(10px)',
+                  minHeight: 'clamp(48px, 6.5vh, 60px)',
+                  padding: 'clamp(6px, 1.2vh, 12px) 0', background: 'var(--bg-card)', backdropFilter: 'blur(10px)',
                   border: `2px solid ${activeButton === dir ? 'var(--accent)' : 'var(--border-color)'}`,
-                  borderRadius: 20, transition: 'all 0.2s', cursor: 'pointer',
-                  boxShadow: activeButton === dir ? '0 0 25px rgba(2, 132, 199, 0.45)' : '0 4px 14px rgba(0,0,0,0.1)',
+                  borderRadius: 16, transition: 'all 0.2s', cursor: 'pointer',
+                  boxShadow: activeButton === dir ? '0 0 20px rgba(2, 132, 199, 0.45)' : '0 3px 10px rgba(0,0,0,0.1)',
                   transform: activeButton === dir ? 'scale(1.04)' : 'scale(1)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
               >
-                <span style={{ fontSize: 'clamp(28px, 4.5vh, 42px)', lineHeight: 1, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.15))' }}>
+                <span style={{ fontSize: 'clamp(24px, 3.8vh, 32px)', lineHeight: 1, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.15))' }}>
                   {dir === 'up' && '⬆️'}
                   {dir === 'down' && '⬇️'}
                   {dir === 'left' && '⬅️'}
@@ -366,17 +366,17 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
             <button
               onClick={() => handleSelect('?')}
               style={{
-                minHeight: 44,
-                padding: '10px 28px', background: 'var(--bg-card)', border: '1.5px solid var(--border-color)',
-                borderRadius: 999, fontSize: 13, color: 'var(--text-muted)', fontWeight: 900, textTransform: 'uppercase',
-                letterSpacing: '0.15em', cursor: 'pointer', transition: 'all 0.2s'
+                minHeight: 38,
+                padding: '6px 24px', background: 'var(--bg-card)', border: '1.5px solid var(--border-color)',
+                borderRadius: 999, fontSize: 11, color: 'var(--text-muted)', fontWeight: 900, textTransform: 'uppercase',
+                letterSpacing: '0.12em', cursor: 'pointer', transition: 'all 0.2s'
               }}
             >
               Can't See
             </button>
           </div>
-          <div style={{ textAlign: 'center', marginTop: 3, fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', opacity: 0.8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-            <span>Voice: Say "Up", "Down", "Left", "Right" or "can't see"</span>
+          <div style={{ textAlign: 'center', marginTop: 2, fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', opacity: 0.8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <span>Voice: "Left", "Up", "Down", "Right" or "can't see"</span>
             {isListening && <span style={{ color: '#10b981', fontWeight: 'bold' }}>🎤 Listening</span>}
           </div>
         </div>

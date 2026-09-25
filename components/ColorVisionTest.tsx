@@ -367,24 +367,24 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, faceLandmarksRef, dist
                                     </div>
                                 )}
                                 {/* Ishihara Plate Image */}
-                                <div className="max-h-[25vh] sm:max-h-[29vh] md:max-h-[33vh] aspect-square relative rounded-full overflow-hidden shadow-2xl bg-[#f5f0e0] border-4 border-white/5 shrink-1">
+                                <div className="max-h-[160px] sm:max-h-[190px] aspect-square relative rounded-full overflow-hidden shadow-2xl bg-[#f5f0e0] border-4 border-white/5 shrink-1">
                                     <img
                                         src={plate?.imageSrc}
                                         alt={`Ishihara Plate`}
                                         className="w-full h-full object-contain"
                                     />
                                 </div>
-                                <p className="text-xs sm:text-sm md:text-base font-bold text-white text-center">{t.what_number}</p>
+                                <p className="text-xs sm:text-sm font-bold text-white text-center">{t.what_number}</p>
                             </div>
 
-                            {/* Answer buttons — Significantly Enlarged */}
-                            <div className="shrink-0 p-3 pt-0 space-y-2 max-w-xl mx-auto w-full">
-                                <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full">
+                            {/* Answer buttons — Single Responsive Row of 4 + Can't See */}
+                            <div className="shrink-0 p-2 sm:p-3 pt-0 space-y-1.5 sm:space-y-2 max-w-xl mx-auto w-full">
+                                <div className="grid grid-cols-4 gap-2 sm:gap-3 w-full">
                                     {options.map((opt) => (
                                         <button
                                             key={opt}
                                             onClick={() => handleAnswer(opt)}
-                                            className="py-3.5 sm:py-4.5 md:py-5 glass border-2 border-white/20 hover:border-cyan-400 bg-white/5 hover:bg-cyan-500/25 rounded-2xl md:rounded-3xl font-black text-2xl sm:text-3xl md:text-5xl text-white transition-all transform hover:scale-[1.02] active:scale-95 shadow-xl flex items-center justify-center min-h-[66px] sm:min-h-[78px] md:min-h-[86px]"
+                                            className="py-2.5 sm:py-3 glass border-2 border-white/20 hover:border-cyan-400 bg-white/5 hover:bg-cyan-500/25 rounded-xl sm:rounded-2xl font-black text-xl sm:text-2xl md:text-3xl text-white transition-all transform hover:scale-[1.02] active:scale-95 shadow-md flex items-center justify-center min-h-[48px] sm:min-h-[56px] cursor-pointer"
                                         >
                                             {opt}
                                         </button>
@@ -392,11 +392,11 @@ const ColorVisionTest: React.FC<Props> = ({ lang, stream, faceLandmarksRef, dist
                                 </div>
                                 <button
                                     onClick={() => handleAnswer('none')}
-                                    className="w-full py-3.5 sm:py-4 glass border-2 border-white/10 hover:border-red-400/50 hover:bg-red-500/10 rounded-xl sm:rounded-2xl text-xs sm:text-sm md:text-base text-slate-300 hover:text-white font-black uppercase tracking-[0.25em] transition-all shadow-md active:scale-95 min-h-[48px] sm:min-h-[54px] flex items-center justify-center"
+                                    className="w-full py-2 glass border-2 border-white/10 hover:border-red-400/50 hover:bg-red-500/10 rounded-xl text-xs sm:text-sm text-slate-300 hover:text-white font-black uppercase tracking-[0.2em] transition-all shadow-md active:scale-95 min-h-[38px] sm:min-h-[42px] flex items-center justify-center cursor-pointer"
                                 >
                                     {t.cant_see}
                                 </button>
-                                <div className="text-center mt-1 text-[10px] sm:text-xs text-slate-400 uppercase tracking-widest opacity-70 flex items-center justify-center gap-2">
+                                <div className="text-center mt-0.5 text-[10px] sm:text-xs text-slate-400 uppercase tracking-widest opacity-70 flex items-center justify-center gap-2">
                                     <span>Voice: Say the number or "can't see"</span>
                                     {isListening && <span className="text-emerald-400 font-bold animate-pulse">🎤 Listening</span>}
                                 </div>

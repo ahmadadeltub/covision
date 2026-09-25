@@ -134,43 +134,43 @@ const NearVisualAcuityTest: React.FC<Props> = ({
         </div>
       )}
 
-      {/* Reading Card Simulator */}
-      <div className="w-full flex-1 min-h-0 flex flex-col items-center justify-center my-2 p-5 sm:p-8 bg-white rounded-3xl border-2 border-slate-300 shadow-2xl text-slate-900 max-w-2xl relative">
-        <div className="absolute top-3 left-4 flex items-center gap-2">
+      {/* Reading Card Simulator — Responsively Capped */}
+      <div className="w-full flex-1 min-h-0 max-h-[210px] sm:max-h-[250px] flex flex-col items-center justify-center my-1.5 p-3 sm:p-5 bg-white rounded-2xl md:rounded-3xl border-2 border-slate-300 shadow-xl text-slate-900 max-w-xl relative">
+        <div className="absolute top-2.5 left-3.5 flex items-center gap-2">
           <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
             Clinical Reading Plate • 40 cm Standard
           </span>
         </div>
-        <div className="absolute top-3 right-4">
+        <div className="absolute top-2.5 right-3.5">
           <span className="text-[10px] font-mono font-bold text-cyan-800 bg-cyan-50 border border-cyan-200 px-2 py-0.5 rounded">
             Sample {levelIndex + 1}/3
           </span>
         </div>
 
-        <div className="text-center my-auto py-4">
+        <div className="text-center my-auto py-2">
           <p
             className="font-serif leading-relaxed text-slate-900 select-none tracking-normal"
-            style={{ fontSize: `${currentSentence.sizePt * 1.8}px` }}
+            style={{ fontSize: `clamp(14px, 2.2vh, ${currentSentence.sizePt * 1.6}px)` }}
           >
             {currentSentence.text}
           </p>
-          <p className="text-sm sm:text-base text-slate-500 font-sans mt-4 font-bold">
+          <p className="text-xs sm:text-sm text-slate-500 font-sans mt-2 font-bold">
             Can you comfortably read the sentence above clearly with your normal reading glasses/vision?
           </p>
         </div>
       </div>
 
-      {/* Response Controls */}
-      <div className="w-full max-w-2xl flex gap-3 shrink-0 pt-1">
+      {/* Response Controls — 100% Visible */}
+      <div className="w-full max-w-xl flex gap-2.5 shrink-0 pt-1 pb-1">
         <button
           onClick={() => handleResponse(false)}
-          className="flex-1 py-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider border border-white/10 active:scale-95 transition-all shadow-md min-h-[54px] cursor-pointer"
+          className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider border border-white/10 active:scale-95 transition-all shadow-md min-h-[46px] sm:min-h-[50px] cursor-pointer flex items-center justify-center text-center"
         >
           ✕ Cannot Read Clearly
         </button>
         <button
           onClick={() => handleResponse(true)}
-          className="flex-1 py-3.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-cyan-600/30 active:scale-95 transition-all min-h-[54px] cursor-pointer"
+          className="flex-1 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-cyan-600/30 active:scale-95 transition-all min-h-[46px] sm:min-h-[50px] cursor-pointer flex items-center justify-center text-center"
         >
           ✓ Yes, Completely Clear
         </button>

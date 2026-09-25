@@ -73,7 +73,7 @@ const TestingEngine: React.FC<Props> = ({
     <div className="w-full h-full flex flex-col max-w-7xl mx-auto overflow-hidden">
       {/* Distance Enforcement Bar */}
       {stream && (
-        <div className="shrink-0 px-4 md:px-8 pt-4">
+        <div className="shrink-0 px-3 md:px-6 pt-1 sm:pt-2">
           <DistanceBar
             distanceM={propDistanceM}
             status={propDistanceStatus}
@@ -87,7 +87,7 @@ const TestingEngine: React.FC<Props> = ({
 
       {/* Global Mini Camera View (Top Right) */}
       {stream && (
-        <div className="absolute top-2 right-2 md:top-4 md:right-4 z-50 w-24 h-32 sm:w-28 sm:h-36 md:w-36 md:h-48 rounded-2xl overflow-hidden border-2 border-[#1c96c5]/40 shadow-[0_0_25px_rgba(28,150,197,0.3)] bg-black/60 backdrop-blur-md pointer-events-none transition-all duration-300">
+        <div className="absolute top-2 right-2 md:top-3 md:right-4 z-50 w-20 h-28 sm:w-24 sm:h-32 md:w-32 md:h-44 rounded-2xl overflow-hidden border-2 border-[#1c96c5]/40 shadow-[0_0_20px_rgba(28,150,197,0.3)] bg-black/60 backdrop-blur-md pointer-events-none transition-all duration-300">
           <video
             ref={videoRef}
             autoPlay
@@ -101,32 +101,32 @@ const TestingEngine: React.FC<Props> = ({
             color="#1c96c5"
             className="absolute inset-0 w-full h-full pointer-events-none"
           />
-          <div className="absolute bottom-1.5 right-1.5 px-2 py-0.5 rounded-md bg-black/75 border border-[#1c96c5]/40 text-[9px] md:text-[10px] text-[#1c96c5] font-black tracking-widest uppercase shadow-sm flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#1c96c5] animate-ping inline-block" />
+          <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded-md bg-black/75 border border-[#1c96c5]/40 text-[8px] md:text-[9px] text-[#1c96c5] font-black tracking-widest uppercase shadow-sm flex items-center gap-1">
+            <span className="w-1 h-1 rounded-full bg-[#1c96c5] animate-ping inline-block" />
             Live
           </div>
         </div>
       )}
 
       {/* Progress Header */}
-      <div className="shrink-0 pt-2 md:pt-4 pb-1 md:pb-2 px-3 md:px-8 space-y-2 md:space-y-4">
+      <div className="shrink-0 pt-1 pb-1 px-3 md:px-6 space-y-1">
         <div className="flex justify-between items-end">
           <div className="flex flex-col">
-            <div className="text-xs md:text-xl font-black text-cyan-500 uppercase tracking-[0.15em] md:tracking-[0.4em]">Phase {currentTestIndex + 1} / {tests.length}</div>
+            <div className="text-xs md:text-sm font-black text-cyan-500 uppercase tracking-[0.15em] md:tracking-[0.3em]">Phase {currentTestIndex + 1} / {tests.length}</div>
           </div>
-          <div className="text-sm md:text-xl font-black text-slate-500 uppercase tracking-widest">{Math.round(progress)}%</div>
+          <div className="text-xs md:text-sm font-black text-slate-500 uppercase tracking-widest">{Math.round(progress)}%</div>
         </div>
 
-        <div className="w-full bg-slate-900 h-3 rounded-full overflow-hidden border border-white/5 relative">
+        <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-white/5 relative">
           <div
-            className="bg-gradient-to-r from-cyan-500 to-indigo-600 h-full transition-all duration-700 shadow-[0_0_20px_rgba(0,243,255,0.6)]"
+            className="bg-gradient-to-r from-cyan-500 to-indigo-600 h-full transition-all duration-700 shadow-[0_0_15px_rgba(0,243,255,0.6)]"
             style={{ width: `${progress}%` }}
           />
         </div>
       </div>
 
       {/* Test Area — blurred & locked when too close */}
-      <div className={`flex-1 min-h-0 relative p-2 md:p-6 lg:p-8 transition-all duration-300 ${isPaused ? 'opacity-30 pointer-events-none blur-sm' : ''}`}>
+      <div className={`flex-1 min-h-0 relative p-1 sm:p-2 md:p-3 overflow-hidden flex flex-col transition-all duration-300 ${isPaused ? 'opacity-30 pointer-events-none blur-sm' : ''}`}>
         {currentType === TestType.Acuity && (
           <AcuityTest calibration={calibration} t={t} stream={stream} onFinish={handleTestFinish} />
         )}

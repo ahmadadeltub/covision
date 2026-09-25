@@ -111,17 +111,20 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
     handleSelect('__CANT_SEE__');
   };
 
-  // Keyboard options
-  const candidateLetters = [currentLetter, 'D', 'K', 'R'].sort(() => 0.5 - Math.random());
+  // Stable candidate options per letter trial
+  const candidateLetters = React.useMemo(() => {
+    const distractors = ['D', 'K', 'R', 'S', 'N', 'V', 'Z', 'H'].filter(c => c !== currentLetter).sort(() => 0.5 - Math.random()).slice(0, 3);
+    return [currentLetter, ...distractors].sort(() => 0.5 - Math.random());
+  }, [currentLetter]);
 
   return (
-    <div className="w-full h-full flex flex-col justify-between items-center p-2 sm:p-4 max-w-4xl mx-auto animate-in fade-in select-none">
+    <div className="w-full h-full flex flex-col justify-between items-center p-2 sm:p-3 max-w-4xl mx-auto animate-in fade-in select-none overflow-hidden">
       {/* Header Bar */}
-      <div className="w-full flex items-center justify-between bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-cyan-500/30 shrink-0">
-        <div className="flex items-center gap-2.5">
-          <span className="text-xl">🌗</span>
+      <div className="w-full flex items-center justify-between bg-slate-900/80 backdrop-blur-md px-3.5 py-1.5 rounded-2xl border border-cyan-500/30 shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">🌗</span>
           <div>
-            <h2 className="text-xs sm:text-sm md:text-base font-black text-white uppercase tracking-wider">
+            <h2 className="text-xs sm:text-sm font-black text-white uppercase tracking-wider leading-tight">
               Quantitative Contrast Sensitivity (3 Samples)
             </h2>
             <p className="text-[10px] text-cyan-400 font-bold uppercase">
@@ -130,19 +133,19 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="px-2.5 py-1 rounded-full bg-cyan-950/70 border border-cyan-500/40 text-[10px] font-mono font-bold text-cyan-300">
+          <span className="px-2 py-0.5 rounded-full bg-cyan-950/70 border border-cyan-500/40 text-[10px] font-mono font-bold text-cyan-300">
             {currentLevel.label} · {currentLevel.logCS.toFixed(2)} logCS
           </span>
         </div>
       </div>
 
-      {/* Target Optotype Display Box */}
-      <div className="w-full flex-1 min-h-0 flex items-center justify-center my-2 max-w-lg">
-        <div className="w-full max-h-[320px] aspect-[4/3] rounded-3xl bg-white flex items-center justify-center border-4 border-slate-300 shadow-2xl relative">
+      {/* Target Optotype Display Box — Responsively Capped */}
+      <div className="w-full flex-1 min-h-0 flex items-center justify-center my-1 max-w-sm">
+        <div className="w-full max-h-[160px] sm:max-h-[190px] aspect-[4/3] rounded-2xl bg-white flex items-center justify-center border-4 border-slate-300 shadow-xl relative">
           <span
             className="font-black font-mono transition-opacity select-none leading-none"
             style={{
-              fontSize: 'clamp(80px, 16vw, 140px)',
+              fontSize: 'clamp(60px, 12vh, 96px)',
               color: '#0f172a',
               opacity: currentLevel.opacity,
             }}
@@ -152,7 +155,7 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
 
           {feedback && (
             <div
-              className={`absolute inset-0 rounded-3xl flex items-center justify-center text-4xl font-black ${
+              className={`absolute inset-0 rounded-2xl flex items-center justify-center text-3xl font-black ${
                 feedback === 'correct' ? 'bg-emerald-500/20 text-emerald-600' : 'bg-rose-500/20 text-rose-600'
               }`}
             >
@@ -162,14 +165,14 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
         </div>
       </div>
 
-      {/* Response Controls & Compact AI Coach */}
-      <div className="w-full max-w-lg space-y-2 shrink-0">
+      {/* Response Controls — 100% Guaranteed Fit */}
+      <div className="w-full max-w-md space-y-1.5 shrink-0 pb-1">
         <div className="grid grid-cols-4 gap-2">
           {candidateLetters.map((l) => (
             <button
               key={l}
               onClick={() => handleSelect(l)}
-              className="py-3 bg-slate-800 hover:bg-cyan-600 text-white rounded-2xl font-black text-xl md:text-2xl font-mono border border-white/10 active:scale-95 transition-all shadow-md min-h-[52px] cursor-pointer"
+              className="py-2.5 bg-slate-800 hover:bg-cyan-600 text-white rounded-xl font-black text-xl md:text-2xl font-mono border border-white/10 active:scale-95 transition-all shadow-md min-h-[46px] sm:min-h-[50px] cursor-pointer flex items-center justify-center"
             >
               {l}
             </button>
@@ -177,15 +180,10 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
         </div>
         <button
           onClick={handleCantSee}
-          className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-black uppercase tracking-widest border border-slate-700 active:scale-95 transition-all cursor-pointer min-h-[44px]"
+          className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-black uppercase tracking-wider border border-slate-700 active:scale-95 transition-all cursor-pointer min-h-[38px] flex items-center justify-center"
         >
           {t.cant_see || 'Cannot See Letter'}
         </button>
-
-        {/* Compact AI Coach Inline */}
-        <div className="pt-1">
-          <AIBotBubble botState={botState} />
-        </div>
       </div>
     </div>
   );

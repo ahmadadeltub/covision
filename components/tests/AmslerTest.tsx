@@ -143,10 +143,10 @@ const AmslerTest: React.FC<Props> = ({ t, stream, onFinish }) => {
       </div>
 
       {/* Center Amsler Grid */}
-      <div className="w-full flex-1 min-h-0 flex items-center justify-center my-2 max-w-md">
+      <div className="w-full flex-1 min-h-0 flex items-center justify-center my-1.5 max-w-sm">
         <div
           onClick={handleGridClick}
-          className="relative w-full aspect-square max-h-[340px] bg-black border-4 border-slate-600 rounded-2xl shadow-2xl cursor-crosshair overflow-hidden select-none"
+          className="relative w-full aspect-square max-h-[190px] sm:max-h-[220px] bg-black border-4 border-slate-600 rounded-2xl shadow-xl cursor-crosshair overflow-hidden select-none"
         >
           {/* Grid lines (20x20 squares) */}
           <div
@@ -161,7 +161,7 @@ const AmslerTest: React.FC<Props> = ({ t, stream, onFinish }) => {
           />
 
           {/* Center fixation dot */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white shadow-[0_0_12px_#fff] pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white shadow-[0_0_12px_#fff] pointer-events-none" />
 
           {/* Marked points */}
           {activePoints.map((pt, idx) => (
@@ -171,8 +171,8 @@ const AmslerTest: React.FC<Props> = ({ t, stream, onFinish }) => {
               style={{
                 left: `${pt.x}%`,
                 top: `${pt.y}%`,
-                width: 18,
-                height: 18,
+                width: 14,
+                height: 14,
                 background: pt.type === 'missing' ? 'rgba(239, 68, 68, 0.9)' : 'rgba(245, 158, 11, 0.9)',
                 border: '2px solid white',
               }}
@@ -182,13 +182,13 @@ const AmslerTest: React.FC<Props> = ({ t, stream, onFinish }) => {
       </div>
 
       {/* Distortion Mode & Clear Buttons */}
-      <div className="w-full max-w-xl flex items-center justify-between gap-2 shrink-0 py-1">
+      <div className="w-full max-w-lg flex items-center justify-between gap-2 shrink-0 py-0.5">
         <div className="flex gap-1.5 overflow-x-auto py-0.5">
           {(['wavy', 'missing', 'blurred'] as DistortionType[]).map((mode) => (
             <button
               key={mode}
               onClick={() => setDistortionMode(mode)}
-              className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                 distortionMode === mode
                   ? 'bg-cyan-500 text-black shadow-md'
                   : 'bg-slate-800 text-slate-400 hover:text-white border border-white/5'
@@ -201,32 +201,27 @@ const AmslerTest: React.FC<Props> = ({ t, stream, onFinish }) => {
         {activePoints.length > 0 && (
           <button
             onClick={handleClearPoints}
-            className="px-2.5 py-1 text-[10px] font-bold text-red-400 hover:text-red-300 underline cursor-pointer"
+            className="px-2 py-0.5 text-[10px] font-bold text-red-400 hover:text-red-300 underline cursor-pointer"
           >
             Clear ({activePoints.length})
           </button>
         )}
       </div>
 
-      {/* Bottom Confirmation Controls */}
-      <div className="w-full max-w-xl flex gap-2.5 shrink-0 pt-1">
+      {/* Bottom Confirmation Controls — Guaranteed Visible */}
+      <div className="w-full max-w-lg flex gap-2 shrink-0 pt-1 pb-1">
         <button
           onClick={() => handleEyeComplete(true)}
-          className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-emerald-600/25 active:scale-95 transition-all min-h-[50px] cursor-pointer"
+          className="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider shadow-md active:scale-95 transition-all min-h-[44px] sm:min-h-[48px] cursor-pointer flex items-center justify-center text-center"
         >
-          ✓ All Lines Straight & Clear
+          ✓ All Lines Straight
         </button>
         <button
           onClick={() => handleEyeComplete(false)}
-          className="flex-1 py-3 bg-amber-600 hover:bg-amber-500 text-white rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-amber-600/25 active:scale-95 transition-all min-h-[50px] cursor-pointer"
+          className="flex-1 py-2.5 px-3 bg-amber-600 hover:bg-amber-500 text-white rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider shadow-md active:scale-95 transition-all min-h-[44px] sm:min-h-[48px] cursor-pointer flex items-center justify-center text-center"
         >
-          ⚠️ Distortion / Scotoma Detected
+          ⚠️ Distortion Detected
         </button>
-      </div>
-
-      {/* Compact AI Coach */}
-      <div className="pt-1">
-        <AIBotBubble botState={botState} />
       </div>
     </div>
   );

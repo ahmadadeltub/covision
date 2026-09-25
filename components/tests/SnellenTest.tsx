@@ -235,49 +235,48 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
           </div>
         </div>
 
-        {/* Letter Display */}
-        <div className="flex-1 min-h-0 flex items-center justify-center p-3 md:p-4">
-          <div className="bg-white rounded-2xl md:rounded-[3rem] flex items-center justify-center shadow-2xl border-4 border-white/10 px-6 md:px-16"
-            style={{ minWidth: `${(currentTrial?.sizePx || 0) + 80}px`, minHeight: `${(currentTrial?.sizePx || 0) + 60}px`, maxWidth: '90%', maxHeight: '100%' }}>
+        {/* Letter Display — Adaptive & Responsive */}
+        <div className="flex-1 min-h-0 flex items-center justify-center p-1 sm:p-2 overflow-hidden">
+          <div className="bg-white rounded-2xl md:rounded-[2.5rem] flex items-center justify-center shadow-xl border-4 border-white/10 px-6 py-2 h-full max-h-[160px] sm:max-h-[200px] md:max-h-[230px] aspect-square">
             <span
               key={`both-${levelIdx}`}
               className="font-black text-black select-none leading-none"
-              style={{ fontSize: `${currentTrial?.sizePx}px`, fontFamily: "'Courier New', Courier, monospace" }}>
+              style={{ fontSize: `min(${currentTrial?.sizePx}px, clamp(48px, 14vh, 130px))`, fontFamily: "'Courier New', Courier, monospace" }}>
               {targetLetter}
             </span>
           </div>
         </div>
 
-        {/* Choice Buttons — Significantly Enlarged */}
-        <div className="shrink-0 p-2 md:p-3 pt-0 space-y-2">
-          <div className="grid grid-cols-3 gap-3 md:gap-4 max-w-2xl mx-auto">
+        {/* Choice Buttons — Guaranteed 100% Fit */}
+        <div className="shrink-0 p-1 sm:p-2 pt-0 space-y-1.5 max-w-xl mx-auto w-full">
+          <div className="grid grid-cols-3 gap-2 sm:gap-2.5 w-full">
             {choiceLetters.map((letter, i) => (
               <button
                 key={`${letter}-${i}`}
                 onClick={() => handleSelect(letter)}
-                className={`py-4 sm:py-5 md:py-6 glass border-2 rounded-2xl md:rounded-3xl text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black transition-all active:scale-95 min-h-[64px] sm:min-h-[80px] flex items-center justify-center
+                className={`py-2 sm:py-3 glass border-2 rounded-xl sm:rounded-2xl text-2xl sm:text-3xl md:text-4xl font-black transition-all active:scale-95 min-h-[46px] sm:min-h-[54px] md:min-h-[60px] flex items-center justify-center cursor-pointer
                   ${activeButton === letter
-                    ? 'border-cyan-400 bg-cyan-500/40 shadow-[0_0_50px_rgba(0,243,255,0.6)] scale-105'
-                    : 'border-white/10 hover:border-cyan-400 hover:bg-cyan-500/20'}`}
+                    ? 'border-cyan-400 bg-cyan-500/40 shadow-[0_0_30px_rgba(0,243,255,0.6)] scale-105'
+                    : 'border-white/15 hover:border-cyan-400 hover:bg-cyan-500/20'}`}
                 style={{ fontFamily: "'Courier New', Courier, monospace" }}>
                 <span className="text-slate-900 dark:text-white">{letter}</span>
               </button>
             ))}
           </div>
-          <div className="max-w-2xl mx-auto mt-2">
+          <div>
             <button
               onClick={() => handleSelect('__CANT_SEE__')}
-              className={`w-full py-3.5 sm:py-4 min-h-[52px] sm:min-h-[58px] glass border-2 rounded-xl md:rounded-2xl text-sm md:text-base font-black uppercase tracking-wider md:tracking-widest transition-all active:scale-95 flex items-center justify-center
+              className={`w-full py-2 sm:py-2.5 min-h-[40px] sm:min-h-[44px] glass border-2 rounded-xl text-xs sm:text-sm font-black uppercase tracking-wider transition-all active:scale-95 flex items-center justify-center cursor-pointer
                 ${activeButton === '__CANT_SEE__'
-                  ? 'border-red-400 bg-red-500/40 shadow-[0_0_30px_rgba(239,68,68,0.5)] scale-105 text-red-700 dark:text-red-300'
+                  ? 'border-red-400 bg-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.5)] scale-105 text-red-700 dark:text-red-300'
                   : 'border-slate-200 dark:border-white/10 hover:border-red-400 hover:bg-red-500/10 text-slate-700 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-300'}`}>
-              <span className="flex items-center justify-center gap-2">
-                <span className="text-lg">🚫</span>
+              <span className="flex items-center justify-center gap-1.5">
+                <span className="text-base">🚫</span>
                 <span>Can&apos;t See</span>
               </span>
             </button>
           </div>
-          <div className="text-center mt-1 text-[10px] md:text-xs text-slate-500 uppercase tracking-widest opacity-60 flex items-center justify-center gap-2">
+          <div className="text-center text-[10px] sm:text-xs text-slate-500 uppercase tracking-widest opacity-70 flex items-center justify-center gap-2">
             <span>Voice: Say the letter or &quot;can&apos;t see&quot;</span>
             {isListening && <span className="text-emerald-400 font-bold animate-pulse">🎤 Listening</span>}
           </div>

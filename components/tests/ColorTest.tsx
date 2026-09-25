@@ -333,8 +333,8 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
           </div>
 
           {/* Ishihara Plate Image */}
-          <div className="flex-1 min-h-0 flex items-center justify-center p-3 sm:p-4">
-            <div className="w-[min(48vw,28vh)] h-[min(48vw,28vh)] sm:w-48 sm:h-48 md:w-56 md:h-56 rounded-full overflow-hidden shadow-2xl bg-[#f5f0e0] border-4 border-slate-200 dark:border-white/10 mx-auto">
+          <div className="flex-1 min-h-0 flex items-center justify-center p-2 sm:p-3">
+            <div className="w-[min(38vw,20vh)] h-[min(38vw,20vh)] sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-full overflow-hidden shadow-xl bg-[#f5f0e0] border-4 border-slate-200 dark:border-white/10 mx-auto">
               <img
                 src={currentIshiharaPlate.imageSrc}
                 alt={`Ishihara Plate ${ishiharaIdx + 1}`}
@@ -343,15 +343,15 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
             </div>
           </div>
 
-          {/* Answer Buttons */}
-          <div className="shrink-0 p-3 sm:p-4 pt-0 space-y-2 sm:space-y-3">
-            <p className="text-center text-[10px] sm:text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">What number do you see?</p>
-            <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5 max-w-xl mx-auto">
+          {/* Answer Buttons — Single Row of 4 + Can't See */}
+          <div className="shrink-0 p-2 sm:p-3 pt-0 space-y-1.5 sm:space-y-2">
+            <p className="text-center text-[10px] sm:text-xs text-slate-500 uppercase tracking-widest font-bold mb-0.5">What number do you see?</p>
+            <div className="grid grid-cols-4 gap-2 sm:gap-3 max-w-xl mx-auto">
               {ishiharaOptions.map((opt) => (
                 <button
                   key={opt}
                   onClick={() => handleIshiharaAnswer(opt)}
-                  className="py-4 sm:py-5 md:py-6 glass border-2 border-slate-200 dark:border-white/10 rounded-2xl font-black text-3xl sm:text-4xl md:text-5xl text-slate-900 dark:text-white hover:border-cyan-400 hover:bg-cyan-500/20 transition-all active:scale-95 min-h-[64px] sm:min-h-[76px] md:min-h-[86px] flex items-center justify-center"
+                  className="py-2.5 sm:py-3 glass border-2 border-slate-200 dark:border-white/10 rounded-xl sm:rounded-2xl font-black text-2xl sm:text-3xl text-slate-900 dark:text-white hover:border-cyan-400 hover:bg-cyan-500/20 transition-all active:scale-95 min-h-[48px] sm:min-h-[56px] flex items-center justify-center cursor-pointer"
                 >
                   {opt}
                 </button>
@@ -359,11 +359,11 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
             </div>
             <button
               onClick={() => handleIshiharaAnswer('none')}
-              className="w-full max-w-xl mx-auto block py-3.5 sm:py-4 glass border border-slate-200 dark:border-white/5 rounded-full text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-black uppercase tracking-[0.3em] hover:text-slate-900 dark:hover:text-white transition-colors min-h-[52px] sm:min-h-[58px]"
+              className="w-full max-w-xl mx-auto block py-2 glass border border-slate-200 dark:border-white/5 rounded-full text-xs text-slate-600 dark:text-slate-400 font-black uppercase tracking-[0.2em] hover:text-slate-900 dark:hover:text-white transition-colors min-h-[38px] sm:min-h-[42px] cursor-pointer"
             >
               Can&apos;t See
             </button>
-            <div className="text-center mt-1 text-xs text-slate-500 uppercase tracking-widest opacity-60 flex items-center justify-center gap-2">
+            <div className="text-center mt-0.5 text-[10px] text-slate-500 uppercase tracking-widest opacity-60 flex items-center justify-center gap-2">
                 <span>Voice: Say the number or "can't see"</span>
                 {isListening && <span className="text-emerald-400 font-bold animate-pulse">🎤 Listening</span>}
             </div>
@@ -437,54 +437,54 @@ const ColorTest: React.FC<Props> = ({ t, stream, onFinish }) => {
         </div>
 
         {/* Color Circle */}
-        <div className="flex-1 min-h-0 flex items-center justify-center p-3 sm:p-4">
+        <div className="flex-1 min-h-0 flex items-center justify-center p-2 sm:p-3">
           <div className="relative">
             {/* Outer glow */}
-            <div className="absolute inset-0 rounded-full blur-3xl opacity-40 animate-pulse"
-              style={{ background: colorHex, transform: 'scale(1.4)' }} />
+            <div className="absolute inset-0 rounded-full blur-2xl opacity-40 animate-pulse"
+              style={{ background: colorHex, transform: 'scale(1.3)' }} />
             {/* Main circle */}
             <div
-              className="relative w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-full border-4 border-slate-200 dark:border-white/20 shadow-2xl transition-colors duration-500"
+              className="relative w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full border-4 border-slate-200 dark:border-white/20 shadow-xl transition-colors duration-500"
               style={{
                 background: `radial-gradient(circle at 35% 35%, ${colorHex}ee, ${colorHex}cc, ${colorHex})`,
-                boxShadow: `0 0 60px ${colorHex}50, 0 0 120px ${colorHex}25, inset 0 -8px 25px rgba(0,0,0,0.25), inset 0 8px 25px rgba(255,255,255,0.12)`,
+                boxShadow: `0 0 40px ${colorHex}50, inset 0 -6px 18px rgba(0,0,0,0.25), inset 0 6px 18px rgba(255,255,255,0.12)`,
               }}
             >
               {/* Shine */}
-              <div className="absolute top-4 left-6 w-10 h-5 sm:w-14 sm:h-7 bg-white/25 rounded-full blur-md rotate-[-30deg]" />
+              <div className="absolute top-2.5 left-4 w-7 h-3.5 sm:w-10 sm:h-5 bg-white/25 rounded-full blur-sm rotate-[-30deg]" />
               {/* Question mark */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-4xl sm:text-5xl font-black text-slate-800/40 dark:text-white/30 select-none drop-shadow-lg">?</span>
+                <span className="text-2xl sm:text-4xl font-black text-slate-800/40 dark:text-white/30 select-none drop-shadow-md">?</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Answer Buttons */}
-        <div className="shrink-0 p-3 sm:p-4 pt-0 space-y-2 sm:space-y-3">
-          <p className="text-center text-[10px] sm:text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">What color is this circle?</p>
-          <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5 max-w-2xl mx-auto">
+        {/* Answer Buttons — Compact 2x2 Grid */}
+        <div className="shrink-0 p-2 sm:p-3 pt-0 space-y-1.5 sm:space-y-2">
+          <p className="text-center text-[10px] sm:text-xs text-slate-500 uppercase tracking-widest font-bold mb-0.5">What color is this circle?</p>
+          <div className="grid grid-cols-2 gap-2 sm:gap-2.5 max-w-xl mx-auto">
             {shuffledChoices.map(colorName => {
               const hex = ALL_COLORS[colorName] || '#888';
               return (
                 <button
                   key={colorName}
                   onClick={() => handleSelect(colorName)}
-                  className="group py-3.5 sm:py-4.5 md:py-5 px-4 sm:px-6 glass border-2 border-slate-200 dark:border-white/10 rounded-2xl font-black uppercase tracking-wider hover:border-cyan-400 hover:bg-cyan-500/10 transition-all active:scale-95 flex items-center gap-3 sm:gap-4 justify-center min-h-[64px] sm:min-h-[76px] md:min-h-[86px]"
+                  className="group py-2 sm:py-2.5 px-3 sm:px-4 glass border-2 border-slate-200 dark:border-white/10 rounded-xl sm:rounded-2xl font-black uppercase tracking-wider hover:border-cyan-400 hover:bg-cyan-500/10 transition-all active:scale-95 flex items-center gap-2.5 sm:gap-3 justify-center min-h-[46px] sm:min-h-[52px] cursor-pointer"
                 >
                   <div
-                    className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full border-2 border-white/25 shrink-0 shadow-lg group-hover:scale-110 transition-transform"
+                    className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-white/25 shrink-0 shadow-md group-hover:scale-110 transition-transform"
                     style={{
                       background: `radial-gradient(circle at 35% 35%, ${hex}dd, ${hex})`,
-                      boxShadow: `0 0 14px ${hex}40, inset 0 2px 6px rgba(255,255,255,0.15)`,
+                      boxShadow: `0 0 10px ${hex}40, inset 0 2px 4px rgba(255,255,255,0.15)`,
                     }}
                   />
-                  <span className="text-slate-900 dark:text-white text-base sm:text-lg md:text-xl font-black">{colorName}</span>
+                  <span className="text-slate-900 dark:text-white text-xs sm:text-sm md:text-base font-black">{colorName}</span>
                 </button>
               );
             })}
           </div>
-          <div className="text-center mt-1 text-xs text-slate-500 uppercase tracking-widest opacity-60 flex items-center justify-center gap-2">
+          <div className="text-center mt-0.5 text-[10px] text-slate-500 uppercase tracking-widest opacity-60 flex items-center justify-center gap-2">
               <span>Voice: Say the color</span>
               {isListening && <span className="text-emerald-400 font-bold animate-pulse">🎤 Listening</span>}
           </div>

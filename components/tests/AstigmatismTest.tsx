@@ -136,36 +136,36 @@ const AstigmatismTest: React.FC<Props> = ({ t, stream, onFinish }) => {
   // Blur Position Selector
   if (showBlurSelect) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-between p-6 animate-in fade-in duration-300">
-        <div className="shrink-0">
-          <h3 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter text-center">Where is the distortion?</h3>
-          <p className="text-xs text-cyan-400 font-bold uppercase tracking-wider mt-1 text-center">Tap the blurred clock positions</p>
+      <div className="w-full h-full flex flex-col items-center justify-between p-3 sm:p-5 animate-in fade-in duration-300 overflow-hidden">
+        <div className="shrink-0 text-center">
+          <h3 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight">Where is the distortion?</h3>
+          <p className="text-[10px] sm:text-xs text-cyan-400 font-bold uppercase tracking-wider mt-0.5">Tap the blurred clock positions</p>
         </div>
-        <div className="flex-1 flex items-center justify-center my-4">
-          <div className="relative" style={{ width: 'min(70vw, 320px)', height: 'min(70vw, 320px)' }}>
+        <div className="flex-1 min-h-0 flex items-center justify-center my-2">
+          <div className="relative" style={{ width: 'min(50vw, 220px)', height: 'min(50vw, 220px)' }}>
             {Array.from({ length: 12 }).map((_, i) => {
               const angle = ((i * 30) - 90) * (Math.PI / 180);
-              const r = 45;
+              const r = 44;
               const x = 50 + r * Math.cos(angle);
               const y = 50 + r * Math.sin(angle);
               const isSelected = selectedPositions.includes(i + 1);
               return (
                 <button key={i} onClick={() => togglePosition(i + 1)}
-                  className={`absolute w-10 h-10 rounded-full font-black text-sm transition-all ${isSelected
-                    ? 'bg-red-500/30 border-2 border-red-400 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.5)]'
+                  className={`absolute w-8 h-8 rounded-full font-black text-xs transition-all cursor-pointer ${isSelected
+                    ? 'bg-red-500/30 border-2 border-red-400 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.5)]'
                     : 'bg-slate-800 text-slate-400 border border-white/10 hover:border-cyan-400'}`}
                   style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}>
                   {i === 0 ? 12 : i}
                 </button>
               );
             })}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
             </div>
           </div>
         </div>
         <button onClick={() => handleChoice(true)}
-          className="shrink-0 w-full max-w-2xl py-5 bg-white text-slate-950 rounded-[2rem] font-black text-lg uppercase tracking-[0.3em] hover:bg-cyan-400 transition-all">
+          className="shrink-0 w-full max-w-md py-3 bg-white text-slate-950 rounded-2xl font-black text-sm uppercase tracking-[0.2em] hover:bg-cyan-400 transition-all cursor-pointer shadow-lg active:scale-95 min-h-[44px]">
           Confirm ({selectedPositions.length})
         </button>
       </div>
@@ -221,8 +221,8 @@ const AstigmatismTest: React.FC<Props> = ({ t, stream, onFinish }) => {
         </div>
 
         {/* Pattern Display */}
-        <div className="flex-1 min-h-0 flex items-center justify-center p-3 sm:p-4">
-          <div className="w-[min(65vw,34vh)] h-[min(65vw,34vh)] bg-white rounded-2xl md:rounded-[2rem] p-3 md:p-5 border-4 border-white/10 shadow-2xl">
+        <div className="flex-1 min-h-0 flex items-center justify-center p-2 sm:p-3">
+          <div className="w-[min(48vw,20vh)] h-[min(48vw,20vh)] max-h-[160px] sm:max-h-[180px] bg-white rounded-2xl p-2.5 sm:p-3 border-4 border-white/10 shadow-xl">
             <svg viewBox="0 0 100 100" className="w-full h-full">
               {currentPattern.key === 'clock' && (
                 <>
@@ -285,33 +285,41 @@ const AstigmatismTest: React.FC<Props> = ({ t, stream, onFinish }) => {
           </div>
         </div>
 
-        {/* Smart Answer Buttons */}
-        <div className="shrink-0 p-2 sm:p-3 md:p-4 pt-0 space-y-2">
-          <p className="text-center text-[10px] sm:text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">How do all the lines appear to you?</p>
-          <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5 max-w-2xl mx-auto">
+        {/* Smart Answer Buttons — Compact 2x2 Grid with Horizontal Layout */}
+        <div className="shrink-0 p-2 sm:p-3 pt-0 space-y-1.5">
+          <p className="text-center text-[10px] sm:text-xs text-slate-500 uppercase tracking-widest font-bold mb-0.5">How do all the lines appear to you?</p>
+          <div className="grid grid-cols-2 gap-2 max-w-xl mx-auto">
             <button onClick={() => handleChoice(false)}
-              className="py-3 sm:py-4 md:py-5 min-h-[68px] sm:min-h-[80px] md:min-h-[90px] bg-emerald-500/10 border-2 border-emerald-500/30 text-emerald-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-base md:text-lg tracking-wider hover:bg-emerald-500/20 transition-all active:scale-95 flex flex-col items-center justify-center">
-              <span className="text-2xl sm:text-3xl md:text-4xl block mb-0.5 sm:mb-1">&#x2705;</span>
-              All Lines Sharp
-              <span className="block text-[8px] sm:text-[10px] md:text-xs text-emerald-400/70 normal-case tracking-normal mt-0.5">Equal darkness &amp; clarity</span>
+              className="py-2 px-2.5 min-h-[46px] sm:min-h-[50px] bg-emerald-500/10 border-2 border-emerald-500/30 text-emerald-400 rounded-xl sm:rounded-2xl hover:bg-emerald-500/20 transition-all active:scale-95 flex items-center gap-2 justify-start cursor-pointer">
+              <span className="text-xl sm:text-2xl shrink-0">&#x2705;</span>
+              <div className="text-left min-w-0">
+                <span className="font-black uppercase text-xs sm:text-sm tracking-wide block leading-tight truncate">All Lines Sharp</span>
+                <span className="block text-[8px] sm:text-[10px] text-emerald-400/80 normal-case tracking-normal leading-tight truncate">Equal clarity</span>
+              </div>
             </button>
             <button onClick={() => handleChoice(true)}
-              className="py-3 sm:py-4 md:py-5 min-h-[68px] sm:min-h-[80px] md:min-h-[90px] bg-amber-500/10 border-2 border-amber-500/30 text-amber-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-base md:text-lg tracking-wider hover:bg-amber-500/20 transition-all active:scale-95 flex flex-col items-center justify-center">
-              <span className="text-2xl sm:text-3xl md:text-4xl block mb-0.5 sm:mb-1">&#x26A0;&#xFE0F;</span>
-              Some Lines Blurred
-              <span className="block text-[8px] sm:text-[10px] md:text-xs text-amber-400/70 normal-case tracking-normal mt-0.5">Certain directions look lighter</span>
+              className="py-2 px-2.5 min-h-[46px] sm:min-h-[50px] bg-amber-500/10 border-2 border-amber-500/30 text-amber-400 rounded-xl sm:rounded-2xl hover:bg-amber-500/20 transition-all active:scale-95 flex items-center gap-2 justify-start cursor-pointer">
+              <span className="text-xl sm:text-2xl shrink-0">&#x26A0;&#xFE0F;</span>
+              <div className="text-left min-w-0">
+                <span className="font-black uppercase text-xs sm:text-sm tracking-wide block leading-tight truncate">Some Blurred</span>
+                <span className="block text-[8px] sm:text-[10px] text-amber-400/80 normal-case tracking-normal leading-tight truncate">Certain lines lighter</span>
+              </div>
             </button>
             <button onClick={() => { setSelectedPositions([1,2,3,4,5,6]); handleChoice(true, true); }}
-              className="py-3 sm:py-4 md:py-5 min-h-[68px] sm:min-h-[80px] md:min-h-[90px] bg-orange-500/10 border-2 border-orange-500/30 text-orange-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-base md:text-lg tracking-wider hover:bg-orange-500/20 transition-all active:scale-95 flex flex-col items-center justify-center">
-              <span className="text-2xl sm:text-3xl md:text-4xl block mb-0.5 sm:mb-1">&#x1F300;</span>
-              Lines Are Wavy
-              <span className="block text-[8px] sm:text-[10px] md:text-xs text-orange-400/70 normal-case tracking-normal mt-0.5">Lines bend or curve</span>
+              className="py-2 px-2.5 min-h-[46px] sm:min-h-[50px] bg-orange-500/10 border-2 border-orange-500/30 text-orange-400 rounded-xl sm:rounded-2xl hover:bg-orange-500/20 transition-all active:scale-95 flex items-center gap-2 justify-start cursor-pointer">
+              <span className="text-xl sm:text-2xl shrink-0">&#x1F300;</span>
+              <div className="text-left min-w-0">
+                <span className="font-black uppercase text-xs sm:text-sm tracking-wide block leading-tight truncate">Lines Are Wavy</span>
+                <span className="block text-[8px] sm:text-[10px] text-orange-400/80 normal-case tracking-normal leading-tight truncate">Lines bend/curve</span>
+              </div>
             </button>
             <button onClick={() => { setSelectedPositions([1,2,3,4,5,6,7,8,9,10,11,12]); handleChoice(true, true); }}
-              className="py-3 sm:py-4 md:py-5 min-h-[68px] sm:min-h-[80px] md:min-h-[90px] bg-red-500/10 border-2 border-red-500/30 text-red-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-base md:text-lg tracking-wider hover:bg-red-500/20 transition-all active:scale-95 flex flex-col items-center justify-center">
-              <span className="text-2xl sm:text-3xl md:text-4xl block mb-0.5 sm:mb-1">&#x274C;</span>
-              Very Distorted
-              <span className="block text-[8px] sm:text-[10px] md:text-xs text-red-400/70 normal-case tracking-normal mt-0.5">Can&apos;t see pattern clearly</span>
+              className="py-2 px-2.5 min-h-[46px] sm:min-h-[50px] bg-red-500/10 border-2 border-red-500/30 text-red-400 rounded-xl sm:rounded-2xl hover:bg-red-500/20 transition-all active:scale-95 flex items-center gap-2 justify-start cursor-pointer">
+              <span className="text-xl sm:text-2xl shrink-0">&#x274C;</span>
+              <div className="text-left min-w-0">
+                <span className="font-black uppercase text-xs sm:text-sm tracking-wide block leading-tight truncate">Very Distorted</span>
+                <span className="block text-[8px] sm:text-[10px] text-red-400/80 normal-case tracking-normal leading-tight truncate">Can't see clearly</span>
+              </div>
             </button>
           </div>
         </div>
