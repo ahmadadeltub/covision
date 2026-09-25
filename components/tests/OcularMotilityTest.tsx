@@ -136,7 +136,7 @@ const OcularMotilityTest: React.FC<Props> = ({ lang, t, stream, faceLandmarksRef
 
       {/* Instruction Badge */}
       <div className="w-full text-center shrink-0 pt-1">
-        <span className="text-xs text-slate-400 font-semibold">
+        <span className="text-sm sm:text-base text-slate-300 font-bold">
           Fixate on the target as it evaluates horizontal rectus alignment · Position {currentIndex + 1} of 3
         </span>
       </div>

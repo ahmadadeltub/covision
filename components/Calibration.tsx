@@ -892,10 +892,10 @@ const Calibration: React.FC<Props> = ({ lang, t, stream, videoRef, faceLandmarks
             <div className="flex items-center gap-1.5">
               {/* Guidance Instruction Badge */}
               <div
-                className="flex items-center gap-1 py-0.5 px-2 sm:px-2.5 rounded-full border text-[10px] sm:text-xs font-black uppercase tracking-wider animate-pulse"
+                className="flex items-center gap-1.5 py-1 px-3 sm:px-4 rounded-full border text-xs sm:text-sm md:text-base font-black uppercase tracking-wider animate-pulse shadow-sm"
                 style={{ background: getDistanceColor() + '18', borderColor: getDistanceColor() + '40', color: getDistanceColor() }}
               >
-                <span className="text-xs sm:text-sm">{guidance.icon}</span>
+                <span className="text-sm sm:text-base md:text-lg">{guidance.icon}</span>
                 <span>{guidance.text}</span>
               </div>
 

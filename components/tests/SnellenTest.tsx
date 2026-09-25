@@ -208,8 +208,8 @@ const SnellenTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
             </span>
           </div>
         </div>
-        <div className="text-center px-2">
-          <div className="text-[10px] font-bold text-sky-700 dark:text-cyan-400/80 flex items-center gap-1 justify-center">
+        <div className="text-center px-2 py-1">
+          <div className="text-xs sm:text-sm font-black text-sky-700 dark:text-cyan-400 flex items-center gap-1.5 justify-center uppercase tracking-wide">
             <span>Select the letter below</span>
           </div>
         </div>

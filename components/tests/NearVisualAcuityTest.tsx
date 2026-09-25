@@ -154,7 +154,7 @@ const NearVisualAcuityTest: React.FC<Props> = ({
           >
             {currentSentence.text}
           </p>
-          <p className="text-xs text-slate-400 font-sans mt-4 font-semibold">
+          <p className="text-sm sm:text-base text-slate-500 font-sans mt-4 font-bold">
             Can you comfortably read the sentence above clearly with your normal reading glasses/vision?
           </p>
         </div>

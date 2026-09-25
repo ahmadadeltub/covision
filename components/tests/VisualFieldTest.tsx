@@ -176,8 +176,8 @@ const VisualFieldTest: React.FC<Props> = ({ lang, t, stream, onFinish }) => {
         )}
 
         {/* Tap/Click Helper Notice */}
-        <div className="absolute bottom-2 left-0 right-0 text-center pointer-events-none px-2">
-          <span className="px-3 py-1 rounded-full bg-black/60 border border-white/10 text-[10px] text-slate-300 font-bold uppercase tracking-wider backdrop-blur-sm">
+        <div className="absolute bottom-2.5 left-0 right-0 text-center pointer-events-none px-2">
+          <span className="px-4 py-1.5 rounded-full bg-black/75 border border-white/15 text-xs sm:text-sm text-slate-200 font-bold uppercase tracking-wider backdrop-blur-sm shadow-md">
             Sample {Math.min(stimulusIndex + 1, TOTAL_STIMULI)} of {TOTAL_STIMULI}: Look at red dot & tap when yellow dot flashes
           </span>
         </div>

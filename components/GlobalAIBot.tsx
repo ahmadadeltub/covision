@@ -9,7 +9,7 @@ interface Props {
 /**
  * GlobalAIBot — floating AI assistant.
  * Note: HIDDEN during tests to ensure it NEVER shows on or obscures vision tests.
- * Compact, small-font guidance widget for informational pages.
+ * Shows prominent, readable AI guidance instructions on informational and calibration pages.
  */
 const GlobalAIBot: React.FC<Props> = ({ globalBotState }) => {
   const { message, mood, step, tipIndex, totalTips, distanceM, distanceStatus, isDistanceActive } = globalBotState;
@@ -66,17 +66,17 @@ const GlobalAIBot: React.FC<Props> = ({ globalBotState }) => {
     distanceStatus === 'too_far' ? '#f59e0b' : '#64748b';
 
   const distLabel =
-    distanceStatus === 'ok' ? 'PERFECT' :
-    distanceStatus === 'too_close' ? 'TOO CLOSE' :
-    distanceStatus === 'too_far' ? 'TOO FAR' : 'NO FACE';
+    distanceStatus === 'ok' ? 'PERFECT DISTANCE' :
+    distanceStatus === 'too_close' ? 'TOO CLOSE — STEP BACK' :
+    distanceStatus === 'too_far' ? 'TOO FAR — STEP CLOSER' : 'SEARCHING FOR FACE';
 
   const distIcon =
     distanceStatus === 'ok' ? '✅' :
     distanceStatus === 'too_close' ? '⬅️' :
     distanceStatus === 'too_far' ? '➡️' : '👤';
 
-  // Compact Ring params
-  const radius = 24;
+  // Ring params
+  const radius = 26;
   const circumference = 2 * Math.PI * radius;
   const tipProgress = totalTips > 0 ? (tipIndex + 1) / totalTips : 1;
   const ringProgress = isDistanceActive
@@ -94,18 +94,18 @@ const GlobalAIBot: React.FC<Props> = ({ globalBotState }) => {
       style={{
         ...(isMobile
           ? { top: 12, left: 12 }
-          : { bottom: 16, right: 16 }),
+          : { bottom: 20, right: 20 }),
         display: 'flex',
         flexDirection: 'column',
         alignItems: isMobile ? 'flex-start' : 'flex-end',
-        gap: 6,
+        gap: 8,
         pointerEvents: 'auto',
       }}
     >
-      {/* ─── Compact Speech Bubble with Small Fit Fonts ─── */}
+      {/* ─── Speech Bubble with Large, Readable Guidance Instructions ─── */}
       <div
         style={{
-          maxWidth: 280,
+          maxWidth: 380,
           opacity: showBubble ? 1 : 0,
           transform: showBubble ? 'translateY(0) scale(1)' : 'translateY(10px) scale(0.92)',
           transition: 'all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
@@ -115,84 +115,89 @@ const GlobalAIBot: React.FC<Props> = ({ globalBotState }) => {
         {message && (
           <div
             key={animKey}
-            className="rounded-2xl px-3.5 py-2.5 border shadow-xl relative"
+            className="rounded-3xl px-5 py-4 border shadow-2xl relative"
             style={{
               background: 'var(--bg-card)',
-              borderColor: (message.color || '#06b6d4') + '50',
-              boxShadow: `0 8px 30px ${(message.color || '#06b6d4')}25, 0 4px 12px rgba(0,0,0,0.25)`,
+              borderColor: (message.color || '#06b6d4') + '60',
+              boxShadow: `0 12px 40px ${(message.color || '#06b6d4')}30, 0 4px 16px rgba(0,0,0,0.3)`,
               backdropFilter: 'blur(16px)',
             }}
           >
-            <div className="flex items-start gap-2.5">
-              <span className="text-xl shrink-0 mt-0.5">{message.emoji}</span>
+            <div className="flex items-start gap-3.5">
+              <span className="text-3xl shrink-0 mt-0.5">{message.emoji}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-[13px] font-semibold leading-snug" style={{ color: message.color || 'var(--text-primary)' }}>
+                {/* AI Guidance Instruction Heading */}
+                <span className="text-[11px] font-black uppercase tracking-widest block mb-1" style={{ color: message.color || '#06b6d4' }}>
+                  AI Guidance Instruction
+                </span>
+                {/* Increased Font Size for Guidance Text */}
+                <p className="text-sm sm:text-base md:text-lg font-bold leading-relaxed" style={{ color: message.color || 'var(--text-primary)' }}>
                   {message.text}
                 </p>
                 {totalTips > 0 && tipIndex >= 0 && !isDistanceActive && (
-                  <div className="flex items-center gap-1.5 mt-2 pt-1.5 border-t border-white/10">
-                    <div className="flex gap-1">
+                  <div className="flex items-center gap-2 mt-2.5 pt-2 border-t border-white/10">
+                    <div className="flex gap-1.5">
                       {Array.from({ length: totalTips }).map((_, i) => (
                         <div
                           key={i}
-                          className="w-1.5 h-1.5 rounded-full transition-all duration-300"
+                          className="w-2 h-2 rounded-full transition-all duration-300"
                           style={{
                             background: i <= tipIndex ? ringColor : 'rgba(255,255,255,0.2)',
-                            boxShadow: i <= tipIndex ? `0 0 4px ${ringColor}` : 'none',
+                            boxShadow: i <= tipIndex ? `0 0 5px ${ringColor}` : 'none',
                           }}
                         />
                       ))}
                     </div>
-                    <span className="text-[10px] text-slate-400 font-bold ml-auto">
-                      Tip {tipIndex + 1}/{totalTips}
+                    <span className="text-xs text-slate-400 font-bold ml-auto">
+                      Tip {tipIndex + 1} of {totalTips}
                     </span>
                   </div>
                 )}
               </div>
             </div>
-            {/* Small Arrow pointing down-right */}
+            {/* Arrow pointing down-right */}
             <div
-              className="absolute -bottom-1.5 right-6 w-3 h-3 rotate-45"
+              className="absolute -bottom-2 right-7 w-4 h-4 rotate-45"
               style={{
                 background: 'var(--bg-card)',
-                borderRight: `1px solid ${(message.color || '#06b6d4')}50`,
-                borderBottom: `1px solid ${(message.color || '#06b6d4')}50`,
+                borderRight: `1px solid ${(message.color || '#06b6d4')}60`,
+                borderBottom: `1px solid ${(message.color || '#06b6d4')}60`,
               }}
             />
           </div>
         )}
       </div>
 
-      {/* ─── Live Distance Bar (Compact) ─── */}
+      {/* ─── Live Distance Bar with Increased Guidance Font ─── */}
       {isDistanceActive && expanded && (
         <div
-          className="rounded-xl border shadow-lg overflow-hidden"
+          className="rounded-2xl border shadow-xl overflow-hidden"
           style={{
-            width: 210,
+            width: 250,
             background: 'var(--bg-card)',
-            borderColor: distBarColor + '40',
+            borderColor: distBarColor + '50',
             backdropFilter: 'blur(16px)',
-            boxShadow: `0 4px 20px ${distBarColor}20`,
+            boxShadow: `0 6px 25px ${distBarColor}25`,
           }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-3 pt-2 pb-1">
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm">{distIcon}</span>
-              <span className="text-[10px] font-black uppercase tracking-wider" style={{ color: distBarColor }}>
+          <div className="flex items-center justify-between px-3.5 pt-2.5 pb-1">
+            <div className="flex items-center gap-2">
+              <span className="text-base">{distIcon}</span>
+              <span className="text-xs font-black uppercase tracking-wider" style={{ color: distBarColor }}>
                 {distLabel}
               </span>
             </div>
-            <span className="text-xs font-black tabular-nums" style={{ color: distBarColor }}>
+            <span className="text-sm font-black tabular-nums" style={{ color: distBarColor }}>
               {distanceM > 0 ? `${distanceM.toFixed(2)}m` : '—'}
             </span>
           </div>
 
           {/* Visual distance bar */}
-          <div className="px-3 pb-1.5">
-            <div className="relative w-full h-3 bg-white/5 rounded-full overflow-hidden">
+          <div className="px-3.5 pb-2">
+            <div className="relative w-full h-3.5 bg-white/5 rounded-full overflow-hidden">
               <div
-                className="absolute h-full rounded-full opacity-20"
+                className="absolute h-full rounded-full opacity-25"
                 style={{
                   left: '35%',
                   width: '30%',
@@ -200,7 +205,7 @@ const GlobalAIBot: React.FC<Props> = ({ globalBotState }) => {
                 }}
               />
               <div
-                className="absolute top-0 h-full w-1.5 rounded-full transition-all duration-300"
+                className="absolute top-0 h-full w-2 rounded-full transition-all duration-300"
                 style={{
                   left: `${Math.min(95, Math.max(5, (distanceM / 3) * 100))}%`,
                   background: distBarColor,
@@ -219,7 +224,7 @@ const GlobalAIBot: React.FC<Props> = ({ globalBotState }) => {
         </div>
       )}
 
-      {/* ─── Compact Robot Avatar (Clickable to toggle) ─── */}
+      {/* ─── Robot Avatar (Clickable to toggle) ─── */}
       <button
         onClick={() => {
           setExpanded(!expanded);
@@ -227,7 +232,7 @@ const GlobalAIBot: React.FC<Props> = ({ globalBotState }) => {
             setBubbleVisible(true);
           }
         }}
-        className="relative group flex items-center gap-2 cursor-pointer"
+        className="relative group flex items-center gap-2.5 cursor-pointer"
         style={{
           background: 'none',
           border: 'none',
@@ -236,21 +241,21 @@ const GlobalAIBot: React.FC<Props> = ({ globalBotState }) => {
         }}
         title={expanded ? 'Minimize AI Guide' : 'Expand AI Guide'}
       >
-        <div className="relative" style={{ width: 54, height: 54 }}>
+        <div className="relative" style={{ width: 58, height: 58 }}>
           {/* Subtle Glow */}
           <div
             className={`absolute inset-0 rounded-full blur-xl ${isAlert ? 'animate-ping' : 'animate-pulse'}`}
-            style={{ background: glowColor, transform: 'scale(1.2)' }}
+            style={{ background: glowColor, transform: 'scale(1.25)' }}
           />
 
           {/* Progress Ring */}
-          <svg width="54" height="54" className="absolute inset-0">
-            <circle cx="27" cy="27" r={radius} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
+          <svg width="58" height="58" className="absolute inset-0">
+            <circle cx="29" cy="29" r={radius} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3.5" />
             <circle
-              cx="27" cy="27" r={radius}
+              cx="29" cy="29" r={radius}
               fill="none"
               stroke={ringColor}
-              strokeWidth="3"
+              strokeWidth="3.5"
               strokeLinecap="round"
               strokeDasharray={`${strokeDash} ${strokeGap}`}
               strokeDashoffset={circumference * 0.25}
@@ -263,9 +268,9 @@ const GlobalAIBot: React.FC<Props> = ({ globalBotState }) => {
           <div
             className="absolute inset-0 m-auto rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105"
             style={{
-              width: 44,
-              height: 44,
-              fontSize: '1.5rem',
+              width: 46,
+              height: 46,
+              fontSize: '1.6rem',
               background: `linear-gradient(135deg, ${glowColor}, var(--bg-primary))`,
               border: `2px solid ${ringColor}60`,
               boxShadow: `0 4px 15px rgba(0,0,0,0.3)`,
@@ -276,17 +281,17 @@ const GlobalAIBot: React.FC<Props> = ({ globalBotState }) => {
 
           {/* Small Active Dot */}
           <div
-            className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center"
+            className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
             style={{ background: isDistanceActive ? distBarColor : ringColor, boxShadow: `0 0 8px ${isDistanceActive ? distBarColor : ringColor}` }}
           >
-            <div className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+            <div className="w-2 h-2 rounded-full bg-white animate-ping" />
           </div>
         </div>
 
-        {/* Small Discreet Badge */}
-        <div className="px-2 py-0.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: isDistanceActive ? distBarColor : ringColor }} />
-          <span className="text-[9px] font-black uppercase tracking-wider" style={{ color: isDistanceActive ? distBarColor : ringColor }}>
+        {/* Larger Prominent Badge */}
+        <div className="px-3 py-1.5 rounded-xl bg-black/70 backdrop-blur-md border border-white/15 flex items-center gap-2 shadow-lg">
+          <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: isDistanceActive ? distBarColor : ringColor }} />
+          <span className="text-xs sm:text-sm font-black uppercase tracking-wider" style={{ color: isDistanceActive ? distBarColor : ringColor }}>
             {isDistanceActive ? (distanceStatus === 'ok' ? 'IN RANGE' : 'DISTANCE') : 'AI Guide'}
           </span>
         </div>

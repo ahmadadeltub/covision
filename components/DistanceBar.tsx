@@ -198,14 +198,14 @@ const DistanceBar: React.FC<Props> = ({
                 {/* Right: Live Telemetry Status Pill */}
                 <div className="shrink-0 flex items-center gap-2">
                     <div
-                        className="px-3.5 py-1.5 rounded-xl border text-[10px] md:text-xs font-mono font-black tracking-widest uppercase transition-all duration-300 flex items-center gap-2 shadow-sm"
+                        className="px-4 py-2 rounded-xl border text-xs sm:text-sm md:text-base font-mono font-black tracking-wide uppercase transition-all duration-300 flex items-center gap-2 shadow-sm"
                         style={{
                             backgroundColor: `${themeColor}18`,
                             borderColor: `${themeColor}50`,
                             color: themeColor
                         }}
                     >
-                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: themeColor, boxShadow: `0 0 6px ${themeColor}` }}></span>
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: themeColor, boxShadow: `0 0 8px ${themeColor}` }}></span>
                         <span>{statusLabel}</span>
                     </div>
                 </div>

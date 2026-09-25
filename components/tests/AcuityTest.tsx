@@ -253,8 +253,8 @@ const AcuityTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
           </div>
         </div>
 
-        <div style={{ textAlign: 'center', padding: '0 8px' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', padding: '4px 8px' }}>
+          <div style={{ fontSize: 14, fontWeight: 900, color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             <span>Select the direction</span>
           </div>
         </div>
