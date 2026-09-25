@@ -7,6 +7,9 @@ import SnellenTest from './tests/SnellenTest';
 import ContrastTest from './tests/ContrastTest';
 import AstigmatismTest from './tests/AstigmatismTest';
 import AmslerTest from './tests/AmslerTest';
+import NearVisualAcuityTest from './tests/NearVisualAcuityTest';
+import VisualFieldTest from './tests/VisualFieldTest';
+import OcularMotilityTest from './tests/OcularMotilityTest';
 import DistanceBar from './DistanceBar';
 import FaceMeshCanvas from './FaceMeshCanvas';
 
@@ -127,6 +130,27 @@ const TestingEngine: React.FC<Props> = ({
         {currentType === TestType.Acuity && (
           <AcuityTest calibration={calibration} t={t} stream={stream} onFinish={handleTestFinish} />
         )}
+        {currentType === TestType.NearAcuity && (
+          <NearVisualAcuityTest
+            lang={lang}
+            t={t}
+            stream={stream}
+            faceLandmarksRef={faceLandmarksRef}
+            distanceM={propDistanceM}
+            onFinish={(res) => {
+              const score = (res.OD.tested ? res.OD.correctResponses : 0) + (res.OS.tested ? res.OS.correctResponses : 0);
+              const total = (res.OD.tested ? res.OD.totalPresented : 0) + (res.OS.tested ? res.OS.totalPresented : 0);
+              handleTestFinish({
+                testName: 'Near Visual Acuity (40cm)',
+                score,
+                total: total > 0 ? total : 6,
+                confidence: 0.95,
+                findings: `OD: ${res.OD.snellenEquivalent} (${res.OD.nearNotation}), OS: ${res.OS.snellenEquivalent} (${res.OS.nearNotation})`,
+                nearAcuityData: res,
+              });
+            }}
+          />
+        )}
         {currentType === TestType.Color && (
           <ColorTest t={t} stream={stream} onFinish={handleTestFinish} />
         )}
@@ -141,6 +165,47 @@ const TestingEngine: React.FC<Props> = ({
         )}
         {currentType === TestType.Amsler && (
           <AmslerTest t={t} stream={stream} onFinish={handleTestFinish} />
+        )}
+        {currentType === TestType.VisualField && (
+          <VisualFieldTest
+            lang={lang}
+            t={t}
+            stream={stream}
+            onFinish={(res) => {
+              const score = (res.OD.tested ? res.OD.detected : 0) + (res.OS.tested ? res.OS.detected : 0);
+              const total = (res.OD.tested ? res.OD.stimuliPresented : 0) + (res.OS.tested ? res.OS.stimuliPresented : 0);
+              const odRate = res.OD.stimuliPresented > 0 ? (res.OD.detected / res.OD.stimuliPresented) * 100 : 100;
+              const osRate = res.OS.stimuliPresented > 0 ? (res.OS.detected / res.OS.stimuliPresented) * 100 : 100;
+              handleTestFinish({
+                testName: 'Central Visual Field (30-Point)',
+                score,
+                total: total > 0 ? total : 30,
+                confidence: 0.92,
+                findings: `OD Sensitivity: ${odRate.toFixed(0)}%, OS Sensitivity: ${osRate.toFixed(0)}%`,
+                visualFieldData: res,
+              });
+            }}
+          />
+        )}
+        {currentType === TestType.Motility && (
+          <OcularMotilityTest
+            lang={lang}
+            t={t}
+            stream={stream}
+            faceLandmarksRef={faceLandmarksRef}
+            onFinish={(res) => {
+              const score = res.gazeGrid.filter((g) => g.completed).length;
+              const total = res.gazeGrid.length;
+              handleTestFinish({
+                testName: 'Ocular Motility (9-Gaze)',
+                score,
+                total: total > 0 ? total : 9,
+                confidence: res.trackingConfidence || 0.88,
+                findings: `Completed: ${res.gazePositionsCompleted}/9, Symmetry: ${res.movementSymmetry}, Completeness: ${res.trackingCompletenessPct.toFixed(0)}%`,
+                motilityData: res,
+              });
+            }}
+          />
         )}
       </div>
 

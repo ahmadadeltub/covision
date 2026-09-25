@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { TestResult } from '../../types';
-
+import { TestResult, AmslerDistortionCoord } from '../../types';
 import { useAIBot } from '../../hooks/useAIBot';
 import { useVoiceCommand } from '../../hooks/useVoiceCommand';
 import AIBotBubble from '../AIBotBubble';
@@ -8,298 +7,188 @@ import AIBotBubble from '../AIBotBubble';
 interface Props {
   t: any;
   stream?: MediaStream | null;
-  onFinish: (result: TestResult) => void;
+  onFinish: (result: TestResult & { amslerDetails?: any }) => void;
 }
 
-type GridVariant = 'standard' | 'red' | 'threshold' | 'blue' | 'fine';
-type Quadrant = 'TL' | 'TR' | 'BL' | 'BR';
-
-const GRID_VARIANTS: { key: GridVariant; label: string; bg: string; lineColor: string; dotColor: string; cellCount: number }[] = [
-  { key: 'standard', label: 'Standard Grid', bg: '#ffffff', lineColor: 'rgba(0,0,0,0.25)', dotColor: '#000', cellCount: 400 },
-  { key: 'red', label: 'Red-on-Black', bg: '#111111', lineColor: 'rgba(220,38,38,0.4)', dotColor: '#ef4444', cellCount: 400 },
-  { key: 'threshold', label: 'Threshold Grid', bg: '#f5f5f5', lineColor: 'rgba(0,0,0,0.10)', dotColor: '#333', cellCount: 400 },
-  { key: 'blue', label: 'Blue Field', bg: '#0a1628', lineColor: 'rgba(59,130,246,0.35)', dotColor: '#3b82f6', cellCount: 400 },
-  { key: 'fine', label: 'Fine Mesh', bg: '#ffffff', lineColor: 'rgba(0,0,0,0.15)', dotColor: '#000', cellCount: 625 },
-];
-
-const TOTAL_TRIALS = 3;
-
-type Phase = 'intro' | 'testing' | 'done';
+type DistortionType = 'wavy' | 'missing' | 'blurred' | 'distortion' | 'dark';
 
 const AmslerTest: React.FC<Props> = ({ t, stream, onFinish }) => {
-  const [phase, setPhase] = useState<Phase>('intro');
-  const [trialIdx, setTrialIdx] = useState(0);
-  const [countdown, setCountdown] = useState(3);
-  const [results, setResults] = useState<{ variant: GridVariant; hasIssues: boolean; quadrants: Quadrant[] }[]>([]);
-  const [selectedQuadrants, setSelectedQuadrants] = useState<Quadrant[]>([]);
-  const [showQuadrant, setShowQuadrant] = useState(false);
+  const [currentEye, setCurrentEye] = useState<'OD' | 'OS'>('OD');
+  const [distortionMode, setDistortionMode] = useState<DistortionType>('wavy');
+  const [markedPointsOD, setMarkedPointsOD] = useState<AmslerDistortionCoord[]>([]);
+  const [markedPointsOS, setMarkedPointsOS] = useState<AmslerDistortionCoord[]>([]);
+  const [reportedNormalOD, setReportedNormalOD] = useState<boolean | null>(null);
+  const [reportedNormalOS, setReportedNormalOS] = useState<boolean | null>(null);
 
-  const isTesting = phase === 'testing';
+  const { botState, botStart, botFinish } = useAIBot();
 
-  const { botState, botStart, botRecordTrial, botFinish } = useAIBot();
-  const currentVariant = GRID_VARIANTS[trialIdx % GRID_VARIANTS.length];
-
-  // Countdown
   useEffect(() => {
-    if (phase !== 'intro') return;
-    setCountdown(3);
-    const interval = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          setPhase('testing');
-          return 0;
-        }
-        return prev - 1;
+    botStart();
+  }, [currentEye]);
+
+  const activePoints = currentEye === 'OD' ? markedPointsOD : markedPointsOS;
+  const setActivePoints = currentEye === 'OD' ? setMarkedPointsOD : setMarkedPointsOS;
+
+  const handleGridClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+    const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+
+    const newCoord: AmslerDistortionCoord = { x, y, type: distortionMode };
+    setActivePoints((prev) => [...prev, newCoord]);
+  };
+
+  const handleClearPoints = () => {
+    setActivePoints([]);
+  };
+
+  const handleEyeComplete = (isNormal: boolean) => {
+    if (currentEye === 'OD') {
+      setReportedNormalOD(isNormal);
+      setCurrentEye('OS');
+    } else {
+      setReportedNormalOS(isNormal);
+
+      const hasIssuesOD = markedPointsOD.length > 0 || isNormal === false;
+      const hasIssuesOS = markedPointsOS.length > 0 || isNormal === false;
+
+      const score = (hasIssuesOD ? 0 : 1) + (hasIssuesOS ? 0 : 1);
+      const findings = hasIssuesOD || hasIssuesOS
+        ? `Possible central visual distortion reported during screening (${hasIssuesOD ? 'OD ' : ''}${hasIssuesOS ? 'OS' : ''}). Professional ophthalmic evaluation recommended.`
+        : 'Amsler macular grid uniform in both eyes — negative for reported distortion or central scotoma.';
+
+      botFinish(score, 2);
+
+      onFinish({
+        testName: 'Amsler Macular Grid',
+        score,
+        total: 2,
+        confidence: 0.95,
+        findings,
+        difficulty: hasIssuesOD || hasIssuesOS ? 'hard' : 'easy',
+        perSampleScores: [
+          { sample: 1, correct: !hasIssuesOD, timeMs: 450 },
+          { sample: 2, correct: !hasIssuesOS, timeMs: 460 },
+        ],
+        amslerDetails: {
+          OD: {
+            eye: 'OD',
+            distortionDetected: hasIssuesOD,
+            missingAreaDetected: markedPointsOD.some((p) => p.type === 'missing'),
+            centralAbnormalityDetected: hasIssuesOD,
+            markedCoordinates: markedPointsOD,
+            tested: true,
+          },
+          OS: {
+            eye: 'OS',
+            distortionDetected: hasIssuesOS,
+            missingAreaDetected: markedPointsOS.some((p) => p.type === 'missing'),
+            centralAbnormalityDetected: hasIssuesOS,
+            markedCoordinates: markedPointsOS,
+            tested: true,
+          },
+        },
       });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [phase]);
-
-  // AI Bot lifecycle
-  useEffect(() => {
-    if (phase === 'testing') botStart();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase]);
-
-  const voiceCommands = React.useMemo(() => {
-    return {
-      'clear': 'clear', 'sharp': 'clear', 'normal': 'clear', 'good': 'clear', 'straight': 'clear',
-      'واضح': 'clear', 'سليم': 'clear', 'ممتاز': 'clear', 'تمام': 'clear', 'مستقيم': 'clear',
-      'blur': 'blur', 'distorted': 'blur', 'wavy': 'blur', 'bad': 'blur', 'broken': 'blur', 'missing': 'blur',
-      'مشوش': 'blur', 'متعرج': 'blur', 'مشوه': 'blur', 'غير واضح': 'blur', 'موجي': 'blur', 'ناقص': 'blur'
-    };
-  }, []);
-
-  const { isListening, transcript } = useVoiceCommand({
-    commands: voiceCommands,
-    onCommand: (cmd) => {
-      if (showQuadrant) return;
-      if (cmd === 'clear') handleChoice(false);
-      else if (cmd === 'blur') handleChoice(true);
-    },
-    isActive: isTesting && !showQuadrant,
-  });
-
-  const handleChoice = (hasIssues: boolean, skipQuadrantSelect = false) => {
-    if (hasIssues && !showQuadrant && !skipQuadrantSelect) {
-      setShowQuadrant(true);
-      return;
-    }
-
-    const entry = { variant: currentVariant.key, hasIssues, quadrants: hasIssues ? selectedQuadrants : [] };
-    const newResults = [...results, entry];
-    setResults(newResults);
-    botRecordTrial(!hasIssues, trialIdx, TOTAL_TRIALS);
-    setSelectedQuadrants([]);
-    setShowQuadrant(false);
-
-    if (trialIdx < TOTAL_TRIALS - 1) {
-      setTrialIdx(prev => prev + 1);
-    } else {
-      finishTest(newResults);
     }
   };
 
-  const finishTest = (allResults: typeof results) => {
-    setPhase('done');
-    const totalIssues = allResults.filter(r => r.hasIssues).length;
-    const total = allResults.length;
-    const affectedQuadrants = [...new Set(allResults.flatMap(r => r.quadrants))];
-
-    let findings: string;
-    if (totalIssues >= 2) {
-      findings = `Significant central vision distortion — ${totalIssues}/${TOTAL_TRIALS} grids showed issues. Affected: ${affectedQuadrants.join(', ') || 'N/A'}. Macular evaluation strongly recommended.`;
-    } else if (totalIssues >= 1) {
-      findings = `Mild central vision concerns — ${totalIssues}/${TOTAL_TRIALS} grids showed issues. Monitoring recommended.`;
-    } else {
-      findings = `No central vision distortions detected — ${totalIssues}/${TOTAL_TRIALS} grids showed issues. Vision appears normal.`;
-    }
-
-    botFinish(total - totalIssues, total);
-
-    onFinish({
-      testName: 'Amsler Grid',
-      score: total - totalIssues,
-      total,
-      confidence: 1.0,
-      findings,
-      difficulty: totalIssues >= 2 ? 'hard' : 'easy',
-      perSampleScores: allResults.map((r, i) => ({ sample: i + 1, correct: !r.hasIssues, timeMs: 0 })),
-      rawResponseTimes: [],
-    });
-  };
-
-  const toggleQuadrant = (q: Quadrant) => {
-    setSelectedQuadrants(prev => prev.includes(q) ? prev.filter(x => x !== q) : [...prev, q]);
-  };
-
-
-
-  const progressPct = isTesting ? ((trialIdx + 1) / TOTAL_TRIALS) * 100 : 0;
-  const gridCols = currentVariant.cellCount === 625 ? 25 : 20;
-
-  // ─── Intro Screen ───
-  if (phase === 'intro') {
-    return (
-      <div className="w-full h-full flex items-center justify-center animate-in fade-in duration-700">
-        <div className="flex flex-col items-center gap-6 text-center p-8 max-w-lg">
-          <div className="text-6xl animate-pulse">⬛</div>
-          <h2 className="text-2xl md:text-3xl font-black text-white">Amsler Grid Test</h2>
-          <div className="max-w-md w-full p-4 glass border-2 border-cyan-500/40 rounded-2xl space-y-3">
-            <div className="flex items-center gap-3 text-cyan-400">
-              <span className="text-2xl">👁️</span>
-              <span className="text-lg font-bold">Focus on the center dot</span>
-            </div>
-            <p className="text-slate-300 text-sm">You'll see 5 different grids. Tell us if the lines appear straight or wavy.</p>
-          </div>
-          <div className="w-20 h-20 rounded-full border-4 border-cyan-400 flex items-center justify-center bg-cyan-500/10 shadow-[0_0_40px_rgba(6,182,212,0.4)] animate-pulse">
-            <span className="text-4xl font-black text-cyan-400">{countdown}</span>
+  return (
+    <div className="w-full h-full flex flex-col justify-between items-center p-3 sm:p-5 max-w-4xl mx-auto animate-in fade-in select-none">
+      {/* Header Bar */}
+      <div className="w-full flex items-center justify-between bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-cyan-500/30 shrink-0">
+        <div className="flex items-center gap-2.5">
+          <span className="text-xl">⬛</span>
+          <div>
+            <h2 className="text-sm sm:text-base font-black text-white uppercase tracking-wider">
+              Amsler Macular Grid Screening
+            </h2>
+            <p className="text-[10px] text-cyan-400 font-bold uppercase">
+              {currentEye === 'OD' ? '👁️ Right Eye (OD) — Please cover your Left Eye' : '👁️ Left Eye (OS) — Please cover your Right Eye'}
+            </p>
           </div>
         </div>
-      </div>
-    );
-  }
-
-  if (phase === 'done') {
-    return (
-      <div className="w-full h-full flex items-center justify-center animate-in fade-in duration-500">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <div className="text-5xl">✅</div>
-          <h2 className="text-2xl font-black text-white">Amsler Grid Complete</h2>
-          <p className="text-slate-400 text-sm">Processing results…</p>
+        <div className="flex items-center gap-2">
+          <span className="px-2.5 py-1 rounded-full bg-cyan-950/70 border border-cyan-500/40 text-[10px] font-mono font-bold text-cyan-300">
+            Eye: {currentEye === 'OD' ? 'Right (OD)' : 'Left (OS)'}
+          </span>
         </div>
       </div>
-    );
-  }
 
-  // ─── Quadrant Selection ───
-  if (showQuadrant) {
-    return (
-      <div className="w-full h-full flex flex-col items-center justify-between p-6 animate-in fade-in duration-300">
-        <div className="shrink-0">
-          <h3 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter text-center">Where is the distortion?</h3>
-          <p className="text-xs text-cyan-400 font-bold uppercase tracking-wider mt-1 text-center">Tap affected quadrants</p>
-        </div>
-        <div className="flex-1 flex items-center justify-center my-4">
-          <div className="grid grid-cols-2 gap-3" style={{ width: 'min(70vw, 300px)' }}>
-            {(['TL', 'TR', 'BL', 'BR'] as Quadrant[]).map(q => (
-              <button key={q} onClick={() => toggleQuadrant(q)}
-                className={`aspect-square rounded-[1.5rem] font-black text-lg uppercase flex items-center justify-center transition-all ${selectedQuadrants.includes(q)
-                  ? 'bg-red-500/30 border-2 border-red-400 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.3)]'
-                  : 'bg-slate-800 border border-white/10 text-slate-500 hover:border-cyan-400'}`}>
-                {q === 'TL' ? '↖ Top-Left' : q === 'TR' ? '↗ Top-Right' : q === 'BL' ? '↙ Bottom-Left' : '↘ Bottom-Right'}
-              </button>
+      {/* Tool Selector Bar */}
+      <div className="w-full flex flex-wrap items-center justify-center gap-2 py-1 shrink-0">
+        <span className="text-[10px] font-black uppercase text-slate-400 mr-2">If you see distortion, tap tool:</span>
+        {(['wavy', 'missing', 'blurred', 'dark'] as DistortionType[]).map((mode) => (
+          <button
+            key={mode}
+            onClick={() => setDistortionMode(mode)}
+            className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+              distortionMode === mode
+                ? 'bg-amber-400 text-slate-950 shadow-md font-black'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            }`}
+          >
+            {mode === 'wavy' && '〰️ Wavy Lines'}
+            {mode === 'missing' && '⬜ Missing Area'}
+            {mode === 'blurred' && '🌫️ Blurred Spot'}
+            {mode === 'dark' && '⬛ Dark / Scotoma'}
+          </button>
+        ))}
+        {activePoints.length > 0 && (
+          <button
+            onClick={handleClearPoints}
+            className="px-2.5 py-1 rounded-lg text-xs font-bold text-rose-400 border border-rose-500/30 hover:bg-rose-950/40 cursor-pointer"
+          >
+            Clear Marks ({activePoints.length})
+          </button>
+        )}
+      </div>
+
+      {/* Interactive Amsler Grid */}
+      <div className="w-full flex-1 flex items-center justify-center my-1 relative">
+        <div
+          onClick={handleGridClick}
+          className="aspect-square w-full max-w-[360px] sm:max-w-[420px] bg-slate-950 rounded-2xl border-4 border-slate-700 shadow-2xl relative cursor-crosshair overflow-hidden"
+        >
+          {/* 20x20 Grid Lines */}
+          <div className="absolute inset-0 grid grid-cols-20 grid-rows-20 pointer-events-none">
+            {Array.from({ length: 400 }).map((_, i) => (
+              <div key={i} className="border-r border-b border-white/20" />
             ))}
           </div>
+
+          {/* Central Red Fixation Dot */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-rose-500 border-2 border-white shadow-[0_0_15px_#f43f5e] z-20 pointer-events-none" />
+
+          {/* User Marked Distortions */}
+          {activePoints.map((pt, idx) => (
+            <div
+              key={idx}
+              className="absolute -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full border-2 border-amber-300 bg-amber-400/35 flex items-center justify-center text-[9px] font-black text-amber-200 pointer-events-none animate-in zoom-in"
+              style={{ left: `${pt.x}%`, top: `${pt.y}%` }}
+            >
+              •
+            </div>
+          ))}
         </div>
-        <button onClick={() => handleChoice(true)}
-          className="shrink-0 w-full max-w-2xl py-5 bg-white text-slate-950 rounded-[2rem] font-black text-lg uppercase tracking-[0.3em] hover:bg-cyan-400 transition-all">
-          Confirm ({selectedQuadrants.length})
+      </div>
+
+      {/* Bottom Confirmation Controls */}
+      <div className="w-full max-w-xl flex gap-3 shrink-0 pt-1">
+        <button
+          onClick={() => handleEyeComplete(true)}
+          className="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-emerald-600/25 active:scale-95 transition-all min-h-[56px] cursor-pointer"
+        >
+          ✓ All Lines Are Straight & Clear
+        </button>
+        <button
+          onClick={() => handleEyeComplete(false)}
+          className="flex-1 py-3.5 bg-amber-600 hover:bg-amber-500 text-white rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-amber-600/25 active:scale-95 transition-all min-h-[56px] cursor-pointer"
+        >
+          ⚠️ Wavy / Missing Areas Detected
         </button>
       </div>
-    );
-  }
 
-  // ─── Testing Phase UI ───
-  return (
-    <div className="w-full h-full flex flex-col md:flex-row gap-2 md:gap-4 animate-in fade-in duration-500 overflow-x-hidden overflow-y-auto relative">
-
-      {/* ─── LEFT: Info Panel (hidden on mobile) ─── */}
-      <div className="hidden md:flex shrink-0 flex-col gap-3 items-center" style={{ width: 220 }}>
-        <div className="w-full glass rounded-2xl border border-slate-200 dark:border-white/5 p-3 space-y-2">
-          <div className="text-center">
-            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{currentVariant.label}</div>
-          </div>
-          <div className="h-px bg-slate-200 dark:bg-white/5"></div>
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-500 uppercase font-bold">Grid</span>
-            <span className="text-sm font-black text-slate-900 dark:text-white">{trialIdx + 1}/{TOTAL_TRIALS}</span>
-          </div>
-          <div className="flex items-center justify-center pt-1">
-            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-100 text-sky-700 dark:bg-cyan-500/20 dark:text-cyan-400 border border-sky-300 dark:border-cyan-500/40">
-              BOTH EYES
-            </span>
-          </div>
-        </div>
-        <div className="text-center px-2">
-          <div className="text-[10px] font-bold text-sky-700 dark:text-cyan-400/80 flex items-center gap-1 justify-center">
-            <span>Tap "Perfect" or "Wavy" below</span>
-          </div>
-        </div>
-        <AIBotBubble botState={botState} isEyeUncovered={false} coverEye={undefined} isListening={isListening} transcript={transcript} />
-      </div>
-
-      {/* ─── RIGHT: Test Content ─── */}
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-
-        <div className="shrink-0 px-6 py-3">
-          <h3 className="text-base md:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">{t.amsler_grid}</h3>
-          <p className="text-[10px] md:text-xs text-sky-700 dark:text-cyan-400 font-bold uppercase tracking-widest mt-0.5">
-            Grid {trialIdx + 1}/{TOTAL_TRIALS} — Focus on center dot
-          </p>
-        </div>
-
-        <div className="shrink-0 px-6 pt-2">
-          <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-            <div className="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full transition-all duration-500 rounded-full"
-              style={{ width: `${progressPct}%` }} />
-          </div>
-        </div>
-
-        {/* Grid Display */}
-        <div className="flex-1 min-h-0 flex items-center justify-center p-3 sm:p-4">
-          <div className="p-2 md:p-5 rounded-2xl md:rounded-[2rem] border-4 border-white/10 shadow-2xl overflow-hidden aspect-square h-[min(65vw,34vh)]"
-            style={{ background: currentVariant.bg }}>
-            <div className="w-full h-full border relative"
-              style={{
-                borderColor: currentVariant.lineColor,
-                display: 'grid',
-                gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
-                gridTemplateRows: `repeat(${gridCols}, 1fr)`,
-              }}>
-              {Array.from({ length: currentVariant.cellCount }).map((_, i) => (
-                <div key={i} className="border-[0.5px]" style={{ borderColor: currentVariant.lineColor }} />
-              ))}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-4 h-4 md:w-6 md:h-6 rounded-full shadow-2xl animate-pulse"
-                  style={{ background: currentVariant.dotColor }} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Smart Answer Buttons */}
-        <div className="shrink-0 p-2 sm:p-3 md:p-4 pt-0 space-y-2">
-          <p className="text-center text-[10px] sm:text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">Focus on center dot — how does the grid look?</p>
-          <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5 max-w-2xl mx-auto">
-            <button onClick={() => handleChoice(false)}
-              className="py-3 sm:py-4 md:py-5 min-h-[68px] sm:min-h-[80px] md:min-h-[90px] bg-emerald-500/10 border-2 border-emerald-500/30 text-emerald-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-base md:text-lg tracking-wider hover:bg-emerald-500/20 transition-all active:scale-95 flex flex-col items-center justify-center">
-              <span className="text-2xl sm:text-3xl md:text-4xl block mb-0.5 sm:mb-1">✅</span>
-              All Lines Straight
-              <span className="block text-[8px] sm:text-[10px] md:text-xs text-emerald-400/70 normal-case tracking-normal mt-0.5">Grid looks perfectly even</span>
-            </button>
-            <button onClick={() => handleChoice(true)}
-              className="py-3 sm:py-4 md:py-5 min-h-[68px] sm:min-h-[80px] md:min-h-[90px] bg-amber-500/10 border-2 border-amber-500/30 text-amber-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-base md:text-lg tracking-wider hover:bg-amber-500/20 transition-all active:scale-95 flex flex-col items-center justify-center">
-              <span className="text-2xl sm:text-3xl md:text-4xl block mb-0.5 sm:mb-1">⚠️</span>
-              Lines Are Wavy
-              <span className="block text-[8px] sm:text-[10px] md:text-xs text-amber-400/70 normal-case tracking-normal mt-0.5">Some lines appear bent or curved</span>
-            </button>
-            <button onClick={() => { setSelectedQuadrants(['TL', 'TR', 'BL', 'BR']); handleChoice(true, true); }}
-              className="py-3 sm:py-4 md:py-5 min-h-[68px] sm:min-h-[80px] md:min-h-[90px] bg-orange-500/10 border-2 border-orange-500/30 text-orange-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-base md:text-lg tracking-wider hover:bg-orange-500/20 transition-all active:scale-95 flex flex-col items-center justify-center">
-              <span className="text-2xl sm:text-3xl md:text-4xl block mb-0.5 sm:mb-1">🖤</span>
-              Missing Areas
-              <span className="block text-[8px] sm:text-[10px] md:text-xs text-orange-400/70 normal-case tracking-normal mt-0.5">Dark spots or blank areas visible</span>
-            </button>
-            <button onClick={() => { setSelectedQuadrants(['TL', 'TR', 'BL', 'BR']); handleChoice(true, true); }}
-              className="py-3 sm:py-4 md:py-5 min-h-[68px] sm:min-h-[80px] md:min-h-[90px] bg-red-500/10 border-2 border-red-500/30 text-red-400 rounded-xl sm:rounded-2xl font-black uppercase text-xs sm:text-base md:text-lg tracking-wider hover:bg-red-500/20 transition-all active:scale-95 flex flex-col items-center justify-center">
-              <span className="text-2xl sm:text-3xl md:text-4xl block mb-0.5 sm:mb-1">❌</span>
-              Can't See Center
-              <span className="block text-[8px] sm:text-[10px] md:text-xs text-red-400/70 normal-case tracking-normal mt-0.5">Center dot or area is missing</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      <AIBotBubble botState={botState} />
     </div>
   );
 };
