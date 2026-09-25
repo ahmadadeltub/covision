@@ -56,33 +56,38 @@ const FACE_MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/face_lan
 let cachedFaceLandmarkerInstance: any = null;
 let globalModelInitPromise: Promise<any> | null = null;
 
-export function getFaceLandmarker(): Promise<any> {
-    if (cachedFaceLandmarkerInstance) return Promise.resolve(cachedFaceLandmarkerInstance);
-    if (globalModelInitPromise) return globalModelInitPromise;
+export function getFaceLandmarker(forceCpu = false): Promise<any> {
+    if (!forceCpu && cachedFaceLandmarkerInstance) return Promise.resolve(cachedFaceLandmarkerInstance);
+    if (!forceCpu && globalModelInitPromise) return globalModelInitPromise;
 
-    globalModelInitPromise = (async () => {
+    const initPromise = (async () => {
         try {
-            console.log('useFaceDistance: [Global] Preloading MediaPipe Tasks Vision...');
+            console.log(`useFaceDistance: [Global] Loading MediaPipe Tasks Vision (${forceCpu ? 'CPU' : 'GPU'})...`);
             const vision = await import(/* @vite-ignore */ `${VISION_CDN}/vision_bundle.mjs`);
             const { FaceLandmarker, FilesetResolver } = vision;
             const wasmFileset = await FilesetResolver.forVisionTasks(`${VISION_CDN}/wasm`);
 
             let landmarker: any = null;
-            try {
-                landmarker = await FaceLandmarker.createFromOptions(wasmFileset, {
-                    baseOptions: {
-                        modelAssetPath: FACE_MODEL_URL,
-                        delegate: 'GPU',
-                    },
-                    outputFaceBlendshapes: false,
-                    runningMode: 'VIDEO',
-                    numFaces: 1,
-                    minFaceDetectionConfidence: 0.3,
-                    minFacePresenceConfidence: 0.3,
-                    minTrackingConfidence: 0.3,
-                });
-            } catch (gpuErr) {
-                console.warn('FaceLandmarker GPU delegate failed, falling back to CPU:', gpuErr);
+            if (!forceCpu) {
+                try {
+                    landmarker = await FaceLandmarker.createFromOptions(wasmFileset, {
+                        baseOptions: {
+                            modelAssetPath: FACE_MODEL_URL,
+                            delegate: 'GPU',
+                        },
+                        outputFaceBlendshapes: false,
+                        runningMode: 'VIDEO',
+                        numFaces: 1,
+                        minFaceDetectionConfidence: 0.3,
+                        minFacePresenceConfidence: 0.3,
+                        minTrackingConfidence: 0.3,
+                    });
+                } catch (gpuErr) {
+                    console.warn('FaceLandmarker GPU delegate failed, falling back to CPU:', gpuErr);
+                }
+            }
+
+            if (!landmarker) {
                 landmarker = await FaceLandmarker.createFromOptions(wasmFileset, {
                     baseOptions: {
                         modelAssetPath: FACE_MODEL_URL,
@@ -97,7 +102,7 @@ export function getFaceLandmarker(): Promise<any> {
                 });
             }
             cachedFaceLandmarkerInstance = landmarker;
-            console.log('useFaceDistance: ✅ [Global] FaceLandmarker ready and cached');
+            console.log(`useFaceDistance: ✅ [Global] FaceLandmarker ready (${forceCpu ? 'CPU' : 'GPU'})`);
             return landmarker;
         } catch (err) {
             console.error('Failed to initialize FaceLandmarker:', err);
@@ -106,7 +111,8 @@ export function getFaceLandmarker(): Promise<any> {
         }
     })();
 
-    return globalModelInitPromise;
+    if (!forceCpu) globalModelInitPromise = initPromise;
+    return initPromise;
 }
 
 // Start preloading immediately in browser background
@@ -729,6 +735,7 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
     const lastFaceSendRef = useRef(0);
     const lastVideoTimeRef = useRef(-1);
     const lastInferenceDurationRef = useRef(15);
+    const isCpuFallbackRef = useRef(false);
     const lastPoseSendRef = useRef(0);
     const lastHandSendRef = useRef(0);
 
@@ -738,7 +745,7 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
             ? videoRef.current
             : (detectionVideoRef.current || videoRef.current);
 
-        if (!video || video.readyState < 2 || video.paused || video.ended) {
+        if (!video || video.readyState < 2 || video.videoWidth === 0 || video.videoHeight === 0 || video.paused || video.ended) {
             animFrameRef.current = requestAnimationFrame(detectLoop);
             return;
         }
@@ -809,6 +816,14 @@ export function useFaceDistance(options?: FaceDistanceOptions): FaceDistanceRetu
             } catch (e: any) {
                 if (sendCountRef.current < 5) {
                     console.warn('FaceLandmarker error:', e?.message || e);
+                }
+                // Automatic fallback to CPU if WebGL fails in Firefox / Linux
+                if (e?.message && /webgl|texture|gl|context/i.test(e.message) && !isCpuFallbackRef.current) {
+                    isCpuFallbackRef.current = true;
+                    console.warn('Switching FaceLandmarker to CPU delegate for stability in this browser');
+                    getFaceLandmarker(true).then(cpuModel => {
+                        if (cpuModel) faceLandmarkerRef.current = cpuModel;
+                    }).catch(() => {});
                 }
             }
         }

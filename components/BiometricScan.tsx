@@ -1084,7 +1084,7 @@ const BiometricScan: React.FC<Props> = ({
       canvas.width = capW;
       canvas.height = capH;
       const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+      if (!ctx || video.readyState < 2 || video.videoWidth === 0 || video.videoHeight === 0) return;
 
       ctx.drawImage(video, 0, 0, capW, capH);
       const base64Data = canvas.toDataURL('image/jpeg', 0.72).split(',')[1];

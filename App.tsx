@@ -77,22 +77,30 @@ const App: React.FC = () => {
 
   const toggleKioskMode = useCallback(async () => {
     try {
-      if (!document.fullscreenElement) {
+      const doc = document as any;
+      const isFs = !!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement);
+      if (!isFs) {
         const elem = document.documentElement as any;
         if (elem.requestFullscreen) {
           await elem.requestFullscreen();
         } else if (elem.webkitRequestFullscreen) {
           await elem.webkitRequestFullscreen();
+        } else if (elem.mozRequestFullScreen) {
+          await elem.mozRequestFullScreen();
         } else if (elem.msRequestFullscreen) {
           await elem.msRequestFullscreen();
         }
         setIsKiosk(true);
         await requestWakeLock();
       } else {
-        if (document.exitFullscreen) {
-          await document.exitFullscreen();
-        } else if ((document as any).webkitExitFullscreen) {
-          await (document as any).webkitExitFullscreen();
+        if (doc.exitFullscreen) {
+          await doc.exitFullscreen();
+        } else if (doc.webkitExitFullscreen) {
+          await doc.webkitExitFullscreen();
+        } else if (doc.mozCancelFullScreen) {
+          await doc.mozCancelFullScreen();
+        } else if (doc.msExitFullscreen) {
+          await doc.msExitFullscreen();
         }
         setIsKiosk(false);
       }
@@ -101,10 +109,11 @@ const App: React.FC = () => {
     }
   }, [requestWakeLock]);
 
-  // Keep fullscreen state in sync & listen for visibility change for wake lock
+  // Keep fullscreen state in sync & listen for visibility change for wake lock (Firefox, Chromium, WebKit)
   useEffect(() => {
     const handleFullscreenChange = () => {
-      const active = !!document.fullscreenElement;
+      const doc = document as any;
+      const active = !!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement);
       setIsKiosk(active);
       if (active) {
         requestWakeLock();
@@ -112,18 +121,24 @@ const App: React.FC = () => {
     };
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && document.fullscreenElement) {
+      const doc = document as any;
+      const isFs = !!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement);
+      if (document.visibilityState === 'visible' && isFs) {
         requestWakeLock();
       }
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       if (wakeLockRef.current) {
         wakeLockRef.current.release().catch(() => {});
