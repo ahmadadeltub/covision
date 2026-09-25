@@ -394,23 +394,23 @@ const App: React.FC = () => {
       </div>
 
       {/* ─── Header ─── */}
-      <header className="app-header no-print" style={{ position: 'relative', zIndex: 200, height: 48, padding: '4px 16px', flexShrink: 0 }}>
+      <header className="app-header no-print" style={{ position: 'relative', zIndex: 200, flexShrink: 0 }}>
         {/* Logo + Brand */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(6px, 0.8vw, 14px)' }}>
           {/* Animated Eye Logo */}
           <div style={{
-            width: 32, height: 32,
+            width: 'clamp(28px, 3vw, 48px)', height: 'clamp(28px, 3vw, 48px)',
             borderRadius: '50%',
             background: 'linear-gradient(135deg, #0ea5e9, #6366f1)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 0 14px rgba(56,189,248,0.4)',
             flexShrink: 0,
           }}>
-            <span style={{ fontSize: 16, lineHeight: 1 }}>👁️</span>
+            <span style={{ fontSize: 'clamp(14px, 1.8vw, 26px)', lineHeight: 1 }}>👁️</span>
           </div>
           <div>
             <h1 style={{
-              fontSize: 'clamp(12px, 2vw, 15px)',
+              fontSize: 'clamp(12px, 1.4vw, 22px)',
               fontWeight: 800,
               margin: 0,
               lineHeight: 1.1,
@@ -423,7 +423,7 @@ const App: React.FC = () => {
               {t.app_title}
             </h1>
             <p style={{
-              fontSize: 'clamp(8px, 1.4vw, 10px)',
+              fontSize: 'clamp(8px, 0.9vw, 14px)',
               fontWeight: 500,
               color: 'var(--text-muted)',
               margin: 0,
@@ -435,7 +435,7 @@ const App: React.FC = () => {
         </div>
 
         {/* Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(6px, 0.8vw, 14px)' }}>
           {/* Kiosk Mode Button */}
           <button
             onClick={toggleKioskMode}
@@ -454,12 +454,12 @@ const App: React.FC = () => {
           <button
             onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
             style={{
-              width: 38, height: 38,
+              width: 'clamp(34px, 3vw, 48px)', height: 'clamp(34px, 3vw, 48px)',
               borderRadius: '50%',
               border: '1.5px solid var(--border-color)',
               background: 'var(--bg-secondary)',
               color: 'var(--text-primary)',
-              fontSize: 16,
+              fontSize: 'clamp(14px, 1.6vw, 22px)',
               cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'all 0.2s',

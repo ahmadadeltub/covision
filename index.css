@@ -2,8 +2,30 @@
    Vision Screening — Design System
    ============================================ */
 
+/* ============================================
+   Fluid Viewport Scaling — ALL screen sizes
+   ============================================
+   Base 16px at 1366px wide (16" laptop reference).
+   Scales automatically for phone → tablet → laptop → desktop → TV → 4K.
+   Every rem/em unit in every component adapts instantly.
+   ============================================ */
+html {
+  /* tiny phone → tablet → laptop → desktop → TV → 4K */
+  font-size: clamp(10px, calc(0.45rem + 0.85vw), 26px);
+}
+@media (max-width: 768px) {
+  html { font-size: clamp(10px, calc(0.5rem + 1.5vw), 16px); }
+}
+@media (max-width: 430px) {
+  html { font-size: clamp(10px, calc(0.4rem + 2.2vw), 14px); }
+}
+@media (min-width: 2560px) {
+  html { font-size: clamp(20px, calc(0.5rem + 0.65vw), 30px); }
+}
+
 /* Theme Variables */
 :root {
+
   /* ── Light Mode (default) ── */
   --bg-primary: #f8fafc;
   --bg-secondary: #ffffff;
@@ -127,9 +149,21 @@ body {
   overflow: hidden;
 }
 
+/* ── Large LCD / TV / 4K: give content breathing room ── */
+@media (min-width: 1920px) {
+  .app-main {
+    padding: clamp(16px, 1.8vh, 32px) clamp(24px, 3vw, 80px);
+  }
+}
+@media (min-width: 2560px) {
+  .app-main {
+    padding: clamp(24px, 2vh, 48px) clamp(40px, 5vw, 140px);
+  }
+}
+
 .app-header {
-  height: 48px;
-  padding: 6px 16px;
+  height: clamp(44px, 5vh, 64px);
+  padding: clamp(4px, 0.8vh, 10px) clamp(12px, 2vw, 28px);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -157,7 +191,7 @@ body {
   display: flex;
   align-items: stretch;
   justify-content: center;
-  padding: clamp(4px, 1vh, 12px) clamp(6px, 1.5vw, 16px);
+  padding: clamp(4px, 1.2vh, 20px) clamp(6px, 1.8vw, 28px);
 }
 
 /* Cards */

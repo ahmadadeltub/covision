@@ -14,6 +14,15 @@
   <script>
     tailwind.config = {
       darkMode: ['selector', '[data-theme="dark"]'],
+      theme: {
+        extend: {
+          screens: {
+            '3xl': '1920px',   // Full HD desktop / TV
+            '4xl': '2560px',   // 2K / QHD
+            '5xl': '3840px',   // 4K TV
+          },
+        },
+      },
     };
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
