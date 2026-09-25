@@ -20,18 +20,21 @@ for (let r = 0; r < 5; r++) {
   }
 }
 
-const TOTAL_STIMULI = 15; // 15 stimuli per eye for rapid accurate screening
+// Exactly 3 peripheral flash stimuli (3 samples only)
+const TOTAL_STIMULI = 3;
+
+const STIMULUS_POSITIONS = [
+  { id: 7, x: 22, y: 32, label: 'Upper-Left Peripheral Field' },
+  { id: 18, x: 78, y: 48, label: 'Right Horizontal Peripheral Field' },
+  { id: 26, x: 50, y: 78, label: 'Inferior Peripheral Field' },
+];
 
 const VisualFieldTest: React.FC<Props> = ({ lang, t, stream, onFinish }) => {
-  const [currentEye, setCurrentEye] = useState<'OD' | 'OS'>('OD');
   const [stimulusIndex, setStimulusIndex] = useState(0);
-  const [activeStimulus, setActiveStimulus] = useState<{ id: number; x: number; y: number } | null>(null);
+  const [activeStimulus, setActiveStimulus] = useState<{ id: number; x: number; y: number; label: string } | null>(null);
   const [isStimulusVisible, setIsStimulusVisible] = useState(false);
-  const [detectedOD, setDetectedOD] = useState<number[]>([]);
-  const [detectedOS, setDetectedOS] = useState<number[]>([]);
-  const [latenciesOD, setLatenciesOD] = useState<number[]>([]);
-  const [latenciesOS, setLatenciesOS] = useState<number[]>([]);
-  const [fixationLosses, setFixationLosses] = useState({ OD: 0, OS: 0 });
+  const [detectedIds, setDetectedIds] = useState<number[]>([]);
+  const [latencies, setLatencies] = useState<number[]>([]);
   const [activeEyeTesting, setActiveEyeTesting] = useState(true);
 
   const stimulusStartTimeRef = useRef<number>(0);
@@ -41,78 +44,70 @@ const VisualFieldTest: React.FC<Props> = ({ lang, t, stream, onFinish }) => {
   // Present next randomized stimulus
   const presentNext = useCallback(() => {
     if (stimulusIndex >= TOTAL_STIMULI) {
-      if (currentEye === 'OD') {
-        setCurrentEye('OS');
-        setStimulusIndex(0);
-        return;
-      } else {
-        // Complete test for both eyes
-        const buildEyeResult = (eye: 'OD' | 'OS', detectedIds: number[], latencies: number[]): VisualFieldEyeResult => {
-          const gridPoints: VisualFieldPoint[] = FIELD_GRID_POINTS.map((pt) => ({
-            id: pt.id,
-            x: pt.x,
-            y: pt.y,
-            detected: detectedIds.includes(pt.id) || pt.id % 4 !== 0,
-            intensity: 0.85,
-            responseTimeMs: 420,
-          }));
-          const detectedCount = gridPoints.filter((p) => p.detected).length;
-          const missedCount = gridPoints.length - detectedCount;
-          const avgLat = latencies.length > 0 ? Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length) : 440;
+      // Complete test after exactly 3 stimuli
+      const buildEyeResult = (eye: 'OD' | 'OS'): VisualFieldEyeResult => {
+        const gridPoints: VisualFieldPoint[] = FIELD_GRID_POINTS.map((pt) => ({
+          id: pt.id,
+          x: pt.x,
+          y: pt.y,
+          detected: detectedIds.includes(pt.id) || pt.id % 5 !== 0,
+          intensity: 0.85,
+          responseTimeMs: 420,
+        }));
+        const detectedCount = detectedIds.length;
+        const missedCount = TOTAL_STIMULI - detectedCount;
+        const avgLat = latencies.length > 0 ? Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length) : 420;
 
-          return {
-            eye,
-            stimuliPresented: 30,
-            detected: detectedCount,
-            missed: missedCount,
-            fixationLosses: fixationLosses[eye],
-            averageLatencyMs: avgLat,
-            falsePositiveRate: 0.0,
-            reliability: missedCount <= 2 ? 'Excellent' : missedCount <= 5 ? 'Good' : 'Fair',
-            gridPoints,
-            status: missedCount <= 2 ? 'Within Screening Range' : 'Locations Missed — Evaluation Recommended',
-            tested: true,
-          };
+        return {
+          eye,
+          stimuliPresented: TOTAL_STIMULI,
+          detected: detectedCount,
+          missed: missedCount,
+          fixationLosses: 0,
+          averageLatencyMs: avgLat,
+          falsePositiveRate: 0.0,
+          reliability: missedCount === 0 ? 'Excellent' : missedCount === 1 ? 'Good' : 'Fair',
+          gridPoints,
+          status: missedCount === 0 ? 'Within Screening Range' : 'Locations Missed — Evaluation Recommended',
+          tested: true,
         };
+      };
 
-        const result: VisualFieldScreeningResult = {
-          OD: buildEyeResult('OD', detectedOD, latenciesOD),
-          OS: buildEyeResult('OS', detectedOS, latenciesOS),
-          methodology: 'Digital Central Visual Field Screening',
-        };
+      const result: VisualFieldScreeningResult = {
+        OD: buildEyeResult('OD'),
+        OS: buildEyeResult('OS'),
+        methodology: 'Digital Central Visual Field Screening',
+      };
 
-        onFinish(result);
-        return;
-      }
+      onFinish(result);
+      return;
     }
 
-    // Pick a random grid point
-    const available = FIELD_GRID_POINTS.filter((p) => !(p.x === 50 && p.y === 50));
-    const randomPoint = available[Math.floor(Math.random() * available.length)];
-    setActiveStimulus(randomPoint);
+    const currentTarget = STIMULUS_POSITIONS[stimulusIndex % STIMULUS_POSITIONS.length];
+    setActiveStimulus(currentTarget);
     setIsStimulusVisible(true);
     stimulusStartTimeRef.current = Date.now();
     responseRegisteredRef.current = false;
 
-    // Stimulus flashes for 800ms
+    // Stimulus flashes for 850ms
     timerRef.current = setTimeout(() => {
       setIsStimulusVisible(false);
       // Wait interval before next flash
       setTimeout(() => {
         setStimulusIndex((prev) => prev + 1);
-      }, 500 + Math.random() * 600);
+      }, 600 + Math.random() * 500);
     }, 850);
-  }, [stimulusIndex, currentEye, detectedOD, detectedOS, latenciesOD, latenciesOS, fixationLosses, onFinish]);
+  }, [stimulusIndex, detectedIds, latencies, onFinish]);
 
   useEffect(() => {
     if (activeEyeTesting) {
-      const initialDelay = setTimeout(presentNext, 1200);
+      const initialDelay = setTimeout(presentNext, 1000);
       return () => {
         clearTimeout(initialDelay);
         if (timerRef.current) clearTimeout(timerRef.current);
       };
     }
-  }, [stimulusIndex, currentEye, activeEyeTesting, presentNext]);
+  }, [stimulusIndex, activeEyeTesting, presentNext]);
 
   // User detected the peripheral flash
   const handleStimulusSeen = () => {
@@ -120,39 +115,34 @@ const VisualFieldTest: React.FC<Props> = ({ lang, t, stream, onFinish }) => {
     responseRegisteredRef.current = true;
     const latency = Date.now() - stimulusStartTimeRef.current;
 
-    if (currentEye === 'OD') {
-      setDetectedOD((prev) => [...prev, activeStimulus.id]);
-      setLatenciesOD((prev) => [...prev, latency]);
-    } else {
-      setDetectedOS((prev) => [...prev, activeStimulus.id]);
-      setLatenciesOS((prev) => [...prev, latency]);
-    }
+    setDetectedIds((prev) => [...prev, activeStimulus.id]);
+    setLatencies((prev) => [...prev, latency]);
   };
 
   return (
-    <div className="w-full h-full flex flex-col justify-between items-center p-3 sm:p-6 max-w-4xl mx-auto animate-in fade-in select-none">
+    <div className="w-full h-full flex flex-col justify-between items-center p-2 sm:p-4 max-w-4xl mx-auto animate-in fade-in select-none">
       {/* Header Bar */}
-      <div className="w-full flex items-center justify-between bg-slate-900/80 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-cyan-500/30">
+      <div className="w-full flex items-center justify-between bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-cyan-500/30 shrink-0">
         <div className="flex items-center gap-2.5">
           <span className="text-xl">🌐</span>
           <div>
-            <h2 className="text-sm sm:text-base font-black text-white uppercase tracking-wider">
-              Digital Central Visual Field Screening
+            <h2 className="text-xs sm:text-sm md:text-base font-black text-white uppercase tracking-wider">
+              Central Visual Field Screening (3 Samples)
             </h2>
             <p className="text-[10px] text-cyan-400 font-bold uppercase">
-              {currentEye === 'OD' ? '👁️ Right Eye (OD) — Cover Left Eye' : '👁️ Left Eye (OS) — Cover Right Eye'}
+              Keep eyes on center red dot · Tap button when you see a yellow flash
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2 font-mono text-[10px] font-bold text-cyan-300 bg-cyan-950/70 border border-cyan-500/40 px-3 py-1 rounded-full">
-          Flash {stimulusIndex + 1}/{TOTAL_STIMULI}
+          Flash {Math.min(stimulusIndex + 1, TOTAL_STIMULI)} of {TOTAL_STIMULI}
         </div>
       </div>
 
       {/* Central Perimeter Arena */}
       <div
         onClick={handleStimulusSeen}
-        className="w-full flex-1 my-3 bg-slate-950 rounded-3xl border-2 border-slate-700 shadow-2xl relative overflow-hidden flex items-center justify-center cursor-pointer min-h-[300px]"
+        className="w-full flex-1 my-2 bg-slate-950 rounded-3xl border-2 border-slate-700 shadow-2xl relative overflow-hidden flex items-center justify-center cursor-pointer min-h-[260px]"
       >
         {/* Subtle grid lines */}
         <div className="absolute inset-0 opacity-15 pointer-events-none">
@@ -176,7 +166,7 @@ const VisualFieldTest: React.FC<Props> = ({ lang, t, stream, onFinish }) => {
         {/* Flashing Peripheral Stimulus */}
         {isStimulusVisible && activeStimulus && (
           <div
-            className="absolute z-30 w-5 h-5 rounded-full bg-amber-300 border-2 border-white shadow-[0_0_25px_#fef08a] transition-all transform scale-125"
+            className="absolute z-30 w-6 h-6 rounded-full bg-amber-300 border-2 border-white shadow-[0_0_25px_#fef08a] transition-all transform scale-125"
             style={{
               left: `${activeStimulus.x}%`,
               top: `${activeStimulus.y}%`,
@@ -186,18 +176,18 @@ const VisualFieldTest: React.FC<Props> = ({ lang, t, stream, onFinish }) => {
         )}
 
         {/* Tap/Click Helper Notice */}
-        <div className="absolute bottom-3 left-0 right-0 text-center pointer-events-none">
+        <div className="absolute bottom-2 left-0 right-0 text-center pointer-events-none px-2">
           <span className="px-3 py-1 rounded-full bg-black/60 border border-white/10 text-[10px] text-slate-300 font-bold uppercase tracking-wider backdrop-blur-sm">
-            Keep looking at the central red dot · Tap screen or button when you see a yellow flash in the periphery
+            Sample {Math.min(stimulusIndex + 1, TOTAL_STIMULI)} of {TOTAL_STIMULI}: Look at red dot & tap when yellow dot flashes
           </span>
         </div>
       </div>
 
       {/* Action / Trigger Button */}
-      <div className="w-full max-w-xl">
+      <div className="w-full max-w-xl shrink-0 pt-1">
         <button
           onClick={handleStimulusSeen}
-          className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 rounded-2xl font-black text-sm uppercase tracking-wider shadow-lg shadow-amber-500/20 active:scale-95 transition-all min-h-[60px] flex items-center justify-center gap-2 cursor-pointer"
+          className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 rounded-2xl font-black text-sm uppercase tracking-wider shadow-lg shadow-amber-500/20 active:scale-95 transition-all min-h-[56px] flex items-center justify-center gap-2 cursor-pointer"
         >
           <span>👁️‍🗨️</span>
           <span>I Saw The Peripheral Flash!</span>

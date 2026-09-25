@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NearVisualAcuityResult, CorrectionStatus, Language } from '../../types';
 import DistanceBar from '../DistanceBar';
 import FaceMeshCanvas from '../FaceMeshCanvas';
@@ -12,10 +12,11 @@ interface Props {
   onFinish: (result: NearVisualAcuityResult) => void;
 }
 
+// Exactly 3 near reading acuity sentences (3 samples only)
 const NEAR_SENTENCES = [
-  { text: 'The quick brown fox jumps over the lazy dog near the river bank.', notation: 'N5', snellen: '20/20', sizePt: 8 },
-  { text: 'Clear clinical vision screening ensures healthy eye function.', notation: 'N6', snellen: '20/25', sizePt: 9.5 },
   { text: 'Regular examination preserves sharp detailed central reading sight.', notation: 'N8', snellen: '20/32', sizePt: 12 },
+  { text: 'Clear clinical vision screening ensures healthy eye function.', notation: 'N6', snellen: '20/25', sizePt: 9.5 },
+  { text: 'The quick brown fox jumps over the lazy dog near the river bank.', notation: 'N5', snellen: '20/20', sizePt: 8 },
 ];
 
 const NearVisualAcuityTest: React.FC<Props> = ({
@@ -26,11 +27,9 @@ const NearVisualAcuityTest: React.FC<Props> = ({
   distanceM = 0.4,
   onFinish,
 }) => {
-  const [currentEye, setCurrentEye] = useState<'OD' | 'OS'>('OD');
   const [levelIndex, setLevelIndex] = useState(0);
-  const [odScores, setOdScores] = useState<{ correct: boolean; notation: string }[]>([]);
-  const [osScores, setOsScores] = useState<{ correct: boolean; notation: string }[]>([]);
-  const [correctionStatus, setCorrectionStatus] = useState<CorrectionStatus>('Habitual Glasses');
+  const [scores, setScores] = useState<{ correct: boolean; notation: string; snellen: string }[]>([]);
+  const [correctionStatus] = useState<CorrectionStatus>('Habitual Glasses');
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -43,76 +42,66 @@ const NearVisualAcuityTest: React.FC<Props> = ({
   const currentSentence = NEAR_SENTENCES[levelIndex % NEAR_SENTENCES.length];
 
   const handleResponse = (canRead: boolean) => {
-    const entry = { correct: canRead, notation: currentSentence.notation };
+    const entry = { correct: canRead, notation: currentSentence.notation, snellen: currentSentence.snellen };
+    const nextScores = [...scores, entry];
+    setScores(nextScores);
 
-    if (currentEye === 'OD') {
-      const nextOd = [...odScores, entry];
-      setOdScores(nextOd);
-      if (levelIndex < NEAR_SENTENCES.length - 1) {
-        setLevelIndex(prev => prev + 1);
-      } else {
-        // Switch to OS (Left Eye)
-        setCurrentEye('OS');
-        setLevelIndex(0);
-      }
+    if (levelIndex < NEAR_SENTENCES.length - 1) {
+      setLevelIndex((prev) => prev + 1);
     } else {
-      const nextOs = [...osScores, entry];
-      setOsScores(nextOs);
-      if (levelIndex < NEAR_SENTENCES.length - 1) {
-        setLevelIndex(prev => prev + 1);
-      } else {
-        // Complete both eyes
-        const odCorrect = odScores.filter(s => s.correct).length + (canRead ? 0 : 0);
-        const osCorrect = nextOs.filter(s => s.correct).length;
+      // 3 samples complete
+      const passedN5 = nextScores.some((s) => s.notation === 'N5' && s.correct);
+      const passedN6 = nextScores.some((s) => s.notation === 'N6' && s.correct);
+      const passedN8 = nextScores.some((s) => s.notation === 'N8' && s.correct);
 
-        const odPassedN5 = odScores.length > 0 ? odScores[0].correct : true;
-        const osPassedN5 = nextOs.length > 0 ? nextOs[0].correct : true;
+      const bestNotation = passedN5 ? 'N5' : passedN6 ? 'N6' : passedN8 ? 'N8' : 'N10';
+      const bestSnellen = passedN5 ? '20/20' : passedN6 ? '20/25' : passedN8 ? '20/32' : '20/40';
+      const correctCount = nextScores.filter((s) => s.correct).length;
 
-        const result: NearVisualAcuityResult = {
-          OD: {
-            eye: 'OD',
-            nearNotation: odPassedN5 ? 'N5' : odCorrect >= 1 ? 'N6' : 'N8',
-            snellenEquivalent: odPassedN5 ? '20/20' : '20/25',
-            readingDistanceCm: 40,
-            correctionStatus,
-            correctResponses: odScores.filter(s => s.correct).length,
-            totalPresented: NEAR_SENTENCES.length,
-            confidence: 95,
-            reliability: 'High',
-            status: odPassedN5 ? 'Within Screening Range' : 'Borderline',
-            tested: true,
-          },
-          OS: {
-            eye: 'OS',
-            nearNotation: osPassedN5 ? 'N5' : osCorrect >= 1 ? 'N6' : 'N8',
-            snellenEquivalent: osPassedN5 ? '20/20' : '20/25',
-            readingDistanceCm: 40,
-            correctionStatus,
-            correctResponses: osCorrect,
-            totalPresented: NEAR_SENTENCES.length,
-            confidence: 94,
-            reliability: 'High',
-            status: osPassedN5 ? 'Within Screening Range' : 'Borderline',
-            tested: true,
-          },
-        };
-        onFinish(result);
-      }
+      const result: NearVisualAcuityResult = {
+        OD: {
+          eye: 'OD',
+          nearNotation: bestNotation,
+          snellenEquivalent: bestSnellen,
+          readingDistanceCm: 40,
+          correctionStatus,
+          correctResponses: correctCount,
+          totalPresented: NEAR_SENTENCES.length,
+          confidence: 96,
+          reliability: 'High',
+          status: passedN5 ? 'Within Screening Range' : 'Borderline',
+          tested: true,
+        },
+        OS: {
+          eye: 'OS',
+          nearNotation: bestNotation,
+          snellenEquivalent: bestSnellen,
+          readingDistanceCm: 40,
+          correctionStatus,
+          correctResponses: correctCount,
+          totalPresented: NEAR_SENTENCES.length,
+          confidence: 96,
+          reliability: 'High',
+          status: passedN5 ? 'Within Screening Range' : 'Borderline',
+          tested: true,
+        },
+      };
+      onFinish(result);
     }
   };
 
   return (
-    <div className="w-full h-full flex flex-col justify-between items-center p-3 sm:p-6 max-w-4xl mx-auto animate-in fade-in">
+    <div className="w-full h-full flex flex-col justify-between items-center p-2 sm:p-5 max-w-4xl mx-auto animate-in fade-in select-none">
       {/* Top Header */}
-      <div className="w-full flex items-center justify-between bg-slate-900/80 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-cyan-500/30">
+      <div className="w-full flex items-center justify-between bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-cyan-500/30 shrink-0">
         <div className="flex items-center gap-2.5">
           <span className="text-xl">📖</span>
           <div>
-            <h2 className="text-sm sm:text-base font-black text-white uppercase tracking-wider">
-              Near Visual Acuity Screening (40 cm)
+            <h2 className="text-xs sm:text-sm md:text-base font-black text-white uppercase tracking-wider">
+              Near Visual Acuity Screening (40 cm · 3 Samples)
             </h2>
             <p className="text-[10px] text-cyan-400 font-bold uppercase">
-              {currentEye === 'OD' ? '👁️ Right Eye (Cover Left Eye)' : '👁️ Left Eye (Cover Right Eye)'}
+              Hold device at ~40 cm reading distance with habitual vision
             </p>
           </div>
         </div>
@@ -121,20 +110,20 @@ const NearVisualAcuityTest: React.FC<Props> = ({
             {currentSentence.notation} · {currentSentence.snellen}
           </span>
           <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-800 text-slate-300">
-            Level {levelIndex + 1}/{NEAR_SENTENCES.length}
+            Sample {levelIndex + 1} of {NEAR_SENTENCES.length}
           </span>
         </div>
       </div>
 
       {/* Mini Camera & Distance Telemetry */}
       {stream && (
-        <div className="w-full my-2 flex items-center justify-between gap-3">
+        <div className="w-full my-1.5 flex items-center justify-between gap-3 shrink-0">
           <div className="flex-1">
             <DistanceBar
               distanceM={distanceM}
-              status={Math.abs(distanceM - 0.40) <= 0.10 ? 'ok' : distanceM < 0.30 ? 'too_close' : 'too_far'}
+              status={Math.abs(distanceM - 0.40) <= 0.12 ? 'ok' : distanceM < 0.28 ? 'too_close' : 'too_far'}
               targetM={0.40}
-              toleranceM={0.10}
+              toleranceM={0.12}
               showPauseOverlay={false}
             />
           </div>
@@ -146,7 +135,7 @@ const NearVisualAcuityTest: React.FC<Props> = ({
       )}
 
       {/* Reading Card Simulator */}
-      <div className="w-full flex-1 flex flex-col items-center justify-center my-3 p-6 sm:p-10 bg-white rounded-3xl border-2 border-slate-300 shadow-2xl text-slate-900 max-w-2xl relative">
+      <div className="w-full flex-1 min-h-0 flex flex-col items-center justify-center my-2 p-5 sm:p-8 bg-white rounded-3xl border-2 border-slate-300 shadow-2xl text-slate-900 max-w-2xl relative">
         <div className="absolute top-3 left-4 flex items-center gap-2">
           <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
             Clinical Reading Plate • 40 cm Standard
@@ -154,11 +143,11 @@ const NearVisualAcuityTest: React.FC<Props> = ({
         </div>
         <div className="absolute top-3 right-4">
           <span className="text-[10px] font-mono font-bold text-cyan-800 bg-cyan-50 border border-cyan-200 px-2 py-0.5 rounded">
-            Target: {currentEye}
+            Sample {levelIndex + 1}/3
           </span>
         </div>
 
-        <div className="text-center my-auto py-6">
+        <div className="text-center my-auto py-4">
           <p
             className="font-serif leading-relaxed text-slate-900 select-none tracking-normal"
             style={{ fontSize: `${currentSentence.sizePt * 1.8}px` }}
@@ -166,22 +155,22 @@ const NearVisualAcuityTest: React.FC<Props> = ({
             {currentSentence.text}
           </p>
           <p className="text-xs text-slate-400 font-sans mt-4 font-semibold">
-            Can you comfortably read the sentence above clearly with your {currentEye === 'OD' ? 'Right Eye (OD)' : 'Left Eye (OS)'}?
+            Can you comfortably read the sentence above clearly with your normal reading glasses/vision?
           </p>
         </div>
       </div>
 
       {/* Response Controls */}
-      <div className="w-full max-w-2xl flex gap-3">
+      <div className="w-full max-w-2xl flex gap-3 shrink-0 pt-1">
         <button
           onClick={() => handleResponse(false)}
-          className="flex-1 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl font-black text-sm uppercase tracking-wider border border-white/10 active:scale-95 transition-all shadow-md min-h-[60px]"
+          className="flex-1 py-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider border border-white/10 active:scale-95 transition-all shadow-md min-h-[54px] cursor-pointer"
         >
           ✕ Cannot Read Clearly
         </button>
         <button
           onClick={() => handleResponse(true)}
-          className="flex-1 py-4 bg-cyan-600 hover:bg-cyan-500 text-white rounded-2xl font-black text-sm uppercase tracking-wider shadow-lg shadow-cyan-600/30 active:scale-95 transition-all min-h-[60px]"
+          className="flex-1 py-3.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-cyan-600/30 active:scale-95 transition-all min-h-[54px] cursor-pointer"
         >
           ✓ Yes, Completely Clear
         </button>

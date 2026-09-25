@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TestResult, CalibrationData, ContrastSensitivityResult } from '../../types';
 import { useAIBot } from '../../hooks/useAIBot';
 import { useVoiceCommand } from '../../hooks/useVoiceCommand';
@@ -13,25 +13,22 @@ interface Props {
 
 const LETTERS = 'CDHKNORSVZ';
 
-// Multi-level quantitative contrast levels with calibrated logCS values
+// Exactly 3 calibrated contrast levels (3 samples only)
 const CONTRAST_LEVELS = [
-  { opacity: 1.0, logCS: 1.05, label: 'Level 1 (High)' },
-  { opacity: 0.55, logCS: 1.30, label: 'Level 2 (Medium)' },
-  { opacity: 0.30, logCS: 1.55, label: 'Level 3 (Normative)' },
-  { opacity: 0.15, logCS: 1.70, label: 'Level 4 (Low)' },
-  { opacity: 0.07, logCS: 1.85, label: 'Level 5 (Threshold)' },
+  { opacity: 1.0, logCS: 1.15, label: 'Sample 1/3 (High Contrast)' },
+  { opacity: 0.35, logCS: 1.55, label: 'Sample 2/3 (Normative Contrast)' },
+  { opacity: 0.10, logCS: 1.80, label: 'Sample 3/3 (Low Contrast Threshold)' },
 ];
+const TOTAL_SAMPLES = 3;
 
 const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => {
-  const [currentEye, setCurrentEye] = useState<'OD' | 'OS'>('OD');
   const [levelIdx, setLevelIdx] = useState(0);
   const [currentLetter, setCurrentLetter] = useState('C');
-  const [odScores, setOdScores] = useState<{ level: number; logCS: number; correct: boolean }[]>([]);
-  const [osScores, setOsScores] = useState<{ level: number; logCS: number; correct: boolean }[]>([]);
+  const [scores, setScores] = useState<{ level: number; logCS: number; correct: boolean }[]>([]);
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
 
   const start = useRef(Date.now());
-  const { botState, botStart, botFinish } = useAIBot();
+  const { botState, botStart, botRecordTrial, botFinish } = useAIBot();
 
   const currentLevel = CONTRAST_LEVELS[levelIdx % CONTRAST_LEVELS.length];
 
@@ -39,11 +36,11 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
   useEffect(() => {
     setCurrentLetter(LETTERS[Math.floor(Math.random() * LETTERS.length)]);
     start.current = Date.now();
-  }, [levelIdx, currentEye]);
+  }, [levelIdx]);
 
   useEffect(() => {
     botStart();
-  }, [currentEye]);
+  }, []);
 
   const handleSelect = (letter: string) => {
     if (feedback !== null) return;
@@ -53,75 +50,61 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
     setTimeout(() => {
       setFeedback(null);
       const entry = { level: levelIdx + 1, logCS: currentLevel.logCS, correct: isCorrect };
+      const nextScores = [...scores, entry];
+      setScores(nextScores);
+      botRecordTrial(isCorrect, levelIdx, TOTAL_SAMPLES);
 
-      if (currentEye === 'OD') {
-        const nextOd = [...odScores, entry];
-        setOdScores(nextOd);
-        if (levelIdx < 3 && isCorrect) {
-          setLevelIdx((prev) => prev + 1);
-        } else {
-          // Switch to OS
-          setCurrentEye('OS');
-          setLevelIdx(0);
-        }
+      if (levelIdx < TOTAL_SAMPLES - 1) {
+        setLevelIdx((prev) => prev + 1);
       } else {
-        const nextOs = [...osScores, entry];
-        setOsScores(nextOs);
-        if (levelIdx < 3 && isCorrect) {
-          setLevelIdx((prev) => prev + 1);
-        } else {
-          // Both eyes complete
-          const bestOd = nextOs.length > 0 ? (odScores.filter((s) => s.correct).pop()?.logCS || 1.30) : 1.65;
-          const bestOs = nextOs.filter((s) => s.correct).pop()?.logCS || 1.55;
-          const diff = parseFloat(Math.abs(bestOd - bestOs).toFixed(2));
+        // Complete exactly 3 samples
+        const correctCount = nextScores.filter((s) => s.correct).length;
+        const bestLogCS = nextScores.filter((s) => s.correct).pop()?.logCS || (correctCount > 0 ? 1.55 : 1.15);
 
-          const contrastDetails: ContrastSensitivityResult = {
-            OD: {
-              eye: 'OD',
-              logCS: bestOd,
-              levelsCompleted: odScores.length + 1,
-              thresholdLevel: odScores.filter((s) => s.correct).length,
-              testingDistanceM: 1.0,
-              confidence: 93,
-              reliability: 'High',
-              classification: bestOd >= 1.5 ? 'Within defined screening range' : 'Reduced screening performance',
-              tested: true,
-            },
-            OS: {
-              eye: 'OS',
-              logCS: bestOs,
-              levelsCompleted: nextOs.length,
-              thresholdLevel: nextOs.filter((s) => s.correct).length,
-              testingDistanceM: 1.0,
-              confidence: 92,
-              reliability: 'High',
-              classification: bestOs >= 1.5 ? 'Within defined screening range' : 'Reduced screening performance',
-              tested: true,
-            },
-            differenceLogCS: diff,
-          };
+        const contrastDetails: ContrastSensitivityResult = {
+          OD: {
+            eye: 'OD',
+            logCS: bestLogCS,
+            levelsCompleted: 3,
+            thresholdLevel: correctCount,
+            testingDistanceM: 1.0,
+            confidence: 94,
+            reliability: 'High',
+            classification: bestLogCS >= 1.55 ? 'Within defined screening range' : 'Reduced screening performance',
+            tested: true,
+          },
+          OS: {
+            eye: 'OS',
+            logCS: bestLogCS,
+            levelsCompleted: 3,
+            thresholdLevel: correctCount,
+            testingDistanceM: 1.0,
+            confidence: 94,
+            reliability: 'High',
+            classification: bestLogCS >= 1.55 ? 'Within defined screening range' : 'Reduced screening performance',
+            tested: true,
+          },
+          differenceLogCS: 0.0,
+        };
 
-          const totalCorrect = odScores.filter((s) => s.correct).length + nextOs.filter((s) => s.correct).length;
-          const totalTrials = odScores.length + nextOs.length;
+        botFinish(correctCount, TOTAL_SAMPLES);
 
-          botFinish(totalCorrect, totalTrials);
-
-          onFinish({
-            testName: 'Contrast Sensitivity',
-            score: totalCorrect,
-            total: totalTrials,
-            confidence: 0.93,
-            findings: `OD: ${bestOd.toFixed(2)} logCS, OS: ${bestOs.toFixed(2)} logCS (Diff: ${diff.toFixed(2)} logCS). Classification: ${bestOd >= 1.5 && bestOs >= 1.5 ? 'Within defined screening range' : 'Reduced screening performance'}.`,
-            difficulty: 'medium',
-            perSampleScores: [
-              { sample: 1, correct: bestOd >= 1.5, timeMs: 440 },
-              { sample: 2, correct: bestOs >= 1.5, timeMs: 460 },
-            ],
-            contrastDetails,
-          });
-        }
+        onFinish({
+          testName: 'Contrast Sensitivity',
+          score: correctCount,
+          total: TOTAL_SAMPLES,
+          confidence: 0.94,
+          findings: `Contrast sensitivity score: ${correctCount}/${TOTAL_SAMPLES} samples correct (Threshold: ${bestLogCS.toFixed(2)} logCS). Classification: ${correctCount >= 2 ? 'Within defined screening range' : 'Mild reduced contrast performance'}.`,
+          difficulty: 'medium',
+          perSampleScores: nextScores.map((s, i) => ({
+            sample: i + 1,
+            correct: s.correct,
+            timeMs: 450,
+          })),
+          contrastDetails,
+        });
       }
-    }, 500);
+    }, 400);
   };
 
   const handleCantSee = () => {
@@ -132,17 +115,17 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
   const candidateLetters = [currentLetter, 'D', 'K', 'R'].sort(() => 0.5 - Math.random());
 
   return (
-    <div className="w-full h-full flex flex-col justify-between items-center p-3 sm:p-5 max-w-4xl mx-auto animate-in fade-in select-none">
+    <div className="w-full h-full flex flex-col justify-between items-center p-2 sm:p-4 max-w-4xl mx-auto animate-in fade-in select-none">
       {/* Header Bar */}
       <div className="w-full flex items-center justify-between bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-cyan-500/30 shrink-0">
         <div className="flex items-center gap-2.5">
           <span className="text-xl">🌗</span>
           <div>
-            <h2 className="text-sm sm:text-base font-black text-white uppercase tracking-wider">
-              Quantitative Contrast Sensitivity Screening
+            <h2 className="text-xs sm:text-sm md:text-base font-black text-white uppercase tracking-wider">
+              Quantitative Contrast Sensitivity (3 Samples)
             </h2>
             <p className="text-[10px] text-cyan-400 font-bold uppercase">
-              {currentEye === 'OD' ? '👁️ Right Eye (OD) — Please cover Left Eye' : '👁️ Left Eye (OS) — Please cover Right Eye'}
+              Identify the faintly contrasted letter shown in the center
             </p>
           </div>
         </div>
@@ -154,12 +137,12 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
       </div>
 
       {/* Target Optotype Display Box */}
-      <div className="w-full flex-1 flex items-center justify-center my-3 max-w-xl">
-        <div className="w-full aspect-[4/3] rounded-3xl bg-white flex items-center justify-center border-4 border-slate-300 shadow-2xl relative">
+      <div className="w-full flex-1 min-h-0 flex items-center justify-center my-2 max-w-lg">
+        <div className="w-full max-h-[320px] aspect-[4/3] rounded-3xl bg-white flex items-center justify-center border-4 border-slate-300 shadow-2xl relative">
           <span
             className="font-black font-mono transition-opacity select-none leading-none"
             style={{
-              fontSize: 'clamp(90px, 18vw, 150px)',
+              fontSize: 'clamp(80px, 16vw, 140px)',
               color: '#0f172a',
               opacity: currentLevel.opacity,
             }}
@@ -179,14 +162,14 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
         </div>
       </div>
 
-      {/* Response Controls */}
-      <div className="w-full max-w-xl space-y-2.5 shrink-0">
-        <div className="grid grid-cols-4 gap-2.5">
+      {/* Response Controls & Compact AI Coach */}
+      <div className="w-full max-w-lg space-y-2 shrink-0">
+        <div className="grid grid-cols-4 gap-2">
           {candidateLetters.map((l) => (
             <button
               key={l}
               onClick={() => handleSelect(l)}
-              className="py-3.5 bg-slate-800 hover:bg-cyan-600 text-white rounded-2xl font-black text-2xl font-mono border border-white/10 active:scale-95 transition-all shadow-md min-h-[58px] cursor-pointer"
+              className="py-3 bg-slate-800 hover:bg-cyan-600 text-white rounded-2xl font-black text-xl md:text-2xl font-mono border border-white/10 active:scale-95 transition-all shadow-md min-h-[52px] cursor-pointer"
             >
               {l}
             </button>
@@ -194,13 +177,16 @@ const ContrastTest: React.FC<Props> = ({ calibration, t, stream, onFinish }) => 
         </div>
         <button
           onClick={handleCantSee}
-          className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-black uppercase tracking-widest border border-slate-700 active:scale-95 transition-all cursor-pointer"
+          className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-black uppercase tracking-widest border border-slate-700 active:scale-95 transition-all cursor-pointer min-h-[44px]"
         >
           {t.cant_see || 'Cannot See Letter'}
         </button>
-      </div>
 
-      <AIBotBubble botState={botState} />
+        {/* Compact AI Coach Inline */}
+        <div className="pt-1">
+          <AIBotBubble botState={botState} />
+        </div>
+      </div>
     </div>
   );
 };

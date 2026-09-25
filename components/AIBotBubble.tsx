@@ -14,8 +14,8 @@ interface Props {
 }
 
 /**
- * Floating AI Robot Bot — shows real-time accuracy feedback
- * AND eye-cover coaching instructions. LARGE size for visibility.
+ * Compact AI Robot Assistant Bubble — small fit fonts,
+ * clean non-intrusive sidebar badge for tests.
  */
 const AIBotBubble: React.FC<Props> = ({ botState, isEyeUncovered = false, coverEye = 'left', isListening, transcript }) => {
   const { message, accuracy, correct, total, mood, streak } = botState;
@@ -26,7 +26,7 @@ const AIBotBubble: React.FC<Props> = ({ botState, isEyeUncovered = false, coverE
     if (message) {
       setVisible(true);
       setAnimKey(message.id);
-      const timer = setTimeout(() => setVisible(false), 6000);
+      const timer = setTimeout(() => setVisible(false), 5000);
       return () => clearTimeout(timer);
     }
   }, [message]);
@@ -35,20 +35,20 @@ const AIBotBubble: React.FC<Props> = ({ botState, isEyeUncovered = false, coverE
   const ringColor = isEyeUncovered ? '#ef4444' : pct >= 80 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
   const moodEmoji = isEyeUncovered ? '🚨' : mood === 'happy' ? '😎' : mood === 'neutral' ? '🤖' : mood === 'worried' ? '😟' : '⚠️';
 
-  // Ring SVG params — MASSIVE
-  const radius = 62;
+  // Compact Ring SVG params
+  const radius = 22;
   const circumference = 2 * Math.PI * radius;
   const strokeDash = isEyeUncovered ? 0 : circumference * accuracy;
   const strokeGap = circumference - strokeDash;
 
-  const glowColor = isEyeUncovered ? 'rgba(239,68,68,0.5)' :
-    mood === 'happy' ? 'rgba(16,185,129,0.5)' :
-    mood === 'worried' ? 'rgba(245,158,11,0.5)' :
-    mood === 'alert' ? 'rgba(239,68,68,0.5)' :
-    'rgba(6,182,212,0.4)';
+  const glowColor = isEyeUncovered ? 'rgba(239,68,68,0.35)' :
+    mood === 'happy' ? 'rgba(16,185,129,0.3)' :
+    mood === 'worried' ? 'rgba(245,158,11,0.3)' :
+    mood === 'alert' ? 'rgba(239,68,68,0.3)' :
+    'rgba(6,182,212,0.25)';
 
   const coverMsg = isEyeUncovered ? {
-    text: `Cover your ${coverEye.toUpperCase()} eye! Use your hand gently — don't press on the eyelid.`,
+    text: `Cover ${coverEye.toUpperCase()} eye gently.`,
     emoji: '🤚',
     color: '#ef4444',
   } : null;
@@ -57,73 +57,58 @@ const AIBotBubble: React.FC<Props> = ({ botState, isEyeUncovered = false, coverE
   const showBubble = !!displayMsg;
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full" style={{ maxWidth: 300 }}>
-      {/* ─── Speech Bubble — LARGE ─── */}
+    <div className="flex flex-col items-center gap-2 w-full max-w-[210px] mx-auto select-none pointer-events-none">
+      {/* ─── Compact Speech Bubble ─── */}
       <div
         className="relative w-full"
         style={{
-          minHeight: 64,
+          minHeight: showBubble ? 36 : 0,
           opacity: showBubble ? 1 : 0,
-          transform: showBubble ? 'translateY(0) scale(1)' : 'translateY(10px) scale(0.9)',
-          transition: 'all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)',
-          pointerEvents: 'none',
+          transform: showBubble ? 'translateY(0) scale(1)' : 'translateY(6px) scale(0.95)',
+          transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
         }}
       >
         {displayMsg && (
           <div
             key={isEyeUncovered ? 'cover-warn' : animKey}
-            className={`w-full rounded-2xl px-5 py-5 border shadow-2xl ${isEyeUncovered ? 'animate-pulse' : ''}`}
+            className={`w-full rounded-xl px-2.5 py-1.5 border shadow-md ${isEyeUncovered ? 'animate-pulse' : ''}`}
             style={{
-              background: isEyeUncovered ? 'rgba(127,29,29,0.95)' : 'var(--bg-card)',
-              borderColor: (displayMsg.color || '#06b6d4') + '60',
-              boxShadow: `0 8px 40px ${(displayMsg.color || '#06b6d4')}35`,
-              backdropFilter: 'blur(16px)',
+              background: isEyeUncovered ? 'rgba(127,29,29,0.92)' : 'var(--bg-card)',
+              borderColor: (displayMsg.color || '#06b6d4') + '50',
+              backdropFilter: 'blur(12px)',
             }}
           >
-            <div className="flex items-start gap-3">
-              <span className="text-4xl shrink-0">{displayMsg.emoji}</span>
-              <p className="text-base font-bold leading-relaxed" style={{ color: isEyeUncovered ? '#ffffff' : (displayMsg.color && displayMsg.color !== '#06b6d4' ? displayMsg.color : 'var(--text-primary)') }}>
+            <div className="flex items-center gap-2">
+              <span className="text-base shrink-0">{displayMsg.emoji}</span>
+              <p className="text-[11px] font-semibold leading-tight flex-1" style={{ color: isEyeUncovered ? '#ffffff' : (displayMsg.color && displayMsg.color !== '#06b6d4' ? displayMsg.color : 'var(--text-primary)') }}>
                 {displayMsg.text}
               </p>
             </div>
-            {isEyeUncovered && (
-              <div className="mt-3 flex items-center gap-2 pt-2.5 border-t border-red-500/30">
-                <div className="w-2.5 h-2.5 rounded-full bg-red-400 animate-ping" />
-                <span className="text-xs font-black text-red-300 uppercase tracking-wider">Test paused — cover eye to continue</span>
-              </div>
-            )}
           </div>
         )}
-        <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-5 h-5 rotate-45"
-          style={{
-            background: isEyeUncovered ? 'rgba(127,29,29,0.95)' : 'var(--bg-card)',
-            borderRight: `1px solid ${(displayMsg?.color || '#06b6d4')}60`,
-            borderBottom: `1px solid ${(displayMsg?.color || '#06b6d4')}60`,
-          }}
-        />
       </div>
 
-      {/* ─── Robot Avatar + Ring — MASSIVE ─── */}
-      <div className="relative flex items-center justify-center" style={{ width: 140, height: 140 }}>
+      {/* ─── Compact Robot Avatar + Progress Ring ─── */}
+      <div className="relative flex items-center justify-center" style={{ width: 52, height: 52 }}>
         <div
-          className={`absolute inset-0 rounded-full blur-2xl ${isEyeUncovered ? 'animate-ping' : 'animate-pulse'}`}
-          style={{ background: glowColor, transform: 'scale(1.8)' }}
+          className={`absolute inset-0 rounded-full blur-md ${isEyeUncovered ? 'animate-ping' : 'animate-pulse'}`}
+          style={{ background: glowColor, transform: 'scale(1.2)' }}
         />
 
-        <svg width="140" height="140" className="absolute">
-          <circle cx="70" cy="70" r={radius} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="6" />
+        <svg width="52" height="52" className="absolute">
+          <circle cx="26" cy="26" r={radius} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
           {isEyeUncovered ? (
-            <circle cx="70" cy="70" r={radius} fill="none" stroke="#ef4444" strokeWidth="6" strokeLinecap="round" strokeDasharray="12 8"
-              className="animate-spin" style={{ animationDuration: '3s', filter: 'drop-shadow(0 0 10px #ef4444)' }} />
+            <circle cx="26" cy="26" r={radius} fill="none" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" strokeDasharray="6 4"
+              className="animate-spin" style={{ animationDuration: '3s' }} />
           ) : (
-            <circle cx="70" cy="70" r={radius} fill="none" stroke={ringColor} strokeWidth="6" strokeLinecap="round"
+            <circle cx="26" cy="26" r={radius} fill="none" stroke={ringColor} strokeWidth="3" strokeLinecap="round"
               strokeDasharray={`${strokeDash} ${strokeGap}`} strokeDashoffset={circumference * 0.25}
-              className="transition-all duration-700" style={{ filter: `drop-shadow(0 0 10px ${ringColor})` }} />
+              className="transition-all duration-500" style={{ filter: `drop-shadow(0 0 4px ${ringColor})` }} />
           )}
         </svg>
 
         <div
-          className="relative w-[116px] h-[116px] rounded-full flex items-center justify-center text-[3.5rem] z-10"
+          className="relative w-[42px] h-[42px] rounded-full flex items-center justify-center text-xl z-10"
           style={{
             background: `linear-gradient(135deg, ${
               isEyeUncovered ? 'rgba(239,68,68,0.3)' :
@@ -132,84 +117,64 @@ const AIBotBubble: React.FC<Props> = ({ botState, isEyeUncovered = false, coverE
               mood === 'alert' ? 'rgba(239,68,68,0.25)' :
               'rgba(6,182,212,0.25)'
             }, var(--bg-primary))`,
-            border: `4px solid ${ringColor}60`,
-            boxShadow: `inset 0 -8px 20px rgba(0,0,0,0.3), 0 0 40px ${ringColor}25`,
+            border: `2px solid ${ringColor}60`,
+            boxShadow: `0 2px 10px rgba(0,0,0,0.2)`,
           }}
         >
           {moodEmoji}
         </div>
 
         {streak >= 3 && !isEyeUncovered && (
-          <div className="absolute -top-2 -right-2 w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center z-20 shadow-lg shadow-amber-500/50 animate-bounce">
-            <span className="text-base font-black text-black">🔥</span>
+          <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-500 flex items-center justify-center z-20 shadow">
+            <span className="text-[9px] font-black text-black">🔥</span>
           </div>
         )}
       </div>
 
-      {/* ─── Label ─── */}
-      <div className="flex flex-col items-center gap-1.5 mt-2">
-        <div className="flex items-center gap-2.5">
-          <div className={`w-3 h-3 rounded-full ${isEyeUncovered ? 'bg-red-400 animate-ping' : 'bg-cyan-400 animate-pulse'}`} />
-          <span className={`text-sm font-black uppercase tracking-[0.2em] ${isEyeUncovered ? 'text-red-400' : 'text-cyan-400'}`}>
-            {isEyeUncovered ? 'COVER EYE!' : 'AI ASSISTANT'}
+      {/* ─── Compact Label & Mic Status ─── */}
+      <div className="flex flex-col items-center gap-0.5">
+        <div className="flex items-center gap-1.5">
+          <div className={`w-1.5 h-1.5 rounded-full ${isEyeUncovered ? 'bg-red-400 animate-ping' : 'bg-cyan-400 animate-pulse'}`} />
+          <span className={`text-[9px] font-black uppercase tracking-wider ${isEyeUncovered ? 'text-red-400' : 'text-cyan-400'}`}>
+            {isEyeUncovered ? 'COVER EYE' : 'AI COACH'}
           </span>
         </div>
 
-        {/* Mic Status Indicator */}
+        {/* Mic Status */}
         {isListening !== undefined && (
-          <div className={`flex items-center gap-2 px-3 py-1 rounded-full border ${isListening ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-slate-800/50 border-white/10 text-slate-500'}`}>
-            <span className={`text-xs ${isListening ? 'animate-pulse' : ''}`}>🎤</span>
-            <span className="text-[9px] font-black uppercase tracking-widest truncate max-w-[150px]">
-              {isListening ? (transcript ? `"${transcript}"` : 'Listening...') : 'Mic Off'}
+          <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full border ${isListening ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-slate-800/40 border-white/5 text-slate-500'}`}>
+            <span className={`text-[9px] ${isListening ? 'animate-pulse' : ''}`}>🎤</span>
+            <span className="text-[8px] font-bold uppercase tracking-wider truncate max-w-[110px]">
+              {isListening ? (transcript ? `"${transcript}"` : 'Listening') : 'Mic Off'}
             </span>
           </div>
         )}
       </div>
 
-      {/* ─── Stats Card — LARGE ─── */}
+      {/* ─── Compact Stats ─── */}
       {total > 0 && !isEyeUncovered && (
-        <div className="w-full glass rounded-2xl border border-white/10 px-5 py-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-4 h-4 rounded-full" style={{ background: ringColor }} />
-              <span className="text-base font-black uppercase tracking-wider" style={{ color: ringColor }}>
-                {pct}%
-              </span>
-            </div>
-            <span className="text-base font-bold text-slate-600 dark:text-slate-400">
-              {correct}/{total}
+        <div className="w-full glass rounded-lg border border-white/10 px-2 py-1 flex items-center justify-between gap-1">
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 rounded-full" style={{ background: ringColor }} />
+            <span className="text-[10px] font-black uppercase" style={{ color: ringColor }}>
+              {pct}%
             </span>
-            {streak >= 2 && (
-              <span className="text-base font-bold text-amber-500 dark:text-amber-400">🔥{streak}</span>
-            )}
           </div>
-          <div className="w-full h-3 bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
-            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: ringColor }} />
-          </div>
+          <span className="text-[10px] font-bold text-slate-400">
+            {correct}/{total}
+          </span>
+          {streak >= 2 && (
+            <span className="text-[9px] font-bold text-amber-400">🔥{streak}</span>
+          )}
         </div>
       )}
 
-      {/* ─── Eye Cover Card ─── */}
+      {/* ─── Eye Cover Warning Card ─── */}
       {isEyeUncovered && (
-        <div className="w-full glass rounded-2xl border-2 border-red-500/40 px-5 py-4 animate-pulse">
-          <div className="flex items-center gap-2.5 mb-3">
-            <span className="text-2xl">👁️</span>
-            <span className="text-sm font-black text-red-600 dark:text-red-400 uppercase tracking-wider">Eye Cover Required</span>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center gap-2.5">
-              <span className="text-lg">🤚</span>
-              <span className="text-sm text-slate-800 dark:text-slate-300">Cover your <span className="font-black text-slate-950 dark:text-white">{coverEye.toUpperCase()}</span> eye</span>
-            </div>
-            <div className="flex items-center gap-2.5">
-              <span className="text-lg">⚡</span>
-              <span className="text-sm text-slate-800 dark:text-slate-300">Don't press on the eyelid</span>
-            </div>
-            <div className="flex items-center gap-2.5">
-              <span className="text-lg">✅</span>
-              <span className="text-sm text-slate-800 dark:text-slate-300">Test resumes automatically</span>
-            </div>
-          </div>
+        <div className="w-full glass rounded-lg border border-red-500/40 px-2 py-1 animate-pulse text-center">
+          <span className="text-[9px] font-black text-red-400 uppercase tracking-wider">
+            Cover {coverEye.toUpperCase()} Eye
+          </span>
         </div>
       )}
     </div>
