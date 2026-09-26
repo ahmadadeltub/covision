@@ -173,7 +173,7 @@ If nothing matches, reply with exactly: NONE`;
 
   try {
     const aiPromise = ai.models.generateContent({
-      model: 'gemini-2.5-flash',  // ultra-low latency Gemini model
+      model: 'gemini-flash-latest',  // ultra-low latency Gemini model
       contents: prompt,
       config: { maxOutputTokens: 10, temperature: 0 },  // deterministic, minimal output
     });

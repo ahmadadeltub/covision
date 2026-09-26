@@ -41,7 +41,7 @@ const ResultsDashboard: React.FC<Props> = ({ lang, t, results, onReset }) => {
       const prompt = `Act as a senior ophthalmologist. Analyze these results: ${testSummary}. Provide 3 short paragraphs: Assessment, Anomalies, Recommendation. Keep it professional and concise. End with a medical disclaimer. Use English.`;
 
       const responsePromise = ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-flash-latest',
         contents: prompt
       });
       const timeoutPromise = new Promise<any>((_, reject) => setTimeout(() => reject(new Error('AI timeout')), 5000));

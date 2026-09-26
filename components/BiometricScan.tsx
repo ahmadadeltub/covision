@@ -1102,7 +1102,7 @@ const BiometricScan: React.FC<Props> = ({
       }
 
       const client = new GoogleGenAI({ apiKey });
-      const modelCandidates = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+      const modelCandidates = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.7-flash', 'gemini-3.5-flash'];
       setAiError(null);
 
       // Fast retry logic with lean timeout for Jetson Edge AI responsiveness
@@ -1139,7 +1139,7 @@ Return strictly JSON matching this structure:
             ],
             config: { responseMimeType: "application/json" }
           });
-          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('AI timeout')), 4000));
+          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('AI timeout')), 10000));
           const response = await Promise.race([responsePromise, timeoutPromise]);
 
           let textContent = '';
@@ -1157,12 +1157,13 @@ Return strictly JSON matching this structure:
           const rawMood = typeof parsed.mood === 'string' ? parsed.mood : parsed.mood?.value;
           const rawDist = typeof parsed.distanceCm === 'number' ? parsed.distanceCm : parsed.distanceCm?.value;
 
+          const localFallback = runLocalFaceAnalysis();
           const normalized: BiometricResult = {
-            age: { value: typeof rawAge === 'number' && !isNaN(rawAge) ? rawAge : 28 },
-            gender: { value: (rawGender === 'female' ? 'female' : 'male') },
-            glasses: { value: !!rawGlasses },
-            mood: { value: typeof rawMood === 'string' && rawMood ? rawMood : 'Focused' },
-            distanceCm: { value: typeof rawDist === 'number' && !isNaN(rawDist) ? rawDist : 60 }
+            age: { value: typeof rawAge === 'number' && !isNaN(rawAge) ? rawAge : localFallback.age.value },
+            gender: { value: (rawGender === 'female' ? 'female' : rawGender === 'male' ? 'male' : localFallback.gender.value) },
+            glasses: { value: typeof rawGlasses === 'boolean' ? rawGlasses : localFallback.glasses.value },
+            mood: { value: typeof rawMood === 'string' && rawMood ? rawMood : localFallback.mood.value },
+            distanceCm: { value: typeof rawDist === 'number' && !isNaN(rawDist) ? rawDist : localFallback.distanceCm.value }
           };
 
           clearInterval(interval);
@@ -1174,10 +1175,8 @@ Return strictly JSON matching this structure:
 
         } catch (err: any) {
           lastError = err;
-          const errStr = err?.message || String(err);
-          const is429 = errStr.includes('429') || errStr.includes('RESOURCE_EXHAUSTED') || errStr.includes('exhausted') || errStr.includes('quota');
-          if (is429 && attempt < MAX_RETRIES - 1) {
-            console.warn(`Rate limited (429), will retry...`);
+          console.warn(`Gemini attempt ${attempt + 1} (${modelCandidates[attempt % modelCandidates.length]}) failed:`, err?.message || err);
+          if (attempt < MAX_RETRIES - 1) {
             continue;
           }
           break;
