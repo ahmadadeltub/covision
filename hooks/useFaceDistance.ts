@@ -56,53 +56,32 @@ const FACE_MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/face_lan
 let cachedFaceLandmarkerInstance: any = null;
 let globalModelInitPromise: Promise<any> | null = null;
 
-export function getFaceLandmarker(forceCpu = false): Promise<any> {
-    if (!forceCpu && cachedFaceLandmarkerInstance) return Promise.resolve(cachedFaceLandmarkerInstance);
-    if (!forceCpu && globalModelInitPromise) return globalModelInitPromise;
+export function getFaceLandmarker(_forceCpu = false): Promise<any> {
+    if (cachedFaceLandmarkerInstance) return Promise.resolve(cachedFaceLandmarkerInstance);
+    if (globalModelInitPromise) return globalModelInitPromise;
 
-    const initPromise = (async () => {
+    globalModelInitPromise = (async () => {
         try {
-            console.log(`useFaceDistance: [Global] Loading MediaPipe Tasks Vision (${forceCpu ? 'CPU' : 'GPU'})...`);
+            console.log('useFaceDistance: [Global] Loading MediaPipe Tasks Vision (CPU)...');
             const vision = await import(/* @vite-ignore */ `${VISION_CDN}/vision_bundle.mjs`);
             const { FaceLandmarker, FilesetResolver } = vision;
             const wasmFileset = await FilesetResolver.forVisionTasks(`${VISION_CDN}/wasm`);
 
-            let landmarker: any = null;
-            if (!forceCpu) {
-                try {
-                    landmarker = await FaceLandmarker.createFromOptions(wasmFileset, {
-                        baseOptions: {
-                            modelAssetPath: FACE_MODEL_URL,
-                            delegate: 'GPU',
-                        },
-                        outputFaceBlendshapes: false,
-                        runningMode: 'VIDEO',
-                        numFaces: 1,
-                        minFaceDetectionConfidence: 0.3,
-                        minFacePresenceConfidence: 0.3,
-                        minTrackingConfidence: 0.3,
-                    });
-                } catch (gpuErr) {
-                    console.warn('FaceLandmarker GPU delegate failed, falling back to CPU:', gpuErr);
-                }
-            }
+            const landmarker = await FaceLandmarker.createFromOptions(wasmFileset, {
+                baseOptions: {
+                    modelAssetPath: FACE_MODEL_URL,
+                    delegate: 'CPU',
+                },
+                outputFaceBlendshapes: false,
+                runningMode: 'VIDEO',
+                numFaces: 1,
+                minFaceDetectionConfidence: 0.3,
+                minFacePresenceConfidence: 0.3,
+                minTrackingConfidence: 0.3,
+            });
 
-            if (!landmarker) {
-                landmarker = await FaceLandmarker.createFromOptions(wasmFileset, {
-                    baseOptions: {
-                        modelAssetPath: FACE_MODEL_URL,
-                        delegate: 'CPU',
-                    },
-                    outputFaceBlendshapes: false,
-                    runningMode: 'VIDEO',
-                    numFaces: 1,
-                    minFaceDetectionConfidence: 0.3,
-                    minFacePresenceConfidence: 0.3,
-                    minTrackingConfidence: 0.3,
-                });
-            }
             cachedFaceLandmarkerInstance = landmarker;
-            console.log(`useFaceDistance: ✅ [Global] FaceLandmarker ready (${forceCpu ? 'CPU' : 'GPU'})`);
+            console.log('useFaceDistance: ✅ [Global] FaceLandmarker ready (CPU)');
             return landmarker;
         } catch (err) {
             console.error('Failed to initialize FaceLandmarker:', err);
@@ -111,8 +90,7 @@ export function getFaceLandmarker(forceCpu = false): Promise<any> {
         }
     })();
 
-    if (!forceCpu) globalModelInitPromise = initPromise;
-    return initPromise;
+    return globalModelInitPromise;
 }
 
 // Start preloading immediately in browser background
